@@ -1,197 +1,394 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#060912">
 <title>Bot de trading simulado</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><polyline points='1,12 5,7 9,9 15,3' fill='none' stroke='%232a78d6' stroke-width='2'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2360a5fa'/><stop offset='1' stop-color='%23a78bfa'/></linearGradient></defs><rect width='32' height='32' rx='9' fill='url(%23g)'/><polyline points='7,21 13,14 18,18 25,10' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  // Aplica el tema guardado antes de pintar, para evitar parpadeos
+  try { const t = localStorage.getItem("tema"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 <style>
-:root {
-  color-scheme: light;
-  --plano: #f9f9f7; --superficie: #fcfcfb; --borde: rgba(11,11,11,0.10);
-  --texto: #0b0b0b; --texto-2: #52514e; --texto-3: #898781;
-  --rejilla: #e1e0d9; --eje: #c3c2b7;
-  --serie-bot: #2a78d6; --serie-ref: #898781;
-  --positivo: #2a78d6; --negativo: #e34948; --neutro: #f0efec;
-  --bien: #006300; --mal: #d03b3b; --aviso-fondo: #fff6e0; --aviso-borde: #fab219;
-  --boton: #0b0b0b; --boton-texto: #ffffff;
-}
-@media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme="light"])) {
-    color-scheme: dark;
-    --plano: #0d0d0d; --superficie: #1a1a19; --borde: rgba(255,255,255,0.10);
-    --texto: #ffffff; --texto-2: #c3c2b7; --texto-3: #898781;
-    --rejilla: #2c2c2a; --eje: #383835;
-    --serie-bot: #3987e5; --serie-ref: #898781;
-    --positivo: #3987e5; --negativo: #e66767; --neutro: #383835;
-    --bien: #0ca30c; --mal: #e66767; --aviso-fondo: #2a2210; --aviso-borde: #c98500;
-    --boton: #ffffff; --boton-texto: #0b0b0b;
-  }
-}
-:root[data-theme="dark"] {
+/* ===================== Tokens de diseño ===================== */
+:root, :root[data-theme="dark"] {
   color-scheme: dark;
-  --plano: #0d0d0d; --superficie: #1a1a19; --borde: rgba(255,255,255,0.10);
-  --texto: #ffffff; --texto-2: #c3c2b7; --texto-3: #898781;
-  --rejilla: #2c2c2a; --eje: #383835;
-  --serie-bot: #3987e5; --serie-ref: #898781;
-  --positivo: #3987e5; --negativo: #e66767; --neutro: #383835;
-  --bien: #0ca30c; --mal: #e66767; --aviso-fondo: #2a2210; --aviso-borde: #c98500;
-  --boton: #ffffff; --boton-texto: #0b0b0b;
+  --fondo: #060912;
+  --luz-1: rgba(59, 91, 253, .55); --luz-2: rgba(139, 92, 246, .45); --luz-3: rgba(20, 184, 166, .30);
+  --vidrio: rgba(255, 255, 255, .055); --vidrio-fuerte: rgba(255, 255, 255, .09); --vidrio-hover: rgba(255, 255, 255, .12);
+  --borde: rgba(255, 255, 255, .12); --borde-suave: rgba(255, 255, 255, .07); --brillo: rgba(255, 255, 255, .10);
+  --sombra: 0 10px 40px rgba(0, 0, 0, .35);
+  --texto: #f4f6fb; --texto-2: #b4bccd; --texto-3: #8a93a8;
+  --rejilla: rgba(255, 255, 255, .07); --eje: rgba(255, 255, 255, .18);
+  --bot: #60a5fa; --bot-2: #a78bfa; --ref: #9aa3b5;
+  --bien: #34d399; --mal: #f87171; --aviso: #fbbf24;
+  --positivo: #60a5fa; --negativo: #f87171;
+  --chip-compra: rgba(96, 165, 250, .16); --chip-venta: rgba(167, 139, 250, .18);
+  --boton-texto: #060912; --tooltip: rgba(12, 16, 32, .88);
 }
+:root[data-theme="light"] {
+  color-scheme: light;
+  --fondo: #eef2fb;
+  --luz-1: rgba(96, 165, 250, .45); --luz-2: rgba(167, 139, 250, .40); --luz-3: rgba(45, 212, 191, .30);
+  --vidrio: rgba(255, 255, 255, .55); --vidrio-fuerte: rgba(255, 255, 255, .72); --vidrio-hover: rgba(255, 255, 255, .85);
+  --borde: rgba(15, 23, 42, .10); --borde-suave: rgba(15, 23, 42, .06); --brillo: rgba(255, 255, 255, .9);
+  --sombra: 0 10px 40px rgba(30, 41, 80, .12);
+  --texto: #0f172a; --texto-2: #475569; --texto-3: #64748b;
+  --rejilla: rgba(15, 23, 42, .07); --eje: rgba(15, 23, 42, .20);
+  --bot: #2563eb; --bot-2: #7c3aed; --ref: #64748b;
+  --bien: #059669; --mal: #dc2626; --aviso: #b45309;
+  --positivo: #2563eb; --negativo: #dc2626;
+  --chip-compra: rgba(37, 99, 235, .12); --chip-venta: rgba(124, 58, 237, .12);
+  --boton-texto: #ffffff; --tooltip: rgba(255, 255, 255, .92);
+}
+
+/* ===================== Base ===================== */
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--plano); color: var(--texto);
-  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
-h1 { font-size: 1.5rem; margin: 0; }
-h2 { font-size: 1.05rem; margin: 0 0 4px; }
-p { margin: 0; }
-.sub { color: var(--texto-2); }
-.nota { color: var(--texto-3); font-size: .85rem; }
-.cabecera { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.pastilla { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px;
-  border: 1px solid var(--borde); background: var(--superficie); font-size: .85rem; color: var(--texto-2); }
-.punto { width: 8px; height: 8px; border-radius: 50%; }
-.tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: 12px; padding: 16px; }
-.rejilla-kpi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
-@media (min-width: 860px) { .rejilla-kpi { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.kpi .etiqueta { color: var(--texto-2); font-size: .85rem; }
-.kpi .valor { font-size: 1.6rem; font-weight: 600; margin: 2px 0; }
-.kpi .detalle { color: var(--texto-2); font-size: .85rem; }
-.bien, .kpi .detalle.bien { color: var(--bien); } .mal, .kpi .detalle.mal { color: var(--mal); }
-.seccion { margin-top: 12px; }
-.fila-titulo { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
-.filtros { display: flex; gap: 4px; }
-.filtros button { font: inherit; font-size: .85rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;
-  border: 1px solid var(--borde); background: transparent; color: var(--texto-2); }
-.filtros button[aria-pressed="true"] { background: var(--texto); color: var(--superficie); border-color: var(--texto); }
-.leyenda { display: flex; flex-wrap: wrap; gap: 16px; font-size: .85rem; color: var(--texto-2); margin-bottom: 4px; }
-.clave { display: inline-block; width: 16px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 6px; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; min-height: 100vh; background: var(--fondo); color: var(--texto);
+  font: 15px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  transition: background-color .4s ease, color .4s ease;
+}
+h1, h2, h3, p { margin: 0; }
+a { color: inherit; }
+.num, td.num { font-variant-numeric: tabular-nums; }
+
+/* Luces de fondo que se mueven despacio */
+.fondo { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.fondo span { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .9; animation: flotar 26s ease-in-out infinite alternate; }
+.fondo span:nth-child(1) { width: 46vmax; height: 46vmax; background: var(--luz-1); top: -16vmax; left: -10vmax; }
+.fondo span:nth-child(2) { width: 40vmax; height: 40vmax; background: var(--luz-2); top: 10vmax; right: -14vmax; animation-duration: 32s; }
+.fondo span:nth-child(3) { width: 34vmax; height: 34vmax; background: var(--luz-3); bottom: -14vmax; left: 20vmax; animation-duration: 38s; }
+.fondo::after { content: ""; position: absolute; inset: 0;
+  background-image: radial-gradient(var(--borde-suave) 1px, transparent 1px); background-size: 28px 28px; opacity: .6; }
+@keyframes flotar { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(4vmax, 3vmax) scale(1.08); } 100% { transform: translate(-3vmax, 5vmax) scale(.95); } }
+
+/* ===================== Cristal ===================== */
+.vidrio {
+  background: var(--vidrio); border: 1px solid var(--borde); border-radius: 20px;
+  backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow: var(--sombra), inset 0 1px 0 var(--brillo);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root, :root[data-theme="dark"] { --vidrio: rgba(18, 24, 40, .92); --vidrio-fuerte: rgba(26, 34, 54, .95); }
+  :root[data-theme="light"] { --vidrio: rgba(255, 255, 255, .92); --vidrio-fuerte: rgba(255, 255, 255, .96); }
+}
+
+/* ===================== Barra superior ===================== */
+.barra { position: sticky; top: 0; z-index: 20; padding: 12px 16px 0; padding-top: max(12px, env(safe-area-inset-top)); }
+.barra-int { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 12px; padding: 10px 12px 10px 14px; border-radius: 18px; }
+.marca { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.logo { width: 36px; height: 36px; border-radius: 11px; flex: none; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--bot), var(--bot-2)); box-shadow: 0 6px 20px -4px var(--bot); }
+.marca h1 { font-size: 1rem; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.marca p { font-size: .78rem; color: var(--texto-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pastilla { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 999px;
+  background: var(--vidrio-fuerte); border: 1px solid var(--borde); font-size: .8rem; color: var(--texto-2); white-space: nowrap; }
+.punto { width: 8px; height: 8px; border-radius: 50%; background: var(--bien); box-shadow: 0 0 0 0 var(--bien); animation: latido 2s infinite; }
+.punto.pausa { background: var(--aviso); animation: none; }
+@keyframes latido { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--bien) 60%, transparent); } 70% { box-shadow: 0 0 0 8px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+.icono-boton { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; cursor: pointer; flex: none;
+  background: var(--vidrio-fuerte); border: 1px solid var(--borde); color: var(--texto-2); transition: background .2s, color .2s, transform .2s; }
+.icono-boton:hover { background: var(--vidrio-hover); color: var(--texto); }
+.icono-boton:active { transform: scale(.94); }
+.icono-boton:focus-visible, .filtros button:focus-visible, .boton:focus-visible { outline: 2px solid var(--bot); outline-offset: 2px; }
+.solo-oscuro { display: none; } :root[data-theme="light"] .solo-oscuro { display: block; } :root[data-theme="light"] .solo-claro { display: none; }
+
+/* ===================== Contenido ===================== */
+main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 40px; display: grid; gap: 16px; }
+.tarjeta { padding: 20px; min-width: 0; }
+.titulo-tarjeta { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.titulo-tarjeta h2 { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
+.titulo-tarjeta svg { color: var(--bot); flex: none; }
+.nota { color: var(--texto-3); font-size: .84rem; }
+.bien { color: var(--bien); } .mal { color: var(--mal); }
+
+/* Aparición escalonada */
+.aparece { opacity: 0; transform: translateY(10px); animation: aparecer .6s cubic-bezier(.2, .7, .2, 1) forwards; }
+@keyframes aparecer { to { opacity: 1; transform: none; } }
+
+/* Aviso de datos antiguos */
+.aviso { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-color: color-mix(in srgb, var(--aviso) 55%, transparent); }
+.aviso svg { color: var(--aviso); flex: none; margin-top: 2px; }
+
+/* KPIs */
+.kpis { display: grid; gap: 16px; grid-template-columns: 1.25fr 1fr 1fr; grid-template-areas: "dest a b" "dest c d"; }
+.kpi { padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; min-width: 0; }
+.kpi .etiqueta { display: flex; align-items: center; gap: 8px; color: var(--texto-2); font-size: .82rem; }
+.kpi .etiqueta svg { color: var(--texto-3); }
+.kpi .valor { font-size: 1.55rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+.kpi .detalle { font-size: .82rem; color: var(--texto-3); }
+.kpi.destacada { grid-area: dest; position: relative; overflow: hidden; padding: 24px; }
+.kpi.destacada::before { content: ""; position: absolute; inset: -40% -20% auto auto; width: 70%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--bot) 35%, transparent), transparent 65%); pointer-events: none; }
+.kpi.destacada .valor { font-size: clamp(2.2rem, 5vw, 3.1rem); background: linear-gradient(135deg, var(--texto), color-mix(in srgb, var(--texto) 70%, var(--bot)));
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.insignia { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600;
+  background: color-mix(in srgb, currentColor 14%, transparent); }
+.comparacion { margin-top: 10px; display: grid; gap: 8px; }
+.comparacion .fila-barra { display: grid; grid-template-columns: 96px 1fr auto; gap: 10px; align-items: center; font-size: .8rem; color: var(--texto-2); }
+.pista { height: 8px; border-radius: 99px; background: var(--rejilla); overflow: hidden; }
+.pista span { display: block; height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(.2, .7, .2, 1); width: 0; }
+.kpi:nth-of-type(2) { grid-area: a; } .kpi:nth-of-type(3) { grid-area: b; } .kpi:nth-of-type(4) { grid-area: c; } .kpi:nth-of-type(5) { grid-area: d; }
+
+/* Gráfica */
+.cabecera-grafica { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.filtros { display: inline-flex; padding: 4px; gap: 2px; border-radius: 12px; background: var(--vidrio-fuerte); border: 1px solid var(--borde); }
+.filtros button { font: inherit; font-size: .8rem; font-weight: 500; padding: 6px 12px; border-radius: 9px; border: 0; cursor: pointer;
+  background: transparent; color: var(--texto-2); transition: background .2s, color .2s; }
+.filtros button:hover { color: var(--texto); }
+.filtros button[aria-pressed="true"] { background: linear-gradient(135deg, var(--bot), var(--bot-2)); color: #fff; box-shadow: 0 4px 14px -4px var(--bot); }
+.leyenda { display: flex; flex-wrap: wrap; gap: 18px; font-size: .82rem; color: var(--texto-2); margin-bottom: 6px; }
+.clave { display: inline-block; width: 18px; height: 0; border-top: 2.5px solid; vertical-align: middle; margin-right: 7px; border-radius: 2px; }
 .grafica { position: relative; }
-.grafica svg { display: block; width: 100%; height: 300px; touch-action: pan-y; }
-.grafica text { fill: var(--texto-3); font-size: 11px; font-variant-numeric: tabular-nums; }
-.tooltip { position: absolute; pointer-events: none; background: var(--superficie); border: 1px solid var(--borde);
-  border-radius: 8px; padding: 8px 10px; font-size: .8rem; box-shadow: 0 4px 16px rgba(0,0,0,.12); min-width: 170px; display: none; }
-.tooltip .fecha { color: var(--texto-2); margin-bottom: 4px; }
-.tooltip .linea { display: flex; align-items: center; gap: 6px; }
-.tooltip strong { font-variant-numeric: tabular-nums; }
-.dos-columnas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; }
-.tabla { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: .85rem; }
-th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rejilla); white-space: nowrap; }
-th { color: var(--texto-2); font-weight: 500; }
-td.num { text-align: right; font-variant-numeric: tabular-nums; }
-.peso { display: grid; grid-template-columns: minmax(120px, 1.3fr) 1fr 52px; gap: 8px; align-items: center; padding: 5px 0; font-size: .85rem; }
-.barra { position: relative; height: 12px; }
-.barra::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; border-left: 1px solid var(--eje); }
-.barra span { position: absolute; top: 0; height: 12px; border-radius: 4px; }
-.peso .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--texto-2); }
-.medidor { height: 10px; border-radius: 5px; background: var(--neutro); position: relative; margin: 10px 0 18px; }
-.medidor .relleno { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--serie-bot); }
-.medidor .marca { position: absolute; top: -4px; bottom: -4px; border-left: 2px solid var(--texto); }
-.medidor .marca span { position: absolute; top: 16px; font-size: .75rem; color: var(--texto-2); white-space: nowrap; }
-.medidor .marca.venta span { right: 4px; } .medidor .marca.compra span { left: 4px; }
-.acciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin: 12px 0; }
-.accion { border: 1px solid var(--borde); border-radius: 8px; padding: 10px 12px; }
-.accion code { font-weight: 600; }
-.botones { display: flex; flex-wrap: wrap; gap: 8px; }
-.boton { display: inline-block; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 500;
-  background: var(--boton); color: var(--boton-texto); }
-.boton.secundario { background: transparent; color: var(--texto); border: 1px solid var(--borde); }
-.aviso { border: 1px solid var(--aviso-borde); background: var(--aviso-fondo); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
-.veredicto { font-size: .9rem; margin-bottom: 6px; }
-.eventos li { margin-bottom: 4px; } .eventos { padding-left: 18px; margin: 0; font-size: .85rem; }
-details summary { cursor: pointer; color: var(--texto-2); font-size: .85rem; margin-top: 8px; }
-footer { margin-top: 24px; }
+.grafica svg { display: block; width: 100%; height: 320px; touch-action: pan-y; }
+.grafica text { fill: var(--texto-3); font-size: 11px; font-variant-numeric: tabular-nums; font-family: inherit; }
+.tooltip { position: absolute; top: 8px; pointer-events: none; padding: 10px 12px; font-size: .8rem; min-width: 190px; border-radius: 14px;
+  opacity: 0; transform: translateY(4px); transition: opacity .15s, transform .15s; background: var(--tooltip); }
+.tooltip.visible { opacity: 1; transform: none; }
+.tooltip .fecha { color: var(--texto-3); margin-bottom: 6px; font-size: .76rem; }
+.tooltip .linea { display: flex; align-items: center; gap: 8px; margin: 2px 0; }
+.tooltip strong { font-variant-numeric: tabular-nums; font-weight: 600; }
+.tooltip .nombre { color: var(--texto-3); }
+details summary { cursor: pointer; color: var(--texto-2); font-size: .84rem; margin-top: 10px; width: fit-content; }
+details summary:hover { color: var(--texto); }
+
+/* Rejillas de dos columnas */
+.dos { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+
+/* Medidor semicircular */
+.medidor { display: grid; place-items: center; margin: 8px 0 4px; }
+.medidor svg { width: min(100%, 300px); height: auto; overflow: visible; }
+.medidor .valor-medidor { font-size: 34px; font-weight: 700; fill: var(--texto); letter-spacing: -.02em; }
+.medidor .sub-medidor { font-size: 11px; fill: var(--texto-3); }
+.medidor .etiqueta-umbral { font-size: 10.5px; fill: var(--texto-2); font-weight: 500; }
+.texto-piensa { font-size: .88rem; color: var(--texto-2); text-align: center; max-width: 46ch; margin: 0 auto; }
+
+/* Veredicto */
+.veredicto { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 16px; margin: 12px 0;
+  background: color-mix(in srgb, var(--color-veredicto, var(--bot)) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-veredicto, var(--bot)) 35%, transparent); }
+.veredicto .emoji { font-size: 1.6rem; line-height: 1; filter: drop-shadow(0 0 12px var(--color-veredicto, var(--bot))); }
+.veredicto strong { display: block; font-size: 1rem; }
+.veredicto span { color: var(--texto-2); font-size: .84rem; }
+
+/* Tablas */
+.tabla { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rejilla); white-space: nowrap; }
+th { color: var(--texto-3); font-weight: 500; font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; }
+td.num, th.num { text-align: right; }
+tbody tr { transition: background .15s; }
+tbody tr:hover { background: var(--vidrio-fuerte); }
+tr:last-child td { border-bottom: 0; }
+.chip { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .76rem; font-weight: 600; }
+.chip.compra { background: var(--chip-compra); color: var(--bot); }
+.chip.venta { background: var(--chip-venta); color: var(--bot-2); }
+.mini-tabla { margin-top: 12px; }
+.mini-tabla td, .mini-tabla th { padding: 7px 8px; }
+
+/* Pesos */
+.peso { display: grid; grid-template-columns: minmax(110px, 1.2fr) 1fr 50px; gap: 10px; align-items: center; padding: 6px 0; font-size: .84rem; }
+.peso + .peso { border-top: 1px solid var(--borde-suave); }
+.barra-peso { position: relative; height: 10px; }
+.barra-peso::before { content: ""; position: absolute; left: 50%; top: -4px; bottom: -4px; border-left: 1px dashed var(--eje); }
+.barra-peso span { position: absolute; top: 0; height: 10px; border-radius: 5px; transition: width .8s cubic-bezier(.2, .7, .2, 1); }
+.peso .num { text-align: right; color: var(--texto-2); }
+
+/* Línea temporal */
+.eventos { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 0; max-height: 360px; overflow-y: auto; }
+.eventos li { position: relative; padding: 0 0 16px 22px; font-size: .86rem; }
+.eventos li::before { content: ""; position: absolute; left: 4px; top: 7px; width: 9px; height: 9px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--bot), var(--bot-2)); box-shadow: 0 0 10px var(--bot); }
+.eventos li::after { content: ""; position: absolute; left: 8px; top: 20px; bottom: 2px; border-left: 1px solid var(--borde); }
+.eventos li:last-child::after { display: none; }
+.eventos .cuando { display: block; color: var(--texto-3); font-size: .76rem; }
+
+/* Controles */
+.acciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 14px 0 16px; }
+.accion { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 16px; background: var(--vidrio); border: 1px solid var(--borde-suave);
+  transition: background .2s, transform .2s, border-color .2s; }
+.accion:hover { background: var(--vidrio-fuerte); border-color: var(--borde); transform: translateY(-2px); }
+.accion .icono { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none;
+  background: color-mix(in srgb, var(--bot) 16%, transparent); color: var(--bot); }
+.accion code { font: 600 .82rem/1.3 ui-monospace, "Cascadia Code", Consolas, monospace; display: block; margin-bottom: 2px; }
+.accion p { font-size: .8rem; color: var(--texto-3); }
+.botones { display: flex; flex-wrap: wrap; gap: 10px; }
+.boton { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: .88rem;
+  background: linear-gradient(135deg, var(--bot), var(--bot-2)); color: #fff; box-shadow: 0 8px 24px -8px var(--bot); transition: transform .2s, box-shadow .2s; }
+.boton:hover { transform: translateY(-2px); box-shadow: 0 12px 28px -8px var(--bot); }
+.boton.secundario { background: var(--vidrio-fuerte); color: var(--texto); border: 1px solid var(--borde); box-shadow: none; }
+.boton.secundario:hover { background: var(--vidrio-hover); }
+
+/* Esqueleto de carga */
+.cargando .valor, .cargando .detalle { color: transparent !important; background: linear-gradient(90deg, var(--rejilla), var(--vidrio-hover), var(--rejilla));
+  background-size: 200% 100%; animation: brillo 1.4s infinite; border-radius: 8px; -webkit-background-clip: border-box !important; background-clip: border-box !important; }
+@keyframes brillo { to { background-position: -200% 0; } }
+
+footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 8px 16px 32px; }
+
+/* ===================== Responsive ===================== */
+@media (max-width: 960px) {
+  .kpis { grid-template-columns: 1fr 1fr; grid-template-areas: "dest dest" "a b" "c d"; }
+}
+@media (max-width: 760px) {
+  .dos { grid-template-columns: 1fr; }
+  .grafica svg { height: 250px; }
+  .tarjeta { padding: 16px; }
+  .ocultar-movil { display: none !important; }
+}
+@media (max-width: 420px) {
+  .col-n { display: none; }
+  .peso { grid-template-columns: 1fr 50px; row-gap: 6px; }
+  .peso > span:first-child { grid-column: 1; grid-row: 1; }
+  .peso > .num { grid-column: 2; grid-row: 1; }
+  .barra-peso { grid-column: 1 / -1; grid-row: 2; }
+  .mini-tabla td:first-child { white-space: normal; }
+  .kpi { padding: 14px; } .kpi .valor { font-size: 1.25rem; }
+  .comparacion .fila-barra { grid-template-columns: 78px 1fr auto; }
+  .marca p { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
 </style>
 </head>
 <body>
-<main>
-  <div class="cabecera">
-    <div>
-      <h1>Bot de trading simulado</h1>
-      <p class="sub" id="subtitulo">Cargando datos...</p>
-    </div>
-    <div style="display:flex; gap:8px; flex-wrap:wrap">
-      <span class="pastilla" id="estado-bot"><span class="punto"></span><span>...</span></span>
-      <span class="pastilla" id="actualizado">...</span>
-    </div>
-  </div>
+<div class="fondo" aria-hidden="true"><span></span><span></span><span></span></div>
 
+<header class="barra">
+  <div class="barra-int vidrio">
+    <div class="marca">
+      <div class="logo" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3,16 9,10 13,14 21,6"/><polyline points="15,6 21,6 21,12"/></svg></div>
+      <div style="min-width:0">
+        <h1>Bot de trading simulado</h1>
+        <p id="subtitulo">Cargando datos…</p>
+      </div>
+    </div>
+    <span class="pastilla" id="estado-bot"><span class="punto"></span><span>…</span></span>
+    <span class="pastilla ocultar-movil" id="actualizado">…</span>
+    <button class="icono-boton" id="tema" type="button" aria-label="Cambiar entre modo claro y oscuro" title="Modo claro / oscuro">
+      <svg class="solo-claro" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="solo-oscuro" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
   <div id="aviso"></div>
 
-  <div class="rejilla-kpi">
-    <div class="tarjeta kpi"><div class="etiqueta">Valor del bot</div><div class="valor" id="kpi-bot">-</div><div class="detalle" id="kpi-bot-d"></div></div>
-    <div class="tarjeta kpi"><div class="etiqueta">Comprar y mantener (referencia)</div><div class="valor" id="kpi-ref">-</div><div class="detalle" id="kpi-ref-d"></div></div>
-    <div class="tarjeta kpi"><div class="etiqueta">Posición</div><div class="valor" id="kpi-pos">-</div><div class="detalle" id="kpi-pos-d"></div></div>
-    <div class="tarjeta kpi"><div class="etiqueta">Operaciones</div><div class="valor" id="kpi-ops">-</div><div class="detalle" id="kpi-ops-d"></div></div>
-  </div>
-
-  <section class="tarjeta seccion">
-    <div class="fila-titulo">
+  <section class="kpis cargando" id="kpis" aria-label="Resumen">
+    <article class="vidrio kpi destacada aparece">
+      <div class="etiqueta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M16 13h2M2 10h20"/></svg>Valor del bot (dinero ficticio)</div>
       <div>
-        <h2>Bot frente a comprar y mantener</h2>
-        <p class="nota">Valor de la cartera ficticia, en euros. Si la línea azul no supera a la gris, el bot no aporta nada.</p>
+        <div class="valor num" id="kpi-bot">000,00 €</div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px">
+          <span class="insignia" id="kpi-bot-d">+0,0 %</span>
+          <span class="detalle" id="kpi-diferencia"></span>
+        </div>
       </div>
-      <div class="filtros" role="group" aria-label="Periodo">
-        <button data-dias="1">24 h</button><button data-dias="7">7 días</button><button data-dias="30">30 días</button><button data-dias="0" aria-pressed="true">Todo</button>
+      <div class="comparacion" aria-hidden="true">
+        <div class="fila-barra"><span>Bot</span><div class="pista"><span id="barra-bot" style="background:linear-gradient(90deg,var(--bot),var(--bot-2))"></span></div><span class="num" id="barra-bot-t"></span></div>
+        <div class="fila-barra"><span>Mantener</span><div class="pista"><span id="barra-ref" style="background:var(--ref)"></span></div><span class="num" id="barra-ref-t"></span></div>
+      </div>
+    </article>
+    <article class="vidrio kpi aparece" style="animation-delay:.05s">
+      <div class="etiqueta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Comprar y mantener</div>
+      <div class="valor num" id="kpi-ref">000,00 €</div>
+      <div class="detalle" id="kpi-ref-d">+0,0 %</div>
+    </article>
+    <article class="vidrio kpi aparece" style="animation-delay:.1s">
+      <div class="etiqueta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.8 9a3 3 0 0 0-2.8-2H11a2.5 2.5 0 0 0 0 5h2a2.5 2.5 0 0 1 0 5h-1a3 3 0 0 1-2.8-2M12 5v2M12 17v2"/></svg>Posición</div>
+      <div class="valor" id="kpi-pos">Fuera</div>
+      <div class="detalle" id="kpi-pos-d">Todo en euros</div>
+    </article>
+    <article class="vidrio kpi aparece" style="animation-delay:.15s">
+      <div class="etiqueta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg>Operaciones</div>
+      <div class="valor num" id="kpi-ops">0</div>
+      <div class="detalle" id="kpi-ops-d">0 ventas</div>
+    </article>
+    <article class="vidrio kpi aparece" style="animation-delay:.2s">
+      <div class="etiqueta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5L12 15.6 7.1 18.2l.9-5.5-4-3.9 5.5-.8z"/></svg>Lecciones aprendidas</div>
+      <div class="valor num" id="lecciones">0</div>
+      <div class="detalle" id="comisiones">0 € en comisiones</div>
+    </article>
+  </section>
+
+  <section class="vidrio tarjeta aparece" style="animation-delay:.25s">
+    <div class="cabecera-grafica">
+      <div>
+        <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 6-7"/></svg><h2>Bot frente a comprar y mantener</h2></div>
+        <p class="nota">Si la línea del bot no supera a la de referencia, el bot no aporta nada.</p>
+      </div>
+      <div class="filtros" role="group" aria-label="Periodo de la gráfica">
+        <button type="button" data-dias="1">24 h</button><button type="button" data-dias="7">7 d</button><button type="button" data-dias="30">30 d</button><button type="button" data-dias="0" aria-pressed="true">Todo</button>
       </div>
     </div>
     <div class="leyenda">
-      <span><span class="clave" style="border-color:var(--serie-bot)"></span>Bot</span>
-      <span><span class="clave" style="border-color:var(--serie-ref); border-top-style:dashed"></span>Comprar y mantener</span>
+      <span><span class="clave" style="border-color:var(--bot)"></span>Bot</span>
+      <span><span class="clave" style="border-color:var(--ref); border-top-style:dashed"></span>Comprar y mantener</span>
     </div>
-    <div class="grafica" id="grafica"><svg id="svg" aria-label="Gráfica del valor del bot y de comprar y mantener"></svg><div class="tooltip" id="tooltip"></div></div>
+    <div class="grafica" id="grafica"><svg id="svg" role="img" aria-label="Evolución del valor del bot y de comprar y mantener"></svg><div class="tooltip vidrio" id="tooltip"></div></div>
     <details><summary>Ver los datos en tabla</summary><div class="tabla"><table id="tabla-historial"></table></div></details>
   </section>
 
-  <div class="dos-columnas">
-    <section class="tarjeta">
-      <h2>¿Qué piensa ahora?</h2>
-      <p class="nota" id="piensa-texto"></p>
-      <div class="medidor" id="medidor"><div class="relleno"></div></div>
-      <h2 style="margin-top:20px">¿Está aprendiendo?</h2>
-      <p class="veredicto" id="veredicto"></p>
-      <p class="nota" style="margin-bottom:8px">Habilidad: cuánto menos se equivoca que un adivino que siempre dice "lo que suele pasar". Por encima de 0 % es mejor; z mayor que 2 significa que no parece suerte.</p>
-      <div class="tabla"><table id="tabla-aprendizaje"></table></div>
-      <table style="margin-top:8px">
-        <tr><th>Lecciones aprendidas</th><td class="num" id="lecciones">-</td></tr>
-        <tr><th>Comisiones pagadas</th><td class="num" id="comisiones">-</td></tr>
-      </table>
-      <div class="botones" style="margin-top:12px" id="enlace-informe"></div>
+  <div class="dos">
+    <section class="vidrio tarjeta aparece" style="animation-delay:.3s">
+      <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg><h2>¿Qué piensa ahora?</h2></div>
+      <p class="nota">Probabilidad de que el precio suba lo suficiente para pagar las comisiones.</p>
+      <div class="medidor"><svg id="medidor" viewBox="0 0 240 150" role="img" aria-label="Probabilidad actual frente a los umbrales"></svg></div>
+      <p class="texto-piensa" id="piensa-texto"></p>
     </section>
-    <section class="tarjeta">
-      <h2>Lo que ha aprendido</h2>
-      <p class="nota" style="margin-bottom:8px">Peso de cada indicador. Azul: si sube, cree que el precio subirá. Rojo: cree que bajará.</p>
-      <div id="pesos"></div>
+
+    <section class="vidrio tarjeta aparece" style="animation-delay:.35s">
+      <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3 0-5 2-5 4.5 0 1 .3 1.8.8 2.5A4 4 0 0 0 6 17a3.5 3.5 0 0 0 6 2.5A3.5 3.5 0 0 0 18 17a4 4 0 0 0-1.8-7c.5-.7.8-1.5.8-2.5C17 5 15 3 12 3zM12 3v16.5"/></svg><h2>¿Está aprendiendo?</h2></div>
+      <p class="nota">Comparado con un adivino que siempre dice "lo que suele pasar".</p>
+      <div class="veredicto" id="veredicto"><span class="emoji">⏳</span><div><strong>Esperando datos</strong><span>El veredicto aparece tras unas horas.</span></div></div>
+      <div class="tabla"><table class="mini-tabla" id="tabla-aprendizaje"></table></div>
+      <p class="nota" style="margin-top:10px">Habilidad &gt; 0 % = mejor que el adivino. z &gt; 2 = muy improbable que sea suerte.</p>
+      <div class="botones" style="margin-top:14px" id="enlace-informe"></div>
     </section>
   </div>
 
-  <section class="tarjeta seccion">
-    <h2>Operaciones</h2>
+  <div class="dos">
+    <section class="vidrio tarjeta aparece" style="animation-delay:.4s">
+      <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><h2>Lo que ha aprendido</h2></div>
+      <p class="nota" style="margin-bottom:8px"><span style="color:var(--positivo)">●</span> si el indicador sube, cree que el precio subirá · <span style="color:var(--negativo)">●</span> cree que bajará</p>
+      <div id="pesos"></div>
+    </section>
+    <section class="vidrio tarjeta aparece" style="animation-delay:.45s">
+      <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h2>Historial de eventos</h2></div>
+      <ul class="eventos" id="eventos"></ul>
+    </section>
+  </div>
+
+  <section class="vidrio tarjeta aparece" style="animation-delay:.5s">
+    <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><h2>Operaciones</h2></div>
     <p class="nota" style="margin-bottom:8px">Más recientes primero. Todo con dinero ficticio.</p>
     <div class="tabla"><table id="tabla-ops"></table></div>
   </section>
 
-  <section class="tarjeta seccion" id="controles">
-    <h2>Controlar el bot</h2>
-    <p class="nota">Los controles están en GitHub y solo tú puedes usarlos con tu sesión iniciada. Pulsa <strong>Abrir controles</strong>, luego <strong>Run workflow</strong>, elige la acción y vuelve a pulsar <strong>Run workflow</strong>. El panel se actualiza en un par de minutos.</p>
+  <section class="vidrio tarjeta aparece" style="animation-delay:.55s" id="controles">
+    <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><h2>Controlar el bot</h2></div>
+    <p class="nota">Los controles están en GitHub y solo funcionan con tu sesión iniciada. Pulsa <strong>Abrir controles</strong> → <strong>Run workflow</strong>, elige la acción y confirma. El panel se actualiza en un par de minutos.</p>
     <div class="acciones">
-      <div class="accion"><code>pausar</code><p class="nota">Deja de operar, pero sigue aprendiendo.</p></div>
-      <div class="accion"><code>reanudar</code><p class="nota">Vuelve a operar.</p></div>
-      <div class="accion"><code>vender_y_pausar</code><p class="nota">Vende lo que tenga al precio actual y se pausa.</p></div>
-      <div class="accion"><code>cambiar_umbrales</code><p class="nota">Más o menos exigente para comprar y vender.</p></div>
-      <div class="accion"><code>reiniciar_simulacion</code><p class="nota">Empieza de cero (puedes cambiar capital y moneda).</p></div>
+      <div class="accion"><div class="icono"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></div><div><code>pausar</code><p>Deja de operar, pero sigue aprendiendo.</p></div></div>
+      <div class="accion"><div class="icono"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></div><div><code>reanudar</code><p>Vuelve a operar.</p></div></div>
+      <div class="accion"><div class="icono"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div><code>vender_y_pausar</code><p>Vende al precio actual y se pausa.</p></div></div>
+      <div class="accion"><div class="icono"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/><circle cx="9" cy="8" r="2" fill="currentColor"/><circle cx="15" cy="16" r="2" fill="currentColor"/></svg></div><div><code>cambiar_umbrales</code><p>Más o menos exigente para operar.</p></div></div>
+      <div class="accion"><div class="icono"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg></div><div><code>reiniciar_simulacion</code><p>Empieza de cero (capital y moneda).</p></div></div>
     </div>
     <div class="botones" id="botones-control"></div>
   </section>
-
-  <section class="tarjeta seccion">
-    <h2>Historial de eventos</h2>
-    <ul class="eventos" id="eventos"></ul>
-  </section>
-
-  <footer class="nota">Simulación educativa con precios reales y dinero ficticio. No es asesoramiento financiero.</footer>
 </main>
+
+<footer>Simulación educativa con precios reales y dinero ficticio · No es asesoramiento financiero</footer>
 
 <script>
 const $ = (id) => document.getElementById(id);
@@ -199,12 +396,10 @@ const euros = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR
 const eurosCortos = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 const pct = (v, dec = 1) => (v >= 0 ? "+" : "") + v.toFixed(dec).replace(".", ",") + " %";
 const pctSimple = (v) => (v * 100).toFixed(1).replace(".", ",") + " %";
+const SVG = "http://www.w3.org/2000/svg";
 let datos = null, dias = 0;
 
-function parseFecha(f) {
-  const [d, h] = f.split(" "); const [dd, mm, aa] = d.split("/").map(Number); const [hh, mi] = h.split(":").map(Number);
-  return new Date(aa, mm - 1, dd, hh, mi);
-}
+/* ---------- Utilidades (los textos de datos van siempre por textContent) ---------- */
 function el(tag, texto, clase) {
   const e = document.createElement(tag);
   if (texto !== undefined && texto !== null) e.textContent = texto;
@@ -213,8 +408,23 @@ function el(tag, texto, clase) {
 }
 function fila(celdas, cabecera = false) {
   const tr = document.createElement("tr");
-  celdas.forEach(([texto, clase]) => tr.appendChild(el(cabecera ? "th" : "td", texto, clase)));
+  celdas.forEach(([contenido, clase]) => {
+    const td = el(cabecera ? "th" : "td", null, clase);
+    if (contenido instanceof Node) td.appendChild(contenido); else td.textContent = contenido;
+    tr.appendChild(td);
+  });
   return tr;
+}
+function svgEl(padre, tag, attrs, texto) {
+  const e = document.createElementNS(SVG, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (texto != null) e.textContent = texto;
+  padre.appendChild(e);
+  return e;
+}
+function parseFecha(f) {
+  const [d, h] = f.split(" "); const [dd, mm, aa] = d.split("/").map(Number); const [hh, mi] = h.split(":").map(Number);
+  return new Date(aa, mm - 1, dd, hh, mi);
 }
 function hace(iso) {
   const min = Math.round((Date.now() - new Date(iso)) / 60000);
@@ -223,214 +433,310 @@ function hace(iso) {
   const h = Math.round(min / 60);
   return h < 48 ? `hace ${h} h` : `hace ${Math.round(h / 24)} días`;
 }
+function color(clase) { return clase === "bien" ? "var(--bien)" : clase === "mal" ? "var(--mal)" : "var(--texto-3)"; }
 
+/* ---------- Tema claro / oscuro ---------- */
+$("tema").addEventListener("click", () => {
+  const nuevo = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  document.documentElement.dataset.theme = nuevo;
+  document.querySelector('meta[name="theme-color"]').content = nuevo === "light" ? "#eef2fb" : "#060912";
+  try { localStorage.setItem("tema", nuevo); } catch (e) {}
+  if (datos) { pintarGrafica(); pintarMedidor(); }
+});
+
+/* ---------- Cabecera y KPIs ---------- */
 function pintarKpis() {
   const d = datos, u = d.ultimo, cap = d.capital_inicial;
-  $("subtitulo").textContent = `${d.simbolo} · velas de ${d.intervalo} · ${eurosCortos.format(cap)} ficticios desde el ${d.creado}`;
+  $("kpis").classList.remove("cargando");
+  $("subtitulo").textContent = `${d.simbolo} · velas de ${d.intervalo} · ${eurosCortos.format(cap)} ficticios desde el ${d.creado.split(" ")[0]} · modelo v${d.version || "1.0"}`;
   const estado = $("estado-bot");
-  estado.querySelector(".punto").style.background = d.pausado ? "var(--aviso-borde)" : "var(--bien)";
-  estado.lastChild.textContent = d.pausado ? "En pausa (sigue aprendiendo)" : "Activo";
+  estado.querySelector(".punto").classList.toggle("pausa", d.pausado);
+  estado.lastChild.textContent = d.pausado ? "En pausa" : "Activo";
+  estado.title = d.pausado ? "En pausa: sigue aprendiendo, pero no opera" : "Operando con dinero ficticio";
   $("actualizado").textContent = "Actualizado " + hace(d.actualizado);
 
   const horas = (Date.now() - new Date(d.actualizado)) / 3600000;
   const aviso = $("aviso"); aviso.replaceChildren();
   if (horas > 3) {
-    const caja = el("div", null, "aviso");
-    caja.appendChild(el("strong", "⚠ El bot no se actualiza desde hace " + Math.round(horas) + " horas. "));
-    caja.appendChild(document.createTextNode("Revisa la pestaña Actions de GitHub por si ha fallado o se ha desactivado."));
-    aviso.appendChild(caja);
+    const caja = el("div", null, "vidrio aviso");
+    caja.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>';
+    const texto = el("div");
+    texto.appendChild(el("strong", `El bot no se actualiza desde hace ${Math.round(horas)} horas. `));
+    texto.appendChild(document.createTextNode("Revisa la pestaña Actions de GitHub por si ha fallado o se ha desactivado."));
+    caja.appendChild(texto); aviso.appendChild(caja);
   }
   if (!u) return;
+
   const rb = (u.bot / cap - 1) * 100, rr = (u.referencia / cap - 1) * 100;
   $("kpi-bot").textContent = euros.format(u.bot);
-  $("kpi-bot-d").textContent = pct(rb); $("kpi-bot-d").className = "detalle " + (rb >= 0 ? "bien" : "mal");
+  const insignia = $("kpi-bot-d");
+  insignia.textContent = (rb >= 0 ? "▲ " : "▼ ") + pct(rb);
+  insignia.style.color = rb >= 0 ? "var(--bien)" : "var(--mal)";
+  const dif = u.bot - u.referencia;
+  $("kpi-diferencia").textContent = `${dif >= 0 ? "+" : "−"}${euros.format(Math.abs(dif))} frente a mantener`;
+
+  const maximo = Math.max(u.bot, u.referencia, cap) * 1.02;
+  requestAnimationFrame(() => {
+    $("barra-bot").style.width = (u.bot / maximo) * 100 + "%";
+    $("barra-ref").style.width = (u.referencia / maximo) * 100 + "%";
+  });
+  $("barra-bot-t").textContent = eurosCortos.format(u.bot);
+  $("barra-ref-t").textContent = eurosCortos.format(u.referencia);
+
   $("kpi-ref").textContent = euros.format(u.referencia);
-  $("kpi-ref-d").textContent = pct(rr); $("kpi-ref-d").className = "detalle " + (rr >= 0 ? "bien" : "mal");
+  $("kpi-ref-d").textContent = pct(rr); $("kpi-ref-d").style.color = rr >= 0 ? "var(--bien)" : "var(--mal)";
   $("kpi-pos").textContent = d.en_posicion ? "Dentro" : "Fuera";
-  $("kpi-pos-d").textContent = (d.en_posicion ? "Tiene " + d.simbolo.slice(0, -3) : "Todo en euros") + " · precio " + euros.format(u.precio);
+  $("kpi-pos-d").textContent = (d.en_posicion ? "Tiene " + d.simbolo.slice(0, -3) : "Todo en euros") + " · " + euros.format(u.precio);
   const ventas = d.operaciones.filter((o) => o.tipo === "VENTA");
   $("kpi-ops").textContent = d.operaciones.length;
   $("kpi-ops-d").textContent = `${ventas.filter((o) => o.resultado > 0).length} de ${ventas.length} ventas con ganancia`;
-}
-
-function pintarPiensa() {
-  const d = datos, u = d.ultimo;
-  if (!u) return;
-  const p = u.prob;
-  const objetivo = (d.movimiento_minimo * 100).toFixed(1).replace(".", ",");
-  let texto = `Cree que hay un ${pctSimple(p)} de probabilidad de que el precio suba más de un ${objetivo} % (lo necesario para pagar comisiones) en las próximas ${d.horizonte} velas. `;
-  if (d.pausado) texto += "Está en pausa, así que no opera.";
-  else if (d.en_posicion) texto += `Venderá si baja del ${pctSimple(d.umbral_venta)}.`;
-  else texto += `Comprará si llega al ${pctSimple(d.umbral_compra)}.`;
-  $("piensa-texto").textContent = texto;
-  const medidor = $("medidor");
-  medidor.querySelectorAll(".marca").forEach((m) => m.remove());
-  medidor.querySelector(".relleno").style.width = Math.min(100, p * 100) + "%";
-  [[d.umbral_venta, "venta"], [d.umbral_compra, "compra"]].forEach(([v, nombre]) => {
-    const marca = el("div", null, "marca " + nombre); marca.style.left = v * 100 + "%";
-    marca.appendChild(el("span", `${nombre} ${Math.round(v * 100)} %`));
-    medidor.appendChild(marca);
-  });
-  const ap = d.aprendizaje;
-  if (ap) {
-    const v = $("veredicto"); v.replaceChildren();
-    v.append(el("span", ap.icono + " "), el("strong", ap.titulo), document.createTextNode(". " + ap.explicacion));
-    const t = $("tabla-aprendizaje"); t.replaceChildren();
-    t.appendChild(fila([["Periodo"], ["Predicciones", "num"], ["Habilidad", "num"], ["z", "num"]], true));
-    ap.periodos.forEach((p) => t.appendChild(fila([[p.nombre], [p.n.toLocaleString("es-ES"), "num"],
-      [pct(p.habilidad * 100), "num " + (p.habilidad > 0 ? "bien" : "mal")], [p.z.toFixed(2).replace(".", ","), "num"]])));
-    const enlace = $("enlace-informe"); enlace.replaceChildren();
-    if (d.repo) {
-      const a = el("a", "Ver informe completo", "boton secundario");
-      a.href = "https://github.com/" + d.repo + "/blob/main/INFORME_APRENDIZAJE.md"; a.target = "_blank"; a.rel = "noopener";
-      enlace.appendChild(a);
-    }
-  }
   $("lecciones").textContent = d.lecciones.toLocaleString("es-ES");
-  $("comisiones").textContent = euros.format(d.comisiones);
+  $("comisiones").textContent = euros.format(d.comisiones) + " en comisiones";
 }
 
+/* ---------- Medidor semicircular ---------- */
+function pintarMedidor() {
+  const d = datos, u = d.ultimo, svg = $("medidor");
+  svg.replaceChildren();
+  if (!u) return;
+  const cx = 120, cy = 122, r = 92, grosor = 16;
+  const punto = (v, radio = r) => { const a = Math.PI * (1 - v); return [cx + radio * Math.cos(a), cy - radio * Math.sin(a)]; };
+  const arco = (desde, hasta) => { const [x1, y1] = punto(desde), [x2, y2] = punto(hasta); return `M${x1} ${y1} A${r} ${r} 0 ${hasta - desde > .5 ? 1 : 0} 1 ${x2} ${y2}`; };
+  const defs = svgEl(svg, "defs", {});
+  const grad = svgEl(defs, "linearGradient", { id: "grad-medidor", x1: "0", y1: "0", x2: "1", y2: "0" });
+  svgEl(grad, "stop", { offset: "0", style: "stop-color:var(--bot)" });
+  svgEl(grad, "stop", { offset: "1", style: "stop-color:var(--bot-2)" });
+
+  svgEl(svg, "path", { d: arco(0, 1), fill: "none", stroke: "var(--rejilla)", "stroke-width": grosor, "stroke-linecap": "round" });
+  // Zona de compra resaltada
+  svgEl(svg, "path", { d: arco(d.umbral_compra, 1), fill: "none", stroke: "var(--bien)", "stroke-opacity": .22, "stroke-width": grosor, "stroke-linecap": "round" });
+  const p = Math.max(0.001, Math.min(1, u.prob));
+  const valor = svgEl(svg, "path", { d: arco(0, p), fill: "none", stroke: "url(#grad-medidor)", "stroke-width": grosor, "stroke-linecap": "round" });
+  const largo = valor.getTotalLength();
+  valor.style.strokeDasharray = largo; valor.style.strokeDashoffset = largo;
+  valor.getBoundingClientRect();
+  valor.style.transition = "stroke-dashoffset 1.2s cubic-bezier(.2,.7,.2,1)"; valor.style.strokeDashoffset = 0;
+
+  [[d.umbral_venta, "venta"], [d.umbral_compra, "compra"]].forEach(([v, nombre]) => {
+    const [x1, y1] = punto(v, r - grosor / 2 - 3), [x2, y2] = punto(v, r + grosor / 2 + 3), [tx, ty] = punto(v, r + grosor / 2 + 14);
+    svgEl(svg, "line", { x1, y1, x2, y2, stroke: "var(--texto)", "stroke-width": 2, "stroke-linecap": "round" });
+    svgEl(svg, "text", { x: tx, y: ty, "text-anchor": v < .5 ? "end" : "start", class: "etiqueta-umbral" }, `${nombre} ${Math.round(v * 100)}%`);
+  });
+  const [px, py] = punto(p);
+  svgEl(svg, "circle", { cx: px, cy: py, r: 6, fill: "var(--texto)", stroke: "var(--bot)", "stroke-width": 3 });
+  svgEl(svg, "text", { x: cx, y: cy - 14, "text-anchor": "middle", class: "valor-medidor" }, pctSimple(u.prob));
+  svgEl(svg, "text", { x: cx, y: cy + 6, "text-anchor": "middle", class: "sub-medidor" }, "probabilidad actual");
+
+  const objetivo = (d.movimiento_minimo * 100).toFixed(1).replace(".", ",");
+  let texto = `Necesita que el precio suba más de un ${objetivo} % en las próximas ${d.horizonte} velas. `;
+  if (d.pausado) texto += "Está en pausa, así que no opera.";
+  else if (d.en_posicion) texto += `Tiene ${d.simbolo.slice(0, -3)} y venderá si baja del ${Math.round(d.umbral_venta * 100)} %.`;
+  else texto += `Comprará si llega al ${Math.round(d.umbral_compra * 100)} %.`;
+  $("piensa-texto").textContent = texto;
+}
+
+/* ---------- Veredicto de aprendizaje ---------- */
+const COLOR_VEREDICTO = { aprende: "var(--bien)", indicios: "var(--aviso)", no_aprende: "var(--texto-3)", peor: "var(--mal)", pocos_datos: "var(--bot)" };
+function pintarAprendizaje() {
+  const ap = datos.aprendizaje;
+  if (!ap) return;
+  const v = $("veredicto"); v.replaceChildren();
+  v.style.setProperty("--color-veredicto", COLOR_VEREDICTO[ap.veredicto] || "var(--bot)");
+  const caja = el("div");
+  caja.append(el("strong", ap.titulo), el("span", ap.explicacion));
+  v.append(el("span", ap.icono, "emoji"), caja);
+
+  const t = $("tabla-aprendizaje"); t.replaceChildren();
+  const cab = document.createElement("thead"); cab.appendChild(fila([["Periodo"], ["Predic.", "num col-n"], ["Habilidad", "num"], ["z", "num"]], true));
+  const cuerpo = document.createElement("tbody");
+  ap.periodos.forEach((p) => cuerpo.appendChild(fila([[p.nombre.replace(" (en directo)", "").replace(" (historia previa)", "")],
+    [p.n.toLocaleString("es-ES"), "num col-n"], [pct(p.habilidad * 100), "num " + (p.habilidad > 0 ? "bien" : "mal")], [p.z.toFixed(2).replace(".", ","), "num"]])));
+  t.append(cab, cuerpo);
+
+  const enlace = $("enlace-informe"); enlace.replaceChildren();
+  if (datos.repo) {
+    const a = el("a", "Ver informe completo", "boton secundario");
+    a.href = "https://github.com/" + datos.repo + "/blob/main/INFORME_APRENDIZAJE.md"; a.target = "_blank"; a.rel = "noopener";
+    enlace.appendChild(a);
+  }
+}
+
+/* ---------- Pesos ---------- */
 function pintarPesos() {
   const cont = $("pesos"); cont.replaceChildren();
   const max = Math.max(0.05, ...datos.aprendido.map((a) => Math.abs(a.peso)));
   datos.aprendido.forEach((a) => {
-    const filaPeso = el("div", null, "peso");
-    filaPeso.title = a.opinion;
-    filaPeso.appendChild(el("span", a.nombre));
-    const barra = el("div", null, "barra"), trozo = document.createElement("span");
+    const f = el("div", null, "peso"); f.title = a.opinion;
+    f.appendChild(el("span", a.nombre));
+    const barra = el("div", null, "barra-peso"), trozo = document.createElement("span");
     const ancho = (Math.abs(a.peso) / max) * 50;
-    trozo.style.width = ancho + "%";
     trozo.style.left = a.peso >= 0 ? "50%" : 50 - ancho + "%";
-    trozo.style.background = a.peso >= 0 ? "var(--positivo)" : "var(--negativo)";
-    barra.appendChild(trozo); filaPeso.appendChild(barra);
-    filaPeso.appendChild(el("span", (a.peso >= 0 ? "+" : "") + a.peso.toFixed(2).replace(".", ","), "num"));
-    cont.appendChild(filaPeso);
+    trozo.style.background = a.peso >= 0 ? "linear-gradient(90deg, var(--positivo), var(--bot-2))" : "linear-gradient(270deg, var(--negativo), #fb923c)";
+    trozo.style.width = "0";
+    requestAnimationFrame(() => { trozo.style.width = ancho + "%"; });
+    barra.appendChild(trozo); f.appendChild(barra);
+    f.appendChild(el("span", (a.peso >= 0 ? "+" : "") + a.peso.toFixed(2).replace(".", ","), "num"));
+    cont.appendChild(f);
   });
 }
 
+/* ---------- Operaciones y eventos ---------- */
 function pintarOperaciones() {
   const t = $("tabla-ops"); t.replaceChildren();
-  t.appendChild(fila([["Fecha"], ["Tipo"], ["Precio", "num"], ["Comisión", "num"], ["Resultado", "num"]], true));
-  if (!datos.operaciones.length) { t.appendChild(fila([["Todavía no ha operado. Es normal: solo compra cuando está bastante seguro."]])); return; }
+  const cab = document.createElement("thead");
+  cab.appendChild(fila([["Fecha"], ["Tipo"], ["Precio", "num"], ["Comisión", "num"], ["Resultado", "num"]], true));
+  const cuerpo = document.createElement("tbody");
+  if (!datos.operaciones.length) {
+    const tr = fila([["Todavía no ha operado. Es normal: solo compra cuando está bastante seguro."]]);
+    tr.firstChild.colSpan = 5; tr.firstChild.style.color = "var(--texto-3)"; cuerpo.appendChild(tr);
+  }
   [...datos.operaciones].reverse().forEach((o) => {
-    const res = o.resultado == null ? ["", "num"] : [(o.resultado >= 0 ? "+" : "") + euros.format(o.resultado), "num " + (o.resultado >= 0 ? "bien" : "mal")];
-    t.appendChild(fila([[o.fecha], [o.tipo === "COMPRA" ? "Compra" : "Venta"], [euros.format(o.precio), "num"], [euros.format(o.comision), "num"], res]));
+    const chip = el("span", o.tipo === "COMPRA" ? "Compra" : "Venta", "chip " + (o.tipo === "COMPRA" ? "compra" : "venta"));
+    const res = o.resultado == null ? ["", "num"] : [(o.resultado >= 0 ? "+" : "−") + euros.format(Math.abs(o.resultado)), "num " + (o.resultado >= 0 ? "bien" : "mal")];
+    cuerpo.appendChild(fila([[o.fecha], [chip], [euros.format(o.precio), "num"], [euros.format(o.comision), "num"], res]));
   });
+  t.append(cab, cuerpo);
 }
-
-function pintarControles() {
-  const cont = $("botones-control"); cont.replaceChildren();
-  if (!datos.repo) { cont.appendChild(el("p", "Los controles aparecerán cuando el bot funcione en GitHub.", "nota")); return; }
-  const base = "https://github.com/" + datos.repo + "/actions/workflows/";
-  [["Abrir controles", "control.yml", ""], ["Ejecutar el bot ahora", "bot.yml", "secundario"], ["Ajustes en config.py", null, "secundario"]].forEach(([texto, wf, clase]) => {
-    const a = el("a", texto, "boton " + clase);
-    a.href = wf ? base + wf : "https://github.com/" + datos.repo + "/blob/main/config.py";
-    a.target = "_blank"; a.rel = "noopener";
-    cont.appendChild(a);
-  });
-}
-
 function pintarEventos() {
   const ul = $("eventos"); ul.replaceChildren();
   if (!datos.eventos.length) ul.appendChild(el("li", "Sin eventos todavía."));
-  [...datos.eventos].reverse().forEach((e) => ul.appendChild(el("li", `${e.fecha} · ${e.texto}`)));
+  [...datos.eventos].reverse().forEach((e) => {
+    const li = el("li"); li.append(el("span", e.fecha, "cuando"), document.createTextNode(e.texto)); ul.appendChild(li);
+  });
+}
+function pintarControles() {
+  const cont = $("botones-control"); cont.replaceChildren();
+  if (!datos.repo) { cont.appendChild(el("p", "Los controles aparecerán cuando el bot funcione en GitHub.", "nota")); return; }
+  const base = "https://github.com/" + datos.repo;
+  [["Abrir controles", base + "/actions/workflows/control.yml", ""],
+   ["Ejecutar el bot ahora", base + "/actions/workflows/bot.yml", "secundario"],
+   ["Ajustes en config.py", base + "/blob/main/config.py", "secundario"]].forEach(([texto, url, clase]) => {
+    const a = el("a", texto, "boton " + clase); a.href = url; a.target = "_blank"; a.rel = "noopener"; cont.appendChild(a);
+  });
 }
 
+/* ---------- Gráfica ---------- */
 function serieVisible() {
   const h = datos.historial;
   if (!dias || !h.length) return h;
   const limite = parseFecha(h[h.length - 1].f).getTime() - dias * 86400000;
   return h.filter((p) => parseFecha(p.f).getTime() >= limite);
 }
-
 function pintarGrafica() {
   const svg = $("svg"), tip = $("tooltip");
   const serie = serieVisible();
-  svg.replaceChildren(); tip.style.display = "none";
-  const ancho = svg.clientWidth || 800, alto = 300, mi = 64, md = 12, ms = 12, mb = 28;
+  svg.replaceChildren(); tip.classList.remove("visible");
+  const ancho = svg.clientWidth || 800, alto = svg.clientHeight || 320;
+  const mi = ancho < 500 ? 48 : 60, md = 10, ms = 12, mb = 28;
   svg.setAttribute("viewBox", `0 0 ${ancho} ${alto}`);
-  const ns = "http://www.w3.org/2000/svg";
-  const nuevo = (tag, attrs, texto) => { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (texto != null) e.textContent = texto; svg.appendChild(e); return e; };
-  if (serie.length < 2) { nuevo("text", { x: ancho / 2, y: alto / 2, "text-anchor": "middle" }, "La gráfica aparecerá tras un par de horas de funcionamiento."); return; }
+  if (serie.length < 2) { svgEl(svg, "text", { x: ancho / 2, y: alto / 2, "text-anchor": "middle" }, "La gráfica aparecerá tras un par de horas de funcionamiento."); return; }
 
   const valores = serie.flatMap((p) => [p.b, p.r]);
   let min = Math.min(...valores), max = Math.max(...valores);
-  const margen = Math.max((max - min) * 0.08, 1); min -= margen; max += margen;
+  const margen = Math.max((max - min) * 0.1, 1); min -= margen; max += margen;
   const x = (i) => mi + (ancho - mi - md) * i / (serie.length - 1);
   const y = (v) => ms + (alto - ms - mb) * (1 - (v - min) / (max - min));
 
+  const defs = svgEl(svg, "defs", {});
+  const area = svgEl(defs, "linearGradient", { id: "grad-area", x1: "0", y1: "0", x2: "0", y2: "1" });
+  svgEl(area, "stop", { offset: "0", style: "stop-color:var(--bot);stop-opacity:.35" });
+  svgEl(area, "stop", { offset: "1", style: "stop-color:var(--bot);stop-opacity:0" });
+  const trazo = svgEl(defs, "linearGradient", { id: "grad-linea", x1: "0", y1: "0", x2: "1", y2: "0" });
+  svgEl(trazo, "stop", { offset: "0", style: "stop-color:var(--bot)" });
+  svgEl(trazo, "stop", { offset: "1", style: "stop-color:var(--bot-2)" });
+
   for (let k = 0; k <= 4; k++) {
     const v = min + (max - min) * k / 4;
-    nuevo("line", { x1: mi, x2: ancho - md, y1: y(v), y2: y(v), stroke: "var(--rejilla)" });
-    nuevo("text", { x: mi - 8, y: y(v) + 4, "text-anchor": "end" }, eurosCortos.format(v));
+    svgEl(svg, "line", { x1: mi, x2: ancho - md, y1: y(v), y2: y(v), stroke: "var(--rejilla)" });
+    svgEl(svg, "text", { x: mi - 8, y: y(v) + 4, "text-anchor": "end" }, eurosCortos.format(v));
+  }
+  // Línea del capital inicial como referencia
+  if (datos.capital_inicial > min && datos.capital_inicial < max) {
+    svgEl(svg, "line", { x1: mi, x2: ancho - md, y1: y(datos.capital_inicial), y2: y(datos.capital_inicial), stroke: "var(--eje)", "stroke-dasharray": "2 4" });
   }
   const etiquetas = Math.min(ancho < 520 ? 3 : 5, serie.length);
   for (let k = 0; k < etiquetas; k++) {
     const i = Math.round((serie.length - 1) * k / Math.max(1, etiquetas - 1));
     const [fecha, hora] = serie[i].f.split(" ");
-    nuevo("text", { x: x(i), y: alto - 8, "text-anchor": k === 0 ? "start" : k === etiquetas - 1 ? "end" : "middle" }, fecha.slice(0, 5) + " " + hora);
+    svgEl(svg, "text", { x: x(i), y: alto - 8, "text-anchor": k === 0 ? "start" : k === etiquetas - 1 ? "end" : "middle" }, fecha.slice(0, 5) + " " + hora);
   }
-  const linea = (clave, color, discontinua) => nuevo("polyline", {
-    points: serie.map((p, i) => `${x(i).toFixed(1)},${y(p[clave]).toFixed(1)}`).join(" "),
-    fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-dasharray": discontinua ? "5 4" : "none" });
-  linea("r", "var(--serie-ref)", true);
-  linea("b", "var(--serie-bot)", false);
 
-  const cruz = nuevo("line", { y1: ms, y2: alto - mb, stroke: "var(--eje)", visibility: "hidden" });
-  const puntoB = nuevo("circle", { r: 4, fill: "var(--serie-bot)", stroke: "var(--superficie)", "stroke-width": 2, visibility: "hidden" });
-  const puntoR = nuevo("circle", { r: 4, fill: "var(--serie-ref)", stroke: "var(--superficie)", "stroke-width": 2, visibility: "hidden" });
-  const zona = nuevo("rect", { x: mi, y: 0, width: ancho - mi - md, height: alto, fill: "transparent" });
+  const puntosBot = serie.map((p, i) => `${x(i).toFixed(1)},${y(p.b).toFixed(1)}`);
+  svgEl(svg, "path", { d: `M${x(0)},${alto - mb} L${puntosBot.join(" L")} L${x(serie.length - 1)},${alto - mb} Z`, fill: "url(#grad-area)" });
+  svgEl(svg, "polyline", { points: serie.map((p, i) => `${x(i).toFixed(1)},${y(p.r).toFixed(1)}`).join(" "),
+    fill: "none", stroke: "var(--ref)", "stroke-width": 2, "stroke-dasharray": "5 4", "stroke-linejoin": "round" });
+  const linea = svgEl(svg, "polyline", { points: puntosBot.join(" "), fill: "none", stroke: "url(#grad-linea)", "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" });
+  const largo = linea.getTotalLength ? linea.getTotalLength() : 0;
+  if (largo) {
+    linea.style.strokeDasharray = largo; linea.style.strokeDashoffset = largo;
+    linea.getBoundingClientRect();
+    linea.style.transition = "stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)"; linea.style.strokeDashoffset = 0;
+  }
+  const ultimo = serie.length - 1;
+  svgEl(svg, "circle", { cx: x(ultimo), cy: y(serie[ultimo].b), r: 4.5, fill: "var(--bot-2)", stroke: "var(--fondo)", "stroke-width": 2 });
+
+  const cruz = svgEl(svg, "line", { y1: ms, y2: alto - mb, stroke: "var(--eje)", "stroke-dasharray": "3 3", visibility: "hidden" });
+  const puntoB = svgEl(svg, "circle", { r: 5, fill: "var(--bot)", stroke: "var(--fondo)", "stroke-width": 2, visibility: "hidden" });
+  const puntoR = svgEl(svg, "circle", { r: 4.5, fill: "var(--ref)", stroke: "var(--fondo)", "stroke-width": 2, visibility: "hidden" });
+  const zona = svgEl(svg, "rect", { x: mi, y: 0, width: ancho - mi - md, height: alto, fill: "transparent" });
 
   function mostrar(evento) {
     const caja = svg.getBoundingClientRect();
     const px = (evento.clientX - caja.left) * ancho / caja.width;
-    const i = Math.max(0, Math.min(serie.length - 1, Math.round((px - mi) / (ancho - mi - md) * (serie.length - 1))));
+    const i = Math.max(0, Math.min(ultimo, Math.round((px - mi) / (ancho - mi - md) * ultimo)));
     const p = serie[i];
     [cruz, puntoB, puntoR].forEach((e) => e.setAttribute("visibility", "visible"));
     cruz.setAttribute("x1", x(i)); cruz.setAttribute("x2", x(i));
     puntoB.setAttribute("cx", x(i)); puntoB.setAttribute("cy", y(p.b));
     puntoR.setAttribute("cx", x(i)); puntoR.setAttribute("cy", y(p.r));
     tip.replaceChildren(el("div", p.f, "fecha"));
-    [[p.b, "Bot", "var(--serie-bot)", false], [p.r, "Comprar y mantener", "var(--serie-ref)", true]].forEach(([v, nombre, color, disc]) => {
+    [[p.b, "Bot", "var(--bot)", false], [p.r, "Mantener", "var(--ref)", true]].forEach(([v, nombre, c, disc]) => {
       const l = el("div", null, "linea"), clave = el("span", null, "clave");
-      clave.style.borderColor = color; if (disc) clave.style.borderTopStyle = "dashed";
-      l.append(clave, el("strong", euros.format(v)), el("span", nombre, "nota"));
+      clave.style.borderColor = c; if (disc) clave.style.borderTopStyle = "dashed";
+      l.append(clave, el("strong", euros.format(v)), el("span", nombre, "nombre"));
       tip.appendChild(l);
     });
-    tip.appendChild(el("div", "Precio " + euros.format(p.p), "nota"));
-    tip.style.display = "block";
+    tip.appendChild(el("div", "Precio " + euros.format(p.p), "nombre"));
+    tip.classList.add("visible");
     const izquierda = x(i) * caja.width / ancho;
-    tip.style.left = Math.min(Math.max(0, izquierda + 12), caja.width - tip.offsetWidth) + "px";
-    tip.style.top = "8px";
+    const derecha = izquierda + 16 + tip.offsetWidth > caja.width;
+    tip.style.left = Math.max(0, derecha ? izquierda - tip.offsetWidth - 16 : izquierda + 16) + "px";
   }
+  function ocultar() { tip.classList.remove("visible"); [cruz, puntoB, puntoR].forEach((e) => e.setAttribute("visibility", "hidden")); }
   zona.addEventListener("pointermove", mostrar);
   zona.addEventListener("pointerdown", mostrar);
-  zona.addEventListener("pointerleave", () => { tip.style.display = "none"; [cruz, puntoB, puntoR].forEach((e) => e.setAttribute("visibility", "hidden")); });
+  zona.addEventListener("pointerleave", ocultar);
 
   const t = $("tabla-historial"); t.replaceChildren();
-  t.appendChild(fila([["Fecha"], ["Precio", "num"], ["Bot", "num"], ["Comprar y mantener", "num"]], true));
-  serie.slice(-72).reverse().forEach((p) => t.appendChild(fila([[p.f], [euros.format(p.p), "num"], [euros.format(p.b), "num"], [euros.format(p.r), "num"]])));
+  const cab = document.createElement("thead"); cab.appendChild(fila([["Fecha"], ["Precio", "num"], ["Bot", "num"], ["Mantener", "num"]], true));
+  const cuerpo = document.createElement("tbody");
+  serie.slice(-72).reverse().forEach((p) => cuerpo.appendChild(fila([[p.f], [euros.format(p.p), "num"], [euros.format(p.b), "num"], [euros.format(p.r), "num"]])));
+  t.append(cab, cuerpo);
 }
 
 document.querySelectorAll(".filtros button").forEach((b) => b.addEventListener("click", () => {
   document.querySelectorAll(".filtros button").forEach((o) => o.setAttribute("aria-pressed", o === b));
   dias = Number(b.dataset.dias); pintarGrafica();
 }));
-window.addEventListener("resize", () => datos && pintarGrafica());
+let temporizador;
+window.addEventListener("resize", () => { clearTimeout(temporizador); temporizador = setTimeout(() => datos && pintarGrafica(), 150); });
 
+/* ---------- Carga ---------- */
 async function cargar() {
   try {
     const r = await fetch("datos.json?" + Date.now(), { cache: "no-store" });
     if (!r.ok) throw new Error(r.status);
     datos = await r.json();
   } catch (e) {
-    $("subtitulo").textContent = "Todavía no hay datos. El bot los creará en su primera ejecución.";
+    $("subtitulo").textContent = "Todavía no hay datos: el bot los creará en su primera ejecución.";
+    $("estado-bot").lastChild.textContent = "Sin datos";
     return;
   }
-  pintarKpis(); pintarPiensa(); pintarPesos(); pintarOperaciones(); pintarControles(); pintarEventos(); pintarGrafica();
+  pintarKpis(); pintarMedidor(); pintarAprendizaje(); pintarPesos(); pintarOperaciones(); pintarEventos(); pintarControles(); pintarGrafica();
 }
 cargar();
 setInterval(cargar, 5 * 60 * 1000);
+setInterval(() => datos && ($("actualizado").textContent = "Actualizado " + hace(datos.actualizado)), 60 * 1000);
 </script>
 </body>
 </html>
