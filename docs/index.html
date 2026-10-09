@@ -214,22 +214,23 @@ tr:last-child td { border-bottom: 0; }
 /* Controles */
 .pasos { list-style: none; counter-reset: paso; padding: 0; margin: 16px 0 0; display: grid; gap: 10px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
-.pasos li { counter-increment: paso; display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 14px;
+.pasos li { counter-increment: paso; display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 14px;
   background: var(--vidrio); border: 1px solid var(--borde-suave); font-size: .86rem; color: var(--texto-2); }
 .pasos li::before { content: counter(paso); flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
   font-weight: 700; font-size: .8rem; color: #fff; background: linear-gradient(135deg, var(--bot), var(--bot-2)); }
 .pasos strong { color: var(--texto); }
 .subtitulo-seccion { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-3); margin: 22px 0 10px; }
 .acciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; margin: 0 0 20px; }
-.accion { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; border-radius: 16px; min-width: 0;
+.accion { display: grid; grid-template-columns: 38px minmax(0, 1fr); column-gap: 14px; row-gap: 10px; align-items: center;
+  align-content: start; padding: 18px 20px; border-radius: 16px; min-width: 0;
   background: var(--vidrio); border: 1px solid var(--borde-suave); transition: background .2s, transform .2s, border-color .2s; }
 .accion:hover { background: var(--vidrio-fuerte); border-color: var(--borde); transform: translateY(-2px); }
 .accion .icono { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; flex: none;
   background: color-mix(in srgb, var(--bot) 16%, transparent); color: var(--bot); }
-.accion .texto-accion { min-width: 0; flex: 1; }
-.accion strong { display: block; font-size: .95rem; margin-bottom: 3px; }
-.accion p { font-size: .84rem; color: var(--texto-2); line-height: 1.45; }
-.accion code { display: inline-block; max-width: 100%; margin-top: 10px; padding: 3px 9px; border-radius: 7px; overflow-wrap: anywhere;
+.accion .texto-accion { display: contents; }
+.accion strong { grid-column: 2; grid-row: 1; font-size: .95rem; line-height: 1.3; }
+.accion p { grid-column: 1 / -1; font-size: .84rem; color: var(--texto-2); line-height: 1.45; }
+.accion code { grid-column: 1 / -1; justify-self: start; max-width: 100%; padding: 3px 9px; border-radius: 7px; overflow-wrap: anywhere;
   font: 500 .74rem/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; color: var(--texto-3);
   background: var(--vidrio-fuerte); border: 1px solid var(--borde-suave); }
 .botones { display: flex; flex-wrap: wrap; gap: 10px; }
