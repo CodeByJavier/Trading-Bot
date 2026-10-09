@@ -1,0 +1,52 @@
+name: Bot cada hora
+
+on:
+  schedule:
+    - cron: "7 * * * *"   # minuto 7 de cada hora (GitHub puede retrasarlo unos minutos)
+  workflow_dispatch:       # botón "Run workflow" para ejecutarlo a mano
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: bot-trading
+  cancel-in-progress: false
+
+env:
+  TZ: Europe/Madrid
+
+jobs:
+  ejecutar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Procesar velas nuevas
+        run: python bot.py --una-vez
+
+      - name: Guardar estado en el repositorio
+        run: |
+          git config user.name "bot-trading"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add datos_bot docs
+          if ! git diff --cached --quiet; then
+            git commit -m "Bot: vela procesada"
+            git pull --rebase
+            git push
+          fi
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+      - id: despliegue
+        uses: actions/deploy-pages@v4

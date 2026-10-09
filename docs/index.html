@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bot de trading simulado</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><polyline points='1,12 5,7 9,9 15,3' fill='none' stroke='%232a78d6' stroke-width='2'/></svg>">
+<style>
+:root {
+  color-scheme: light;
+  --plano: #f9f9f7; --superficie: #fcfcfb; --borde: rgba(11,11,11,0.10);
+  --texto: #0b0b0b; --texto-2: #52514e; --texto-3: #898781;
+  --rejilla: #e1e0d9; --eje: #c3c2b7;
+  --serie-bot: #2a78d6; --serie-ref: #898781;
+  --positivo: #2a78d6; --negativo: #e34948; --neutro: #f0efec;
+  --bien: #006300; --mal: #d03b3b; --aviso-fondo: #fff6e0; --aviso-borde: #fab219;
+  --boton: #0b0b0b; --boton-texto: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --plano: #0d0d0d; --superficie: #1a1a19; --borde: rgba(255,255,255,0.10);
+    --texto: #ffffff; --texto-2: #c3c2b7; --texto-3: #898781;
+    --rejilla: #2c2c2a; --eje: #383835;
+    --serie-bot: #3987e5; --serie-ref: #898781;
+    --positivo: #3987e5; --negativo: #e66767; --neutro: #383835;
+    --bien: #0ca30c; --mal: #e66767; --aviso-fondo: #2a2210; --aviso-borde: #c98500;
+    --boton: #ffffff; --boton-texto: #0b0b0b;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --plano: #0d0d0d; --superficie: #1a1a19; --borde: rgba(255,255,255,0.10);
+  --texto: #ffffff; --texto-2: #c3c2b7; --texto-3: #898781;
+  --rejilla: #2c2c2a; --eje: #383835;
+  --serie-bot: #3987e5; --serie-ref: #898781;
+  --positivo: #3987e5; --negativo: #e66767; --neutro: #383835;
+  --bien: #0ca30c; --mal: #e66767; --aviso-fondo: #2a2210; --aviso-borde: #c98500;
+  --boton: #ffffff; --boton-texto: #0b0b0b;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--plano); color: var(--texto);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1040px; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 1.5rem; margin: 0; }
+h2 { font-size: 1.05rem; margin: 0 0 4px; }
+p { margin: 0; }
+.sub { color: var(--texto-2); }
+.nota { color: var(--texto-3); font-size: .85rem; }
+.cabecera { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.pastilla { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px;
+  border: 1px solid var(--borde); background: var(--superficie); font-size: .85rem; color: var(--texto-2); }
+.punto { width: 8px; height: 8px; border-radius: 50%; }
+.tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: 12px; padding: 16px; }
+.rejilla-kpi { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+@media (min-width: 860px) { .rejilla-kpi { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.kpi .etiqueta { color: var(--texto-2); font-size: .85rem; }
+.kpi .valor { font-size: 1.6rem; font-weight: 600; margin: 2px 0; }
+.kpi .detalle { color: var(--texto-2); font-size: .85rem; }
+.bien, .kpi .detalle.bien { color: var(--bien); } .mal, .kpi .detalle.mal { color: var(--mal); }
+.seccion { margin-top: 12px; }
+.fila-titulo { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.filtros { display: flex; gap: 4px; }
+.filtros button { font: inherit; font-size: .85rem; padding: 4px 10px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--borde); background: transparent; color: var(--texto-2); }
+.filtros button[aria-pressed="true"] { background: var(--texto); color: var(--superficie); border-color: var(--texto); }
+.leyenda { display: flex; flex-wrap: wrap; gap: 16px; font-size: .85rem; color: var(--texto-2); margin-bottom: 4px; }
+.clave { display: inline-block; width: 16px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 6px; }
+.grafica { position: relative; }
+.grafica svg { display: block; width: 100%; height: 300px; touch-action: pan-y; }
+.grafica text { fill: var(--texto-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+.tooltip { position: absolute; pointer-events: none; background: var(--superficie); border: 1px solid var(--borde);
+  border-radius: 8px; padding: 8px 10px; font-size: .8rem; box-shadow: 0 4px 16px rgba(0,0,0,.12); min-width: 170px; display: none; }
+.tooltip .fecha { color: var(--texto-2); margin-bottom: 4px; }
+.tooltip .linea { display: flex; align-items: center; gap: 6px; }
+.tooltip strong { font-variant-numeric: tabular-nums; }
+.dos-columnas { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 12px; }
+.tabla { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--rejilla); white-space: nowrap; }
+th { color: var(--texto-2); font-weight: 500; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.peso { display: grid; grid-template-columns: minmax(120px, 1.3fr) 1fr 52px; gap: 8px; align-items: center; padding: 5px 0; font-size: .85rem; }
+.barra { position: relative; height: 12px; }
+.barra::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; border-left: 1px solid var(--eje); }
+.barra span { position: absolute; top: 0; height: 12px; border-radius: 4px; }
+.peso .num { text-align: right; font-variant-numeric: tabular-nums; color: var(--texto-2); }
+.medidor { height: 10px; border-radius: 5px; background: var(--neutro); position: relative; margin: 10px 0 18px; }
+.medidor .relleno { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; background: var(--serie-bot); }
+.medidor .marca { position: absolute; top: -4px; bottom: -4px; border-left: 2px solid var(--texto); }
+.medidor .marca span { position: absolute; top: 16px; font-size: .75rem; color: var(--texto-2); white-space: nowrap; }
+.medidor .marca.venta span { right: 4px; } .medidor .marca.compra span { left: 4px; }
+.acciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin: 12px 0; }
+.accion { border: 1px solid var(--borde); border-radius: 8px; padding: 10px 12px; }
+.accion code { font-weight: 600; }
+.botones { display: flex; flex-wrap: wrap; gap: 8px; }
+.boton { display: inline-block; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 500;
+  background: var(--boton); color: var(--boton-texto); }
+.boton.secundario { background: transparent; color: var(--texto); border: 1px solid var(--borde); }
+.aviso { border: 1px solid var(--aviso-borde); background: var(--aviso-fondo); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+.eventos li { margin-bottom: 4px; } .eventos { padding-left: 18px; margin: 0; font-size: .85rem; }
+details summary { cursor: pointer; color: var(--texto-2); font-size: .85rem; margin-top: 8px; }
+footer { margin-top: 24px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="cabecera">
+    <div>
+      <h1>Bot de trading simulado</h1>
+      <p class="sub" id="subtitulo">Cargando datos...</p>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      <span class="pastilla" id="estado-bot"><span class="punto"></span><span>...</span></span>
+      <span class="pastilla" id="actualizado">...</span>
+    </div>
+  </div>
+
+  <div id="aviso"></div>
+
+  <div class="rejilla-kpi">
+    <div class="tarjeta kpi"><div class="etiqueta">Valor del bot</div><div class="valor" id="kpi-bot">-</div><div class="detalle" id="kpi-bot-d"></div></div>
+    <div class="tarjeta kpi"><div class="etiqueta">Comprar y mantener (referencia)</div><div class="valor" id="kpi-ref">-</div><div class="detalle" id="kpi-ref-d"></div></div>
+    <div class="tarjeta kpi"><div class="etiqueta">Posición</div><div class="valor" id="kpi-pos">-</div><div class="detalle" id="kpi-pos-d"></div></div>
+    <div class="tarjeta kpi"><div class="etiqueta">Operaciones</div><div class="valor" id="kpi-ops">-</div><div class="detalle" id="kpi-ops-d"></div></div>
+  </div>
+
+  <section class="tarjeta seccion">
+    <div class="fila-titulo">
+      <div>
+        <h2>Bot frente a comprar y mantener</h2>
+        <p class="nota">Valor de la cartera ficticia, en euros. Si la línea azul no supera a la gris, el bot no aporta nada.</p>
+      </div>
+      <div class="filtros" role="group" aria-label="Periodo">
+        <button data-dias="1">24 h</button><button data-dias="7">7 días</button><button data-dias="30">30 días</button><button data-dias="0" aria-pressed="true">Todo</button>
+      </div>
+    </div>
+    <div class="leyenda">
+      <span><span class="clave" style="border-color:var(--serie-bot)"></span>Bot</span>
+      <span><span class="clave" style="border-color:var(--serie-ref); border-top-style:dashed"></span>Comprar y mantener</span>
+    </div>
+    <div class="grafica" id="grafica"><svg id="svg" aria-label="Gráfica del valor del bot y de comprar y mantener"></svg><div class="tooltip" id="tooltip"></div></div>
+    <details><summary>Ver los datos en tabla</summary><div class="tabla"><table id="tabla-historial"></table></div></details>
+  </section>
+
+  <div class="dos-columnas">
+    <section class="tarjeta">
+      <h2>¿Qué piensa ahora?</h2>
+      <p class="nota" id="piensa-texto"></p>
+      <div class="medidor" id="medidor"><div class="relleno"></div></div>
+      <h2 style="margin-top:20px">¿Aprende de verdad?</h2>
+      <p class="nota" style="margin-bottom:8px">Aciertos del cerebro frente a responder siempre lo mismo, en sus últimas 500 lecciones. Solo es útil si supera a la referencia.</p>
+      <table>
+        <tr><th>Aciertos del cerebro</th><td class="num" id="ac-cerebro">-</td></tr>
+        <tr><th>Respondiendo siempre lo mismo</th><td class="num" id="ac-ref">-</td></tr>
+        <tr><th>Lecciones aprendidas</th><td class="num" id="lecciones">-</td></tr>
+        <tr><th>Comisiones pagadas</th><td class="num" id="comisiones">-</td></tr>
+      </table>
+    </section>
+    <section class="tarjeta">
+      <h2>Lo que ha aprendido</h2>
+      <p class="nota" style="margin-bottom:8px">Peso de cada indicador. Azul: si sube, cree que el precio subirá. Rojo: cree que bajará.</p>
+      <div id="pesos"></div>
+    </section>
+  </div>
+
+  <section class="tarjeta seccion">
+    <h2>Operaciones</h2>
+    <p class="nota" style="margin-bottom:8px">Más recientes primero. Todo con dinero ficticio.</p>
+    <div class="tabla"><table id="tabla-ops"></table></div>
+  </section>
+
+  <section class="tarjeta seccion" id="controles">
+    <h2>Controlar el bot</h2>
+    <p class="nota">Los controles están en GitHub y solo tú puedes usarlos con tu sesión iniciada. Pulsa <strong>Abrir controles</strong>, luego <strong>Run workflow</strong>, elige la acción y vuelve a pulsar <strong>Run workflow</strong>. El panel se actualiza en un par de minutos.</p>
+    <div class="acciones">
+      <div class="accion"><code>pausar</code><p class="nota">Deja de operar, pero sigue aprendiendo.</p></div>
+      <div class="accion"><code>reanudar</code><p class="nota">Vuelve a operar.</p></div>
+      <div class="accion"><code>vender_y_pausar</code><p class="nota">Vende lo que tenga al precio actual y se pausa.</p></div>
+      <div class="accion"><code>cambiar_umbrales</code><p class="nota">Más o menos exigente para comprar y vender.</p></div>
+      <div class="accion"><code>reiniciar_simulacion</code><p class="nota">Empieza de cero (puedes cambiar capital y moneda).</p></div>
+    </div>
+    <div class="botones" id="botones-control"></div>
+  </section>
+
+  <section class="tarjeta seccion">
+    <h2>Historial de eventos</h2>
+    <ul class="eventos" id="eventos"></ul>
+  </section>
+
+  <footer class="nota">Simulación educativa con precios reales y dinero ficticio. No es asesoramiento financiero.</footer>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const euros = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
+const eurosCortos = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const pct = (v, dec = 1) => (v >= 0 ? "+" : "") + v.toFixed(dec).replace(".", ",") + " %";
+const pctSimple = (v) => (v * 100).toFixed(1).replace(".", ",") + " %";
+let datos = null, dias = 0;
+
+function parseFecha(f) {
+  const [d, h] = f.split(" "); const [dd, mm, aa] = d.split("/").map(Number); const [hh, mi] = h.split(":").map(Number);
+  return new Date(aa, mm - 1, dd, hh, mi);
+}
+function el(tag, texto, clase) {
+  const e = document.createElement(tag);
+  if (texto !== undefined && texto !== null) e.textContent = texto;
+  if (clase) e.className = clase;
+  return e;
+}
+function fila(celdas, cabecera = false) {
+  const tr = document.createElement("tr");
+  celdas.forEach(([texto, clase]) => tr.appendChild(el(cabecera ? "th" : "td", texto, clase)));
+  return tr;
+}
+function hace(iso) {
+  const min = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (min < 1) return "ahora mismo";
+  if (min < 60) return `hace ${min} min`;
+  const h = Math.round(min / 60);
+  return h < 48 ? `hace ${h} h` : `hace ${Math.round(h / 24)} días`;
+}
+
+function pintarKpis() {
+  const d = datos, u = d.ultimo, cap = d.capital_inicial;
+  $("subtitulo").textContent = `${d.simbolo} · velas de ${d.intervalo} · ${eurosCortos.format(cap)} ficticios desde el ${d.creado}`;
+  const estado = $("estado-bot");
+  estado.querySelector(".punto").style.background = d.pausado ? "var(--aviso-borde)" : "var(--bien)";
+  estado.lastChild.textContent = d.pausado ? "En pausa (sigue aprendiendo)" : "Activo";
+  $("actualizado").textContent = "Actualizado " + hace(d.actualizado);
+
+  const horas = (Date.now() - new Date(d.actualizado)) / 3600000;
+  const aviso = $("aviso"); aviso.replaceChildren();
+  if (horas > 3) {
+    const caja = el("div", null, "aviso");
+    caja.appendChild(el("strong", "⚠ El bot no se actualiza desde hace " + Math.round(horas) + " horas. "));
+    caja.appendChild(document.createTextNode("Revisa la pestaña Actions de GitHub por si ha fallado o se ha desactivado."));
+    aviso.appendChild(caja);
+  }
+  if (!u) return;
+  const rb = (u.bot / cap - 1) * 100, rr = (u.referencia / cap - 1) * 100;
+  $("kpi-bot").textContent = euros.format(u.bot);
+  $("kpi-bot-d").textContent = pct(rb); $("kpi-bot-d").className = "detalle " + (rb >= 0 ? "bien" : "mal");
+  $("kpi-ref").textContent = euros.format(u.referencia);
+  $("kpi-ref-d").textContent = pct(rr); $("kpi-ref-d").className = "detalle " + (rr >= 0 ? "bien" : "mal");
+  $("kpi-pos").textContent = d.en_posicion ? "Dentro" : "Fuera";
+  $("kpi-pos-d").textContent = (d.en_posicion ? "Tiene " + d.simbolo.slice(0, -3) : "Todo en euros") + " · precio " + euros.format(u.precio);
+  const ventas = d.operaciones.filter((o) => o.tipo === "VENTA");
+  $("kpi-ops").textContent = d.operaciones.length;
+  $("kpi-ops-d").textContent = `${ventas.filter((o) => o.resultado > 0).length} de ${ventas.length} ventas con ganancia`;
+}
+
+function pintarPiensa() {
+  const d = datos, u = d.ultimo;
+  if (!u) return;
+  const p = u.prob;
+  const objetivo = (d.movimiento_minimo * 100).toFixed(1).replace(".", ",");
+  let texto = `Cree que hay un ${pctSimple(p)} de probabilidad de que el precio suba más de un ${objetivo} % (lo necesario para pagar comisiones) en las próximas ${d.horizonte} velas. `;
+  if (d.pausado) texto += "Está en pausa, así que no opera.";
+  else if (d.en_posicion) texto += `Venderá si baja del ${pctSimple(d.umbral_venta)}.`;
+  else texto += `Comprará si llega al ${pctSimple(d.umbral_compra)}.`;
+  $("piensa-texto").textContent = texto;
+  const medidor = $("medidor");
+  medidor.querySelectorAll(".marca").forEach((m) => m.remove());
+  medidor.querySelector(".relleno").style.width = Math.min(100, p * 100) + "%";
+  [[d.umbral_venta, "venta"], [d.umbral_compra, "compra"]].forEach(([v, nombre]) => {
+    const marca = el("div", null, "marca " + nombre); marca.style.left = v * 100 + "%";
+    marca.appendChild(el("span", `${nombre} ${Math.round(v * 100)} %`));
+    medidor.appendChild(marca);
+  });
+  $("ac-cerebro").textContent = d.aciertos == null ? "-" : pctSimple(d.aciertos);
+  $("ac-ref").textContent = d.aciertos_sin_pensar == null ? "-" : pctSimple(d.aciertos_sin_pensar);
+  if (d.aciertos != null) $("ac-cerebro").className = "num " + (d.aciertos > d.aciertos_sin_pensar ? "bien" : "mal");
+  $("lecciones").textContent = d.lecciones.toLocaleString("es-ES");
+  $("comisiones").textContent = euros.format(d.comisiones);
+}
+
+function pintarPesos() {
+  const cont = $("pesos"); cont.replaceChildren();
+  const max = Math.max(0.05, ...datos.aprendido.map((a) => Math.abs(a.peso)));
+  datos.aprendido.forEach((a) => {
+    const filaPeso = el("div", null, "peso");
+    filaPeso.title = a.opinion;
+    filaPeso.appendChild(el("span", a.nombre));
+    const barra = el("div", null, "barra"), trozo = document.createElement("span");
+    const ancho = (Math.abs(a.peso) / max) * 50;
+    trozo.style.width = ancho + "%";
+    trozo.style.left = a.peso >= 0 ? "50%" : 50 - ancho + "%";
+    trozo.style.background = a.peso >= 0 ? "var(--positivo)" : "var(--negativo)";
+    barra.appendChild(trozo); filaPeso.appendChild(barra);
+    filaPeso.appendChild(el("span", (a.peso >= 0 ? "+" : "") + a.peso.toFixed(2).replace(".", ","), "num"));
+    cont.appendChild(filaPeso);
+  });
+}
+
+function pintarOperaciones() {
+  const t = $("tabla-ops"); t.replaceChildren();
+  t.appendChild(fila([["Fecha"], ["Tipo"], ["Precio", "num"], ["Comisión", "num"], ["Resultado", "num"]], true));
+  if (!datos.operaciones.length) { t.appendChild(fila([["Todavía no ha operado. Es normal: solo compra cuando está bastante seguro."]])); return; }
+  [...datos.operaciones].reverse().forEach((o) => {
+    const res = o.resultado == null ? ["", "num"] : [(o.resultado >= 0 ? "+" : "") + euros.format(o.resultado), "num " + (o.resultado >= 0 ? "bien" : "mal")];
+    t.appendChild(fila([[o.fecha], [o.tipo === "COMPRA" ? "Compra" : "Venta"], [euros.format(o.precio), "num"], [euros.format(o.comision), "num"], res]));
+  });
+}
+
+function pintarControles() {
+  const cont = $("botones-control"); cont.replaceChildren();
+  if (!datos.repo) { cont.appendChild(el("p", "Los controles aparecerán cuando el bot funcione en GitHub.", "nota")); return; }
+  const base = "https://github.com/" + datos.repo + "/actions/workflows/";
+  [["Abrir controles", "control.yml", ""], ["Ejecutar el bot ahora", "bot.yml", "secundario"], ["Ajustes en config.py", null, "secundario"]].forEach(([texto, wf, clase]) => {
+    const a = el("a", texto, "boton " + clase);
+    a.href = wf ? base + wf : "https://github.com/" + datos.repo + "/blob/main/config.py";
+    a.target = "_blank"; a.rel = "noopener";
+    cont.appendChild(a);
+  });
+}
+
+function pintarEventos() {
+  const ul = $("eventos"); ul.replaceChildren();
+  if (!datos.eventos.length) ul.appendChild(el("li", "Sin eventos todavía."));
+  [...datos.eventos].reverse().forEach((e) => ul.appendChild(el("li", `${e.fecha} · ${e.texto}`)));
+}
+
+function serieVisible() {
+  const h = datos.historial;
+  if (!dias || !h.length) return h;
+  const limite = parseFecha(h[h.length - 1].f).getTime() - dias * 86400000;
+  return h.filter((p) => parseFecha(p.f).getTime() >= limite);
+}
+
+function pintarGrafica() {
+  const svg = $("svg"), tip = $("tooltip");
+  const serie = serieVisible();
+  svg.replaceChildren(); tip.style.display = "none";
+  const ancho = svg.clientWidth || 800, alto = 300, mi = 64, md = 12, ms = 12, mb = 28;
+  svg.setAttribute("viewBox", `0 0 ${ancho} ${alto}`);
+  const ns = "http://www.w3.org/2000/svg";
+  const nuevo = (tag, attrs, texto) => { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (texto != null) e.textContent = texto; svg.appendChild(e); return e; };
+  if (serie.length < 2) { nuevo("text", { x: ancho / 2, y: alto / 2, "text-anchor": "middle" }, "La gráfica aparecerá tras un par de horas de funcionamiento."); return; }
+
+  const valores = serie.flatMap((p) => [p.b, p.r]);
+  let min = Math.min(...valores), max = Math.max(...valores);
+  const margen = Math.max((max - min) * 0.08, 1); min -= margen; max += margen;
+  const x = (i) => mi + (ancho - mi - md) * i / (serie.length - 1);
+  const y = (v) => ms + (alto - ms - mb) * (1 - (v - min) / (max - min));
+
+  for (let k = 0; k <= 4; k++) {
+    const v = min + (max - min) * k / 4;
+    nuevo("line", { x1: mi, x2: ancho - md, y1: y(v), y2: y(v), stroke: "var(--rejilla)" });
+    nuevo("text", { x: mi - 8, y: y(v) + 4, "text-anchor": "end" }, eurosCortos.format(v));
+  }
+  const etiquetas = Math.min(ancho < 520 ? 3 : 5, serie.length);
+  for (let k = 0; k < etiquetas; k++) {
+    const i = Math.round((serie.length - 1) * k / Math.max(1, etiquetas - 1));
+    const [fecha, hora] = serie[i].f.split(" ");
+    nuevo("text", { x: x(i), y: alto - 8, "text-anchor": k === 0 ? "start" : k === etiquetas - 1 ? "end" : "middle" }, fecha.slice(0, 5) + " " + hora);
+  }
+  const linea = (clave, color, discontinua) => nuevo("polyline", {
+    points: serie.map((p, i) => `${x(i).toFixed(1)},${y(p[clave]).toFixed(1)}`).join(" "),
+    fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-dasharray": discontinua ? "5 4" : "none" });
+  linea("r", "var(--serie-ref)", true);
+  linea("b", "var(--serie-bot)", false);
+
+  const cruz = nuevo("line", { y1: ms, y2: alto - mb, stroke: "var(--eje)", visibility: "hidden" });
+  const puntoB = nuevo("circle", { r: 4, fill: "var(--serie-bot)", stroke: "var(--superficie)", "stroke-width": 2, visibility: "hidden" });
+  const puntoR = nuevo("circle", { r: 4, fill: "var(--serie-ref)", stroke: "var(--superficie)", "stroke-width": 2, visibility: "hidden" });
+  const zona = nuevo("rect", { x: mi, y: 0, width: ancho - mi - md, height: alto, fill: "transparent" });
+
+  function mostrar(evento) {
+    const caja = svg.getBoundingClientRect();
+    const px = (evento.clientX - caja.left) * ancho / caja.width;
+    const i = Math.max(0, Math.min(serie.length - 1, Math.round((px - mi) / (ancho - mi - md) * (serie.length - 1))));
+    const p = serie[i];
+    [cruz, puntoB, puntoR].forEach((e) => e.setAttribute("visibility", "visible"));
+    cruz.setAttribute("x1", x(i)); cruz.setAttribute("x2", x(i));
+    puntoB.setAttribute("cx", x(i)); puntoB.setAttribute("cy", y(p.b));
+    puntoR.setAttribute("cx", x(i)); puntoR.setAttribute("cy", y(p.r));
+    tip.replaceChildren(el("div", p.f, "fecha"));
+    [[p.b, "Bot", "var(--serie-bot)", false], [p.r, "Comprar y mantener", "var(--serie-ref)", true]].forEach(([v, nombre, color, disc]) => {
+      const l = el("div", null, "linea"), clave = el("span", null, "clave");
+      clave.style.borderColor = color; if (disc) clave.style.borderTopStyle = "dashed";
+      l.append(clave, el("strong", euros.format(v)), el("span", nombre, "nota"));
+      tip.appendChild(l);
+    });
+    tip.appendChild(el("div", "Precio " + euros.format(p.p), "nota"));
+    tip.style.display = "block";
+    const izquierda = x(i) * caja.width / ancho;
+    tip.style.left = Math.min(Math.max(0, izquierda + 12), caja.width - tip.offsetWidth) + "px";
+    tip.style.top = "8px";
+  }
+  zona.addEventListener("pointermove", mostrar);
+  zona.addEventListener("pointerdown", mostrar);
+  zona.addEventListener("pointerleave", () => { tip.style.display = "none"; [cruz, puntoB, puntoR].forEach((e) => e.setAttribute("visibility", "hidden")); });
+
+  const t = $("tabla-historial"); t.replaceChildren();
+  t.appendChild(fila([["Fecha"], ["Precio", "num"], ["Bot", "num"], ["Comprar y mantener", "num"]], true));
+  serie.slice(-72).reverse().forEach((p) => t.appendChild(fila([[p.f], [euros.format(p.p), "num"], [euros.format(p.b), "num"], [euros.format(p.r), "num"]])));
+}
+
+document.querySelectorAll(".filtros button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll(".filtros button").forEach((o) => o.setAttribute("aria-pressed", o === b));
+  dias = Number(b.dataset.dias); pintarGrafica();
+}));
+window.addEventListener("resize", () => datos && pintarGrafica());
+
+async function cargar() {
+  try {
+    const r = await fetch("datos.json?" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    datos = await r.json();
+  } catch (e) {
+    $("subtitulo").textContent = "Todavía no hay datos. El bot los creará en su primera ejecución.";
+    return;
+  }
+  pintarKpis(); pintarPiensa(); pintarPesos(); pintarOperaciones(); pintarControles(); pintarEventos(); pintarGrafica();
+}
+cargar();
+setInterval(cargar, 5 * 60 * 1000);
+</script>
+</body>
+</html>

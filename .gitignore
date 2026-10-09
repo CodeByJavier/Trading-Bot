@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+*.tmp
+datos_bot/informe_*.html
+.claude/
