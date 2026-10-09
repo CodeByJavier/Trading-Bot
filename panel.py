@@ -9,6 +9,14 @@ import aprendizaje
 import config
 
 
+NOMBRES_MERCADOS = {"BTCEUR": "Bitcoin", "ETHEUR": "Ethereum", "BNBEUR": "BNB", "XRPEUR": "XRP",
+                    "SOLEUR": "Solana", "ADAEUR": "Cardano", "EURUSDT": "Euro/dólar"}
+
+
+def nombre_mercado(simbolo):
+    return NOMBRES_MERCADOS.get(simbolo, simbolo[:-3])
+
+
 def _duracion(velas, intervalo):
     minutos = {"15m": 15, "1h": 60, "4h": 240, "1d": 1440}.get(intervalo, 60) * velas
     if intervalo == "1d":
@@ -55,6 +63,7 @@ def exportar_panel(estado, cerebro, cartera):
         "ia_decide": config.ESTRATEGIA in ("ia", "tendencia_ia"),
         "tendencia": estado.get("tendencia"),
         "horizonte_texto": _duracion(config.HORIZONTE, estado["intervalo"]),
+        "mercados_ia": [nombre_mercado(m) for m in estado.get("mercados_ia", [estado["simbolo"]])],
         "aprendizaje": {"veredicto": clave, "icono": icono, "titulo": titulo, "explicacion": explicacion,
                         "periodos": [dict(r, nombre=nombre) for nombre, r in lineas]},
     }

@@ -10,6 +10,21 @@ Reglas:
 - Antes de subir un cambio, probarlo en el laboratorio (`python laboratorio.py`): debe funcionar
   en el tramo B (validación) y año a año, no solo en el tramo usado para elegirlo.
 
+## 2.1 (09/10/2026)
+
+**La IA aprende de 4 criptomonedas y el capital ficticio sube a 1.000 €.**
+
+- La IA estudia Bitcoin, Ethereum, BNB y XRP (velas de 1 h, 24 h vista, precio + Fear & Greed).
+  Sigue en prácticas y se la evalúa solo prediciendo Bitcoin, frente al adivino ingenuo de Bitcoin.
+- Capital ficticio: 1.000 € (antes 200 €). Con 1 € por orden, una compra + venta necesita subir un
+  0,4 % para cubrir costes (antes 1,2 %). Eso cambia la pregunta de la IA, así que se volvió a probar.
+- Motivo (ver `laboratorio/MULTIMERCADO.md`, con 1.000 €): prediciendo Bitcoin, la habilidad pasa de
+  +9,2 % (solo Bitcoin + Fear & Greed, la v2.0) a +20,9 % (4 criptos + Fear & Greed) en el tramo B,
+  con z = 6,0. Fue también la mejor en el tramo A (+15,2 %).
+- Quién decide no cambia: la tendencia sobre Bitcoin. Repartir el dinero entre 4 criptos salió mejor
+  en total, pero solo por la burbuja de BNB en 2021; sin 2021, solo Bitcoin gana (+127 % frente a +78 %).
+  La mezcla con bolsa y euro/dólar es la más estable, pero rinde menos.
+
 ## 2.0 (09/10/2026)
 
 **Decide una regla de tendencia; la IA pasa a estar "en prácticas".**

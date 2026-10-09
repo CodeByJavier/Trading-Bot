@@ -14,7 +14,7 @@ SIMBOLO = "BTCEUR"        # par a operar (Bitcoin en euros). Otros: "ETHEUR", "S
 INTERVALO = "1h"          # velas con las que aprende la IA: "15m", "1h", "1d"
 
 # --- Dinero ficticio -----------------------------------------------------
-CAPITAL_INICIAL = 200.0   # euros ficticios con los que empieza
+CAPITAL_INICIAL = 1000.0  # euros ficticios con los que empieza
 
 # --- Costes (imitan a un bróker tipo Trade Republic: 1 € por orden) -------
 COMISION_FIJA = 1.0       # euros por cada compra o venta
@@ -24,7 +24,7 @@ SPREAD = 0.001            # diferencia estimada entre precio de compra y venta (
 # --- Versión ---------------------------------------------------------------
 # Súbela cada vez que cambies cómo piensa o decide el bot y apúntalo en CAMBIOS.md.
 # Al cambiarla, el bot guarda la simulación anterior en datos_bot/archivo/ y empieza otra.
-VERSION_MODELO = "2.0"
+VERSION_MODELO = "2.1"
 
 # --- Reglas de decisión (quién decide comprar y vender) ---------------------
 # "tendencia":    regla clásica: dentro si el precio diario supera su media de TENDENCIA_VELAS días
@@ -49,6 +49,10 @@ VELAS_PREENTRENAMIENTO = 3000  # historia que estudia antes de empezar
 # Qué mira el cerebro. Grupos: "precio", "sentimiento" (Fear & Greed),
 # "futuros" (funding rate) y "tendencia" (distancia a la media larga)
 INDICADORES = ["precio", "sentimiento"]
+
+# De qué mercados aprende la IA (todos en euros y en Binance). El bot solo opera con SIMBOLO,
+# pero la IA estudia también los demás: en el laboratorio así predijo Bitcoin el doble de bien.
+MERCADOS_IA = ["BTCEUR", "ETHEUR", "BNBEUR", "XRPEUR"]
 
 # --- Archivos ------------------------------------------------------------
 CARPETA_DATOS = os.path.join(CARPETA_PROYECTO, "datos_bot")

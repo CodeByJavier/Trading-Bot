@@ -75,9 +75,13 @@ def anotar_operacion(op):
                            "" if op["resultado"] is None else f'{op["resultado"]:.2f}'])
 
 
-def velas_ia(cantidad):
-    """Velas con las que aprende la IA, con los datos externos que necesiten sus indicadores."""
-    velas = descargar_velas(config.SIMBOLO, config.INTERVALO, cantidad)
+def mercados_ia():
+    """Mercados de los que aprende la IA; el que se opera (SIMBOLO) siempre va primero."""
+    return [config.SIMBOLO] + [m for m in config.MERCADOS_IA if m != config.SIMBOLO]
+
+
+def datos_externos(velas):
+    """Fear & Greed y funding que necesiten los indicadores (se descargan una vez por ejecución)."""
     fng = tasas = None
     if indicadores.necesita(config.INDICADORES, "sentimiento"):
         try:
@@ -89,7 +93,66 @@ def velas_ia(cantidad):
             tasas = fuentes.funding(velas[0]["t"] - 3 * fuentes.DIA_MS)
         except ConnectionError as error:
             print(f"  (aviso) Sin datos de funding ({error}); esos indicadores valdrán 0 esta vez.")
-    return fuentes.enriquecer(velas, fng, tasas)
+    return fng, tasas
+
+
+def velas_ia(cantidad):
+    """Velas de cada mercado de la IA, con los datos externos que necesiten sus indicadores.
+
+    Si falla la descarga de un mercado que no se opera, se salta esta vez (sus lecciones
+    pendientes se aprenderán en la siguiente ejecución). Si falla el que se opera, es un error.
+    """
+    series = {}
+    for simbolo in mercados_ia():
+        try:
+            series[simbolo] = descargar_velas(simbolo, config.INTERVALO, cantidad)
+        except ConnectionError as error:
+            if simbolo == config.SIMBOLO:
+                raise
+            print(f"  (aviso) Sin datos de {simbolo} ({error}); la IA lo estudiará en la próxima ejecución.")
+    fng, tasas = datos_externos(series[config.SIMBOLO])
+    for velas in series.values():
+        fuentes.enriquecer(velas, fng, tasas)
+    return series
+
+
+def aprender_vela(estado, cerebro, simbolo, velas, i, guardar_evaluacion=True):
+    """La IA aprende la lección que cierra la vela i de un mercado.
+
+    La predicción ingenua se calcula con las subidas recientes de ESE mercado (no de todos
+    mezclados), para que la comparación con el adivino sea justa.
+    """
+    j = i - config.HORIZONTE
+    if j < HISTORIA_NECESARIA - 1:
+        return None
+    subio = cubre_costes(velas[j]["cierre"], velas[i]["cierre"])
+    prediccion, _ = cerebro.aprender(caracteristicas(velas, j), subio)
+    recientes = estado.setdefault("recientes", {}).setdefault(simbolo, [])
+    ingenua = sum(recientes) / len(recientes) if recientes else 0.5
+    recientes.append(int(subio))
+    del recientes[:-500]
+    evaluacion = {"t": velas[j]["t"], "p": round(prediccion, 4), "n": round(ingenua, 4),
+                  "y": int(subio), "v": config.VERSION_MODELO}
+    if guardar_evaluacion and simbolo == config.SIMBOLO:
+        estado.setdefault("evaluaciones", []).append(evaluacion)
+    return evaluacion
+
+
+def aprender_nuevas(estado, cerebro, series, guardar_evaluaciones=True, hasta_penultima=False):
+    """Aprende, en orden temporal y mezclando mercados, todas las velas que la IA aún no ha visto."""
+    pendientes = []
+    for simbolo, velas in series.items():
+        ultimo = estado.setdefault("ultimos_t", {}).get(simbolo, -1)
+        fin = len(velas) - 1 if hasta_penultima else len(velas)
+        pendientes += [(velas[i]["cierre_t"], simbolo, i) for i in range(fin) if velas[i]["t"] > ultimo]
+    pendientes.sort()
+    evaluaciones = []
+    for _, simbolo, i in pendientes:
+        evaluacion = aprender_vela(estado, cerebro, simbolo, series[simbolo], i, guardar_evaluaciones)
+        if evaluacion and simbolo == config.SIMBOLO:
+            evaluaciones.append(evaluacion)
+        estado["ultimos_t"][simbolo] = series[simbolo][i]["t"]
+    return evaluaciones
 
 
 def archivar(estado_previo=None):
@@ -106,47 +169,45 @@ def archivar(estado_previo=None):
 
 
 def crear_estado(motivo=None):
-    print(f"Nueva simulación v{config.VERSION_MODELO}: la IA estudia {config.VELAS_PREENTRENAMIENTO} velas de "
-          f"{config.SIMBOLO} ({config.INTERVALO})...")
-    velas = velas_ia(config.VELAS_PREENTRENAMIENTO)
+    mercados = mercados_ia()
+    print(f"Nueva simulación v{config.VERSION_MODELO}: la IA estudia {config.VELAS_PREENTRENAMIENTO} velas "
+          f"({config.INTERVALO}) de {', '.join(mercados)}...")
+    series = velas_ia(config.VELAS_PREENTRENAMIENTO)
+    velas = series[config.SIMBOLO]
     cerebro = Cerebro(NOMBRES, config.TASA_APRENDIZAJE)
-    h = config.HORIZONTE
-    evaluaciones = []
-    # Hasta la penúltima vela: la última la procesa el primer ciclo (así ninguna lección se repite)
-    for i in range(HISTORIA_NECESARIA - 1 + h, len(velas) - 1):
-        j = i - h
-        subio = cubre_costes(velas[j]["cierre"], velas[i]["cierre"])
-        prediccion, ingenua = cerebro.aprender(caracteristicas(velas, j), subio)
-        evaluaciones.append({"p": prediccion, "n": ingenua, "y": int(subio)})
-    # Las 500 primeras lecciones son de "arranque en frío": no cuentan para evaluar
-    resumen_previo = aprendizaje.resumir(evaluaciones[500:])
-    print(f"Preentrenamiento listo: {cerebro.lecciones} lecciones aprendidas.")
-    if resumen_previo:
-        print(f"Con la historia previa: habilidad {resumen_previo['habilidad'] * 100:+.1f} % frente al "
-              f"adivino ingenuo -> {aprendizaje.VEREDICTOS[resumen_previo['veredicto']][1]}\n")
-
-    cartera = Cartera(config.CAPITAL_INICIAL, config.COMISION_FIJA,
-                      config.COMISION_PORCENTAJE, config.SPREAD)
     estado = {
         "version": config.VERSION_MODELO,
         "simbolo": config.SIMBOLO,
         "intervalo": config.INTERVALO,
+        "mercados_ia": mercados,
         "nombres": NOMBRES,
         "creado": datetime.now().strftime("%d/%m/%Y %H:%M"),
         "precio_inicio": velas[-1]["cierre"],
-        "ultimo_t": velas[-2]["t"],
+        "ultimos_t": {},
         "ultima_tendencia_t": None,
         "compra_t": None,
         "historial": [],
         "eventos": [],
         "evaluaciones": [],
-        "preentrenamiento": resumen_previo,
+        "recientes": {},
     }
+    # Hasta la penúltima vela: la última la procesa el primer ciclo (así ninguna lección se repite)
+    evaluaciones = aprender_nuevas(estado, cerebro, series, guardar_evaluaciones=False, hasta_penultima=True)
+    # Las 500 primeras lecciones son de "arranque en frío": no cuentan para evaluar
+    resumen_previo = aprendizaje.resumir(evaluaciones[500:])
+    estado["preentrenamiento"] = resumen_previo
+    print(f"Preentrenamiento listo: {cerebro.lecciones} lecciones aprendidas.")
+    if resumen_previo:
+        print(f"Con la historia previa: habilidad con {config.SIMBOLO} {resumen_previo['habilidad'] * 100:+.1f} % "
+              f"frente al adivino ingenuo -> {aprendizaje.VEREDICTOS[resumen_previo['veredicto']][1]}\n")
+
+    cartera = Cartera(config.CAPITAL_INICIAL, config.COMISION_FIJA,
+                      config.COMISION_PORCENTAJE, config.SPREAD)
     if motivo:
         anotar_evento(estado, motivo)
     anotar_evento(estado, f"Simulación v{config.VERSION_MODELO} creada con {config.CAPITAL_INICIAL:.0f} € ficticios "
-                          f"en {config.SIMBOLO}. Decide: {config.ESTRATEGIA}. "
-                          f"La IA empieza con {cerebro.lecciones} lecciones de preentrenamiento")
+                          f"en {config.SIMBOLO}. Decide: {config.ESTRATEGIA}. La IA aprende de "
+                          f"{len(mercados)} mercados y empieza con {cerebro.lecciones} lecciones de preentrenamiento")
     return estado, cerebro, cartera
 
 
@@ -156,12 +217,12 @@ def cargar_o_crear():
         return crear_estado()
     with open(RUTA_ESTADO, encoding="utf-8") as archivo:
         estado = json.load(archivo)
-    antes = (estado.get("version", "1.0"), estado["simbolo"], estado["intervalo"], estado["cerebro"]["nombres"])
-    ahora = (config.VERSION_MODELO, config.SIMBOLO, config.INTERVALO, NOMBRES)
+    antes = (estado.get("version", "1.0"), estado["simbolo"], estado["intervalo"], estado["cerebro"]["nombres"],
+             estado.get("mercados_ia", [estado["simbolo"]]))
+    ahora = (config.VERSION_MODELO, config.SIMBOLO, config.INTERVALO, NOMBRES, mercados_ia())
     if antes != ahora:
         carpeta = archivar(estado)
-        print(f"La configuración cambió (v{antes[0]} {antes[1]} {antes[2]} -> v{ahora[0]} {ahora[1]} {ahora[2]}). "
-              f"Simulación anterior guardada en {carpeta}.")
+        print(f"La configuración cambió (v{antes[0]} -> v{ahora[0]}). Simulación anterior guardada en {carpeta}.")
         return crear_estado(f"Nueva versión del bot (v{antes[0]} → v{ahora[0]}). "
                             f"La simulación anterior se guardó en {carpeta}")
     return estado, Cerebro.desde_dict(estado["cerebro"]), Cartera.desde_dict(estado["cartera"])
@@ -184,23 +245,16 @@ def revisar_tendencia(estado, cartera):
 
 
 def ciclo(estado, cerebro, cartera):
-    """Procesa las velas nuevas. Devuelve True si había alguna."""
-    velas = velas_ia(VELAS_POR_CICLO)
-    nuevas = [i for i, v in enumerate(velas) if v["t"] > estado["ultimo_t"]]
+    """Procesa las velas nuevas. Devuelve True si había alguna del mercado que se opera."""
+    series = velas_ia(VELAS_POR_CICLO)
+    velas = series[config.SIMBOLO]
+    ultimo = estado.get("ultimos_t", {}).get(config.SIMBOLO, -1)
+    nuevas = [i for i, v in enumerate(velas) if v["t"] > ultimo]
     if not nuevas:
-        return False
+        return False  # las de los demás mercados se aprenderán junto con la próxima vela
 
-    # 1) La IA aprende de cada vela nueva
-    h = config.HORIZONTE
-    for i in nuevas:
-        j = i - h
-        if j >= HISTORIA_NECESARIA - 1:
-            subio = cubre_costes(velas[j]["cierre"], velas[i]["cierre"])
-            prediccion, ingenua = cerebro.aprender(caracteristicas(velas, j), subio)
-            estado.setdefault("evaluaciones", []).append(
-                {"t": velas[j]["t"], "p": round(prediccion, 4), "n": round(ingenua, 4),
-                 "y": int(subio), "v": config.VERSION_MODELO})
-        estado["ultimo_t"] = velas[i]["t"]
+    # 1) La IA aprende de cada vela nueva de todos sus mercados
+    aprender_nuevas(estado, cerebro, series)
 
     # Si GitHub se saltó alguna ejecución, apunta también esas horas en el historial
     # (con la cartera tal como estaba: en ellas no se pudo operar)

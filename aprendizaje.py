@@ -171,6 +171,9 @@ def escribir_informe(estado, cerebro, cartera):
          "aprende y se la evalúa, pero no compra ni vende hasta que demuestre que mejora los resultados."
          if config.ESTRATEGIA == "tendencia" else f"**Quién decide ahora:** estrategia `{config.ESTRATEGIA}`."),
         "",
+        (f"**De qué aprende la IA:** {', '.join(estado.get('mercados_ia', [estado['simbolo']]))}. "
+         f"Se la evalúa prediciendo {estado['simbolo']}, el mercado que opera el bot."),
+        "",
         "## ¿Cómo se mide?",
         "",
         "Antes de conocer cada resultado se guardan dos predicciones de *\"¿subirá lo suficiente para pagar "

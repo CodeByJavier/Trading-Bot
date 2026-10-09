@@ -19,6 +19,8 @@ from collections import deque
 from datetime import datetime, timezone
 
 import aprendizaje
+import config
+import fuentes
 import indicadores
 import laboratorio as lab
 from cerebro import Cerebro
@@ -40,7 +42,8 @@ MERCADOS = {
 CRIPTOS = ["Bitcoin", "Ethereum", "BNB", "XRP"]
 VEINTICUATRO_SIETE = CRIPTOS + ["Euro/dólar"]  # cotizan 24 h: tienen velas de 1 hora en Binance
 TODOS = list(MERCADOS)
-MINIMO = 2 * 1.0 / 200 + 2 * 0.001  # subida que cubre comisiones (1 € por orden sobre 200 € + spread)
+CAPITAL = config.CAPITAL_INICIAL
+MINIMO = 2 * 1.0 / CAPITAL + 2 * 0.001  # subida que cubre comisiones (1 € por orden + spread)
 ANOS = list(range(2021, datetime.now().year + 1))
 
 
@@ -73,14 +76,14 @@ def cargar(nombre, intervalo):
 
 
 # ------------------------------------------------------------------ experimento 1: IA multimercado
-def _caracteristicas_de(velas, h):
-    lista = indicadores.expandir(["precio"])
+def _caracteristicas_de(velas, h, lista=("precio",)):
+    lista = indicadores.expandir(list(lista))
     inicio = indicadores.historia_necesaria(lista) - 1
     return [indicadores.caracteristicas(velas, j, lista) if j >= inicio else None
             for j in range(len(velas) - h)], inicio
 
 
-def ia_varios(series, cache, entrenar, h):
+def ia_varios(series, cache, entrenar, h, nombres=None):
     """Una sola IA aprende, en orden temporal, de todos los mercados de `entrenar`.
 
     La predicción ingenua se calcula POR MERCADO (porcentaje de subidas recientes de ese mercado),
@@ -91,7 +94,7 @@ def ia_varios(series, cache, entrenar, h):
         x, inicio = cache[m]
         eventos += [(series[m][i]["cierre_t"], m, i) for i in range(inicio + h, len(series[m]))]
     eventos.sort()
-    cerebro = Cerebro(indicadores.nombres(["precio"]), 0.01)
+    cerebro = Cerebro(nombres or indicadores.nombres(["precio"]), 0.01)
     recientes = {m: deque(maxlen=500) for m in entrenar}
     evaluaciones = {m: [] for m in entrenar}
     desde = lab._ms(lab.OPERAR_DESDE)
@@ -121,8 +124,8 @@ def tendencia_por_anos(velas, capital, costes):
 
 
 def cartera(mercados, series, costes):
-    """Reparte 200 € a partes iguales entre `mercados`; cada año vuelve a empezar con 200 €."""
-    capital = 200.0 / len(mercados)
+    """Reparte CAPITAL a partes iguales entre `mercados`; cada año vuelve a empezar con CAPITAL."""
+    capital = CAPITAL / len(mercados)
     partes = {m: tendencia_por_anos(series[m], capital, costes) for m in mercados}
     limites = next(iter(partes.values()))[2]
     anual = {}
@@ -138,12 +141,12 @@ def cartera(mercados, series, costes):
         eventos.sort()
         bot = {m: capital for m in mercados}
         mantener = {m: capital for m in mercados}
-        serie_bot, serie_mantener = [200.0], [200.0]
+        serie_bot, serie_mantener = [CAPITAL], [CAPITAL]
         for _, m, valor, ref in eventos:
             bot[m], mantener[m] = valor, ref
             serie_bot.append(sum(bot.values()))
             serie_mantener.append(sum(mantener.values()))
-        anual[ano] = {"bot": serie_bot[-1] / 200 - 1, "mantener": serie_mantener[-1] / 200 - 1,
+        anual[ano] = {"bot": serie_bot[-1] / CAPITAL - 1, "mantener": serie_mantener[-1] / CAPITAL - 1,
                       "caida_bot": lab._caida_maxima(serie_bot), "caida_mantener": lab._caida_maxima(serie_mantener),
                       "operaciones": sum(1 for m, (res, _, _) in partes.items()
                                          for o in res["operaciones"] if desde <= o["t"] < hasta)}
@@ -183,7 +186,9 @@ def _habilidad(r):
 def main():
     print("Laboratorio multimercado (no toca el bot en vivo)\n")
     md = ["# Laboratorio multimercado", "",
-          f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}. Todo con dinero ficticio y precios reales.", "",
+          f"Generado: {datetime.now().strftime('%d/%m/%Y %H:%M')}. Todo con dinero ficticio y precios reales. "
+          f"Capital: **{CAPITAL:.0f} €** y 1 € por orden, así que una compra + venta necesita subir un "
+          f"{MINIMO * 100:.1f} % para cubrir costes.", "",
           "Mercados: " + ", ".join(f"**{m}**" for m in TODOS) + ". El euro/dólar sale del par EUR/USDT de Binance "
           "(sigue al euro/dólar y cotiza 24 h). Las acciones son el ETF SPY (S&P 500) y el índice IBEX 35, "
           "con velas diarias de Yahoo Finance. Cada mercado se mide en su propia moneda (sin cambio de divisa).", ""]
@@ -196,7 +201,8 @@ def main():
            f"tramo A ({lab.OPERAR_DESDE} → {lab.CORTE}) y en el tramo B ({lab.CORTE} → hoy). "
            "z ≥ 2 = muy improbable que sea suerte.", ""]
     for intervalo, h, variantes, texto in [
-        ("1h", 24, [("Solo Bitcoin", ["Bitcoin"]), ("4 criptomonedas", CRIPTOS),
+        ("1h", 24, [("Solo Bitcoin", ["Bitcoin"]), ("Solo Bitcoin + Fear & Greed", ["Bitcoin"]),
+                    ("4 criptomonedas", CRIPTOS), ("4 criptomonedas + Fear & Greed", CRIPTOS),
                     ("4 criptos + euro/dólar", VEINTICUATRO_SIETE)],
          "Velas de 1 hora, predice 24 h vista"),
         ("1d", 5, [("Solo Bitcoin", ["Bitcoin"]), ("4 criptomonedas", CRIPTOS),
@@ -204,11 +210,18 @@ def main():
          "Velas diarias, predice 5 velas vista (en acciones, 5 sesiones)")]:
         mercados = sorted({m for _, lista in variantes for m in lista}, key=TODOS.index)
         series = {m: cargar(m, intervalo) for m in mercados}
+        fng = lab._con_cache("miedo_codicia", 12, lambda: fuentes.miedo_codicia(0))
+        for m in mercados:
+            fuentes.enriquecer(series[m], fng)
         cache = {m: _caracteristicas_de(series[m], h) for m in mercados}
+        cache_fng = {m: _caracteristicas_de(series[m], h, ("precio", "sentimiento")) for m in mercados}
         resultados = {}
         for nombre, lista in variantes:
             print(f"  [{intervalo}] {nombre}...")
-            resultados[nombre] = ia_varios(series, cache, lista, h)
+            if "Fear & Greed" in nombre:
+                resultados[nombre] = ia_varios(series, cache_fng, lista, h, indicadores.nombres(["precio", "sentimiento"]))
+            else:
+                resultados[nombre] = ia_varios(series, cache, lista, h)
         md += [f"### {texto}", "", "**Habilidad prediciendo Bitcoin según de qué aprende:**", "",
                "| Aprende de | Tramo A | Tramo B |", "|---|---:|---:|"]
         for nombre, _ in variantes:
@@ -226,12 +239,12 @@ def main():
     diarias = {m: cargar(m, "1d") for m in TODOS}
     tr, pct = lab.COSTES["trade_republic"], lab.COSTES["porcentaje"]
     md += ["## 2. Regla de tendencia (50 días, margen 3 %) en cada mercado", "",
-           "Cada mercado por separado con 200 € ficticios y 1 € por orden; cada año vuelve a empezar. "
+           f"Cada mercado por separado con {CAPITAL:.0f} € ficticios y 1 € por orden; cada año vuelve a empezar. "
            "En acciones, \"50 días\" son 50 sesiones de bolsa (unas 10 semanas).", "",
            "| Mercado | Tendencia 2021–hoy | Comprar y mantener | Años que gana a mantener | Caída máx. media tendencia / mantener |",
            "|---|---:|---:|:---:|---:|"]
     for m in TODOS:
-        res, receta, limites = tendencia_por_anos(diarias[m], 200.0, tr)
+        res, receta, limites = tendencia_por_anos(diarias[m], CAPITAL, tr)
         anos = [lab.medir(res, receta, limites[k], limites[k + 1]) for k in range(len(ANOS))]
         anos = [a for a in anos if a]
         bot = lab._encadenar(a["bot"] for a in anos)
@@ -242,11 +255,11 @@ def main():
         md.append(f"| {m} | **{_p(bot)}** | {_p(mantener)} | {gana}/{len(anos)} | {cb * 100:.0f} % / {cm * 100:.0f} % |")
         print(f"  {m}: tendencia {_p(bot)} vs mantener {_p(mantener)}")
 
-    carteras = [("Solo Bitcoin (200 €)", ["Bitcoin"]),
-                ("4 criptos (50 € cada una)", CRIPTOS),
-                ("Mezcla: Bitcoin + Ethereum + euro/dólar + S&P 500 + IBEX (40 € cada uno)",
-                 ["Bitcoin", "Ethereum", "Euro/dólar", "S&P 500", "IBEX 35"])]
-    md += ["", "### Repartiendo los 200 € entre varios mercados (regla de tendencia en cada uno)", "",
+    mezcla = ["Bitcoin", "Ethereum", "Euro/dólar", "S&P 500", "IBEX 35"]
+    carteras = [(f"Solo Bitcoin ({CAPITAL:.0f} €)", ["Bitcoin"]),
+                (f"4 criptos ({CAPITAL / 4:.0f} € cada una)", CRIPTOS),
+                (f"Mezcla: Bitcoin + Ethereum + euro/dólar + S&P 500 + IBEX ({CAPITAL / 5:.0f} € cada uno)", mezcla)]
+    md += ["", f"### Repartiendo los {CAPITAL:.0f} € entre varios mercados (regla de tendencia en cada uno)", "",
            "| Cartera | Comisión | " + " | ".join(str(a) for a in ANOS) +
            " | Todo encadenado | Peor caída de un año |", "|---|---|" + "---:|" * len(ANOS) + "---:|---:|"]
     for nombre, lista in carteras:

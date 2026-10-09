@@ -4,7 +4,7 @@ Un bot que opera con **dinero ficticio** sobre precios reales de Bitcoin y tiene
 que aprende sola**. No se conecta a ningún banco ni bróker y no puede gastar dinero de verdad.
 Funciona gratis en GitHub las 24 horas, con un panel web que puedes mirar desde el móvil.
 
-## Cómo funciona (versión 2.0)
+## Cómo funciona (versión 2.1)
 
 1. **Datos:** precios reales de Binance (o Coinbase si Binance no responde) y el índice
    **Fear & Greed** del mercado cripto. Gratis y sin cuenta.
@@ -12,8 +12,10 @@ Funciona gratis en GitHub las 24 horas, con un panel web que puedes mirar desde 
    de su media de 50 días. Si la supera en un 3 %, compra; si cae un 3 % por debajo, vende.
    Es lo único que en el laboratorio se comportó mejor que comprar y mantener de forma consistente.
 3. **La IA, en prácticas:** cada hora estima la probabilidad de que el precio suba lo suficiente para
-   pagar las comisiones en las próximas 24 h (con 9 indicadores de precio + Fear & Greed). Comprueba
-   sus aciertos y se corrige sola, pero **no compra ni vende** hasta que demuestre que mejora los resultados.
+   pagar las comisiones en las próximas 24 h (con 9 indicadores de precio + Fear & Greed). Aprende de
+   **Bitcoin, Ethereum, BNB y XRP** a la vez, pero se la evalúa con Bitcoin. Comprueba sus aciertos y se
+   corrige sola, pero **no compra ni vende** hasta que demuestre que mejora los resultados.
+4. **Dinero ficticio:** 1.000 € (en `config.py`, `CAPITAL_INICIAL`).
 
 Más detalles del porqué en [CAMBIOS.md](CAMBIOS.md) y [laboratorio/RESULTADOS.md](laboratorio/RESULTADOS.md).
 

@@ -618,6 +618,7 @@ function pintarMedidor() {
   const objetivo = (d.movimiento_minimo * 100).toFixed(1).replace(".", ",");
   const plazo = d.horizonte_texto || `${d.horizonte} velas`;
   let texto = `Probabilidad, según la IA, de que el precio suba más de un ${objetivo} % (lo que cuestan las comisiones) en un plazo de ${plazo}. `;
+  if (d.mercados_ia && d.mercados_ia.length > 1) texto += `Aprende de ${d.mercados_ia.slice(0, -1).join(", ")} y ${d.mercados_ia.slice(-1)}. `;
   if (!d.ia_decide) texto += "Solo observa y aprende: no compra ni vende hasta que demuestre que mejora los resultados.";
   else if (d.pausado) texto += "Está en pausa, así que no opera.";
   else if (d.en_posicion) texto += `Venderá si baja del ${Math.round(d.umbral_venta * 100)} %.`;
