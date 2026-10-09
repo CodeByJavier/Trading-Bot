@@ -11,7 +11,7 @@ CARPETA_PROYECTO = os.path.dirname(os.path.abspath(__file__))
 
 # --- Mercado -------------------------------------------------------------
 SIMBOLO = "BTCEUR"        # par a operar (Bitcoin en euros). Otros: "ETHEUR", "SOLEUR"
-INTERVALO = "1h"          # duración de cada vela: "15m", "1h", "1d"
+INTERVALO = "1h"          # velas con las que aprende la IA: "15m", "1h", "1d"
 
 # --- Dinero ficticio -----------------------------------------------------
 CAPITAL_INICIAL = 200.0   # euros ficticios con los que empieza
@@ -21,20 +21,34 @@ COMISION_FIJA = 1.0       # euros por cada compra o venta
 COMISION_PORCENTAJE = 0.0 # parte del importe (0.001 = 0,1 %)
 SPREAD = 0.001            # diferencia estimada entre precio de compra y venta (0,1 %)
 
-# --- Cerebro (la IA propia) ----------------------------------------------
-VERSION_MODELO = "1.0"         # súbela cada vez que cambies cómo piensa el bot (y apúntalo en CAMBIOS.md)
-HORIZONTE = 4                 # cuántas velas hacia el futuro intenta adivinar
+# --- Versión ---------------------------------------------------------------
+# Súbela cada vez que cambies cómo piensa o decide el bot y apúntalo en CAMBIOS.md.
+# Al cambiarla, el bot guarda la simulación anterior en datos_bot/archivo/ y empieza otra.
+VERSION_MODELO = "2.0"
+
+# --- Reglas de decisión (quién decide comprar y vender) ---------------------
+# "tendencia":    regla clásica: dentro si el precio diario supera su media de TENDENCIA_VELAS días
+# "ia":           la IA decide según su probabilidad (UMBRAL_COMPRA / UMBRAL_VENTA)
+# "tendencia_ia": solo compra con tendencia alcista Y la IA de acuerdo
+# v2.0 usa "tendencia": en el laboratorio fue lo único que se comportó mejor que comprar y
+# mantener de forma consistente (ver laboratorio/RESULTADOS.md y CAMBIOS.md).
+ESTRATEGIA = "tendencia"
+TENDENCIA_INTERVALO = "1d"  # la regla de tendencia se revisa con velas diarias (una vez al día)
+TENDENCIA_VELAS = 50        # media de 50 días
+TENDENCIA_MARGEN = 0.03     # entra al superar la media un 3 % y sale al caer un 3 % por debajo
+PERMANENCIA_MINIMA = 0      # velas mínimas dentro tras comprar (solo estrategia "ia")
+UMBRAL_COMPRA = 0.58        # (estrategias con IA) compra si cree que subirá con probabilidad >= 58 %
+UMBRAL_VENTA = 0.47         # (estrategias con IA) vende si esa probabilidad baja de 47 %
+PAUSADO = False             # en pausa sigue aprendiendo, pero no opera
+
+# --- Cerebro (la IA propia, "en prácticas" mientras ESTRATEGIA sea "tendencia") ----
+HORIZONTE = 24                 # cuántas velas hacia el futuro intenta adivinar (24 h)
 TASA_APRENDIZAJE = 0.01        # cuánto corrige su forma de pensar tras cada lección
-VELAS_PREENTRENAMIENTO = 3000  # historia que estudia antes de empezar a operar
+VELAS_PREENTRENAMIENTO = 3000  # historia que estudia antes de empezar
 
-# --- Reglas de decisión --------------------------------------------------
-UMBRAL_COMPRA = 0.58      # compra si cree que subirá con probabilidad >= 58 %
-UMBRAL_VENTA = 0.47       # vende si esa probabilidad baja de 47 %
-PAUSADO = False           # en pausa sigue aprendiendo, pero no opera
-
-# --- Backtest (prueba con el pasado) -------------------------------------
-VELAS_BACKTEST = 5000
-VELAS_CALENTAMIENTO = 1000  # velas que solo usa para aprender antes de operar
+# Qué mira el cerebro. Grupos: "precio", "sentimiento" (Fear & Greed),
+# "futuros" (funding rate) y "tendencia" (distancia a la media larga)
+INDICADORES = ["precio", "sentimiento"]
 
 # --- Archivos ------------------------------------------------------------
 CARPETA_DATOS = os.path.join(CARPETA_PROYECTO, "datos_bot")

@@ -3,3 +3,4 @@ __pycache__/
 *.tmp
 datos_bot/informe_*.html
 .claude/
+laboratorio/cache/

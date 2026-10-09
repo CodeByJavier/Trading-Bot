@@ -10,6 +10,7 @@ Uso:
   python control.py reiniciar_simulacion [--capital 200] [--simbolo ETHEUR]
 """
 import argparse
+import json
 import os
 import re
 import sys
@@ -52,32 +53,34 @@ def main():
             if not re.fullmatch(r"[A-Z0-9]{2,10}EUR", simbolo):
                 sys.exit(f"'{simbolo}' no parece un par en euros válido (ejemplos: BTCEUR, ETHEUR).")
             cambios["SIMBOLO"] = simbolo
-        for ruta in (bot.RUTA_ESTADO, bot.RUTA_OPERACIONES):
-            if os.path.exists(ruta):
-                os.remove(ruta)
+        previo = None
+        if os.path.exists(bot.RUTA_ESTADO):
+            with open(bot.RUTA_ESTADO, encoding="utf-8") as archivo:
+                previo = json.load(archivo)
+        carpeta = bot.archivar(previo)
         config.aplicar_ajustes(cambios)
-        estado, cerebro, cartera = bot.crear_estado()
+        estado, cerebro, cartera = bot.crear_estado(
+            f"Simulación reiniciada a mano" + (f"; la anterior se guardó en {carpeta}" if carpeta else ""))
         bot.ciclo(estado, cerebro, cartera)
         bot.guardar(estado, cerebro, cartera)
         print("Simulación reiniciada.")
         return
 
-    cargado = bot.cargar_o_crear()
-    if cargado is None:
-        sys.exit(1)
-    estado, cerebro, cartera = cargado
+    estado, cerebro, cartera = bot.cargar_o_crear()
 
     if args.accion == "pausar":
         config.aplicar_ajustes({"PAUSADO": True})
         bot.anotar_evento(estado, "Bot pausado: sigue aprendiendo, pero no opera")
     elif args.accion == "reanudar":
         config.aplicar_ajustes({"PAUSADO": False})
+        estado["ultima_tendencia_t"] = None  # que revise la regla de tendencia en la próxima ejecución
         bot.anotar_evento(estado, "Bot reanudado: vuelve a operar")
     elif args.accion == "vender_y_pausar":
         if cartera.en_posicion:
             vela = descargar_velas(config.SIMBOLO, config.INTERVALO, 1)[-1]
             operacion = cartera.vender(vela["cierre"], bot.fecha_de(vela))
             bot.anotar_operacion(operacion)
+            estado["compra_t"] = None
             bot.anotar_evento(estado, f"Venta manual a {vela['cierre']:,.2f} € "
                                       f"({operacion['resultado']:+.2f} €) y pausa")
         else:
@@ -91,7 +94,8 @@ def main():
         if venta >= compra:
             sys.exit("El umbral de venta tiene que ser menor que el de compra.")
         config.aplicar_ajustes({"UMBRAL_COMPRA": compra, "UMBRAL_VENTA": venta})
-        bot.anotar_evento(estado, f"Umbrales cambiados: compra {compra:.0%}, venta {venta:.0%}")
+        nota = "" if config.ESTRATEGIA != "tendencia" else " (solo afectan si la IA decide; ahora decide la tendencia)"
+        bot.anotar_evento(estado, f"Umbrales cambiados: compra {compra:.0%}, venta {venta:.0%}{nota}")
 
     bot.guardar(estado, cerebro, cartera)
     print(f"Hecho: {args.accion}.")

@@ -1,0 +1,1729 @@
+{
+ "tramos": [
+  {
+   "nombre": "v1.0 actual (1 h, 4 h vista)",
+   "receta": {
+    "intervalo": "1h",
+    "horizonte": 4,
+    "indicadores": [
+     "precio"
+    ],
+    "estrategia": "ia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "01/08/2025",
+    "bot": -0.13146844142064207,
+    "mantener": 0.6101621409012055,
+    "caida_bot": 0.13407127044532643,
+    "caida_mantener": 0.35443820044697577,
+    "operaciones": 22,
+    "comisiones": 22.0,
+    "tiempo_dentro": 0.0038145539906103286,
+    "ia": {
+     "n": 10224,
+     "aciertos": 0.9158,
+     "aciertos_ingenuo": 0.9174,
+     "brier": 0.07226,
+     "brier_ingenuo": 0.07584,
+     "habilidad": 0.0472,
+     "z": 3.05,
+     "veredicto": "aprende"
+    }
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "09/10/2026",
+    "bot": -0.09456021026350259,
+    "mantener": -0.27717519933681534,
+    "caida_bot": 0.10114522392260909,
+    "caida_mantener": 0.5260717382531981,
+    "operaciones": 14,
+    "comisiones": 14.0,
+    "tiempo_dentro": 0.0019177294083804776,
+    "ia": {
+     "n": 10425,
+     "aciertos": 0.9373,
+     "aciertos_ingenuo": 0.9382,
+     "brier": 0.05631,
+     "brier_ingenuo": 0.05777,
+     "habilidad": 0.0252,
+     "z": 1.55,
+     "veredicto": "indicios"
+    }
+   }
+  },
+  {
+   "nombre": "v1.0 con comisión del 0,1 %",
+   "receta": {
+    "intervalo": "1h",
+    "horizonte": 4,
+    "indicadores": [
+     "precio"
+    ],
+    "estrategia": "ia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "0,1 % por orden",
+     "fija": 0.0,
+     "pct": 0.001,
+     "spread": 0.0005
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "01/08/2025",
+    "bot": -0.14961055952813762,
+    "mantener": 0.6216544446130654,
+    "caida_bot": 0.2073169344217853,
+    "caida_mantener": 0.3533784095970049,
+    "operaciones": 228,
+    "comisiones": 40.964431470180905,
+    "tiempo_dentro": 0.0497848200312989,
+    "ia": {
+     "n": 10224,
+     "aciertos": 0.6731,
+     "aciertos_ingenuo": 0.6702,
+     "brier": 0.21498,
+     "brier_ingenuo": 0.22089,
+     "habilidad": 0.0268,
+     "z": 3.17,
+     "veredicto": "aprende"
+    }
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "09/10/2026",
+    "bot": -0.0368357448808212,
+    "mantener": -0.26924963568269655,
+    "caida_bot": 0.21818256886130308,
+    "caida_mantener": 0.5235736357733043,
+    "operaciones": 136,
+    "comisiones": 24.551064355529036,
+    "tiempo_dentro": 0.01975261290631892,
+    "ia": {
+     "n": 10425,
+     "aciertos": 0.7066,
+     "aciertos_ingenuo": 0.7057,
+     "brier": 0.20385,
+     "brier_ingenuo": 0.20787,
+     "habilidad": 0.0193,
+     "z": 2.41,
+     "veredicto": "aprende"
+    }
+   }
+  },
+  {
+   "nombre": "1 h, 24 h vista + Fear & Greed",
+   "receta": {
+    "intervalo": "1h",
+    "horizonte": 24,
+    "indicadores": [
+     "precio",
+     "sentimiento"
+    ],
+    "estrategia": "ia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "01/08/2025",
+    "bot": -0.9294427070776428,
+    "mantener": 0.6101621409012055,
+    "caida_bot": 0.9297643437045389,
+    "caida_mantener": 0.35443820044697577,
+    "operaciones": 180,
+    "comisiones": 180.0,
+    "tiempo_dentro": 0.07902973395931143,
+    "ia": {
+     "n": 10224,
+     "aciertos": 0.7586,
+     "aciertos_ingenuo": 0.7225,
+     "brier": 0.17391,
+     "brier_ingenuo": 0.19657,
+     "habilidad": 0.1153,
+     "z": 3.13,
+     "veredicto": "aprende"
+    }
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "09/10/2026",
+    "bot": -0.7380640798556635,
+    "mantener": -0.27717519933681534,
+    "caida_bot": 0.7380640798556634,
+    "caida_mantener": 0.5260717382531981,
+    "operaciones": 138,
+    "comisiones": 138.0,
+    "tiempo_dentro": 0.05360053696423435,
+    "ia": {
+     "n": 10405,
+     "aciertos": 0.7816,
+     "aciertos_ingenuo": 0.7756,
+     "brier": 0.1619,
+     "brier_ingenuo": 0.17614,
+     "habilidad": 0.0809,
+     "z": 2.6,
+     "veredicto": "aprende"
+    }
+   }
+  },
+  {
+   "nombre": "Diario, 5 días vista",
+   "receta": {
+    "intervalo": "1d",
+    "horizonte": 5,
+    "indicadores": [
+     "precio"
+    ],
+    "estrategia": "ia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "31/07/2025",
+    "bot": 0.0019841243660545516,
+    "mantener": 0.6074171286761645,
+    "caida_bot": 0.2018541118751012,
+    "caida_mantener": 0.3192283374277656,
+    "operaciones": 16,
+    "comisiones": 16.0,
+    "tiempo_dentro": 0.06103286384976526,
+    "ia": {
+     "n": 426,
+     "aciertos": 0.5869,
+     "aciertos_ingenuo": 0.6033,
+     "brier": 0.23777,
+     "brier_ingenuo": 0.24246,
+     "habilidad": 0.0194,
+     "z": 0.64,
+     "veredicto": "indicios"
+    }
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "08/10/2026",
+    "bot": -0.12183887359180245,
+    "mantener": -0.26597594948577663,
+    "caida_bot": 0.2128566660341491,
+    "caida_mantener": 0.5194486269266135,
+    "operaciones": 4,
+    "comisiones": 4.0,
+    "tiempo_dentro": 0.02304147465437788,
+    "ia": {
+     "n": 429,
+     "aciertos": 0.6317,
+     "aciertos_ingenuo": 0.6387,
+     "brier": 0.23694,
+     "brier_ingenuo": 0.23348,
+     "habilidad": -0.0148,
+     "z": -0.7,
+     "veredicto": "no_aprende"
+    }
+   }
+  },
+  {
+   "nombre": "Diario + Fear & Greed",
+   "receta": {
+    "intervalo": "1d",
+    "horizonte": 5,
+    "indicadores": [
+     "precio",
+     "sentimiento"
+    ],
+    "estrategia": "ia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "31/07/2025",
+    "bot": -0.17166791143630522,
+    "mantener": 0.6074171286761645,
+    "caida_bot": 0.3001535307028536,
+    "caida_mantener": 0.3192283374277656,
+    "operaciones": 16,
+    "comisiones": 16.0,
+    "tiempo_dentro": 0.07511737089201878,
+    "ia": {
+     "n": 426,
+     "aciertos": 0.5798,
+     "aciertos_ingenuo": 0.6033,
+     "brier": 0.23786,
+     "brier_ingenuo": 0.24246,
+     "habilidad": 0.019,
+     "z": 0.56,
+     "veredicto": "indicios"
+    }
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "08/10/2026",
+    "bot": -0.12701661921566265,
+    "mantener": -0.26597594948577663,
+    "caida_bot": 0.21750079784460666,
+    "caida_mantener": 0.5194486269266135,
+    "operaciones": 8,
+    "comisiones": 8.0,
+    "tiempo_dentro": 0.03686635944700461,
+    "ia": {
+     "n": 429,
+     "aciertos": 0.6294,
+     "aciertos_ingenuo": 0.6387,
+     "brier": 0.23726,
+     "brier_ingenuo": 0.23348,
+     "habilidad": -0.0162,
+     "z": -0.66,
+     "veredicto": "no_aprende"
+    }
+   }
+  },
+  {
+   "nombre": "Diario + Fear & Greed + futuros",
+   "receta": {
+    "intervalo": "1d",
+    "horizonte": 5,
+    "indicadores": [
+     "precio",
+     "sentimiento",
+     "futuros"
+    ],
+    "estrategia": "ia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "31/07/2025",
+    "bot": -0.17835962155086238,
+    "mantener": 0.6074171286761645,
+    "caida_bot": 0.3004913514268573,
+    "caida_mantener": 0.3192283374277656,
+    "operaciones": 18,
+    "comisiones": 18.0,
+    "tiempo_dentro": 0.09154929577464789,
+    "ia": {
+     "n": 426,
+     "aciertos": 0.5775,
+     "aciertos_ingenuo": 0.6033,
+     "brier": 0.2379,
+     "brier_ingenuo": 0.24246,
+     "habilidad": 0.0188,
+     "z": 0.56,
+     "veredicto": "indicios"
+    }
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "08/10/2026",
+    "bot": -0.17679478577851826,
+    "mantener": -0.26597594948577663,
+    "caida_bot": 0.2621488712716776,
+    "caida_mantener": 0.5194486269266135,
+    "operaciones": 6,
+    "comisiones": 6.0,
+    "tiempo_dentro": 0.03225806451612903,
+    "ia": {
+     "n": 429,
+     "aciertos": 0.6364,
+     "aciertos_ingenuo": 0.6387,
+     "brier": 0.23695,
+     "brier_ingenuo": 0.23348,
+     "habilidad": -0.0149,
+     "z": -0.61,
+     "veredicto": "no_aprende"
+    }
+   }
+  },
+  {
+   "nombre": "Tendencia 50 días (sin IA)",
+   "receta": {
+    "intervalo": "1d",
+    "horizonte": 4,
+    "indicadores": [
+     "precio"
+    ],
+    "estrategia": "tendencia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "31/07/2025",
+    "bot": 0.37533053348440637,
+    "mantener": 0.6074171286761645,
+    "caida_bot": 0.22662597910231272,
+    "caida_mantener": 0.3192283374277656,
+    "operaciones": 27,
+    "comisiones": 27.0,
+    "tiempo_dentro": 0.57981220657277,
+    "ia": null
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "08/10/2026",
+    "bot": -0.11957318233316816,
+    "mantener": -0.26597594948577663,
+    "caida_bot": 0.36536309684021984,
+    "caida_mantener": 0.5194486269266135,
+    "operaciones": 27,
+    "comisiones": 27.0,
+    "tiempo_dentro": 0.46774193548387094,
+    "ia": null
+   }
+  },
+  {
+   "nombre": "Tendencia 50 días + IA con Fear & Greed",
+   "receta": {
+    "intervalo": "1d",
+    "horizonte": 5,
+    "indicadores": [
+     "precio",
+     "sentimiento"
+    ],
+    "estrategia": "tendencia_ia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "31/07/2025",
+    "bot": -0.05116729399255715,
+    "mantener": 0.6074171286761645,
+    "caida_bot": 0.05116729399255718,
+    "caida_mantener": 0.3192283374277656,
+    "operaciones": 2,
+    "comisiones": 2.0,
+    "tiempo_dentro": 0.002347417840375587,
+    "ia": {
+     "n": 426,
+     "aciertos": 0.5798,
+     "aciertos_ingenuo": 0.6033,
+     "brier": 0.23786,
+     "brier_ingenuo": 0.24246,
+     "habilidad": 0.019,
+     "z": 0.56,
+     "veredicto": "indicios"
+    }
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "08/10/2026",
+    "bot": -0.03010276939980927,
+    "mantener": -0.26597594948577663,
+    "caida_bot": 0.03010276939980926,
+    "caida_mantener": 0.5194486269266135,
+    "operaciones": 2,
+    "comisiones": 2.0,
+    "tiempo_dentro": 0.002304147465437788,
+    "ia": {
+     "n": 429,
+     "aciertos": 0.6294,
+     "aciertos_ingenuo": 0.6387,
+     "brier": 0.23726,
+     "brier_ingenuo": 0.23348,
+     "habilidad": -0.0162,
+     "z": -0.66,
+     "veredicto": "no_aprende"
+    }
+   }
+  },
+  {
+   "nombre": "Tendencia 50 días, margen 3 %",
+   "receta": {
+    "intervalo": "1d",
+    "horizonte": 4,
+    "indicadores": [
+     "precio"
+    ],
+    "estrategia": "tendencia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.03,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "31/07/2025",
+    "bot": 0.4033176356971353,
+    "mantener": 0.6074171286761645,
+    "caida_bot": 0.1952236600811239,
+    "caida_mantener": 0.3192283374277656,
+    "operaciones": 11,
+    "comisiones": 11.0,
+    "tiempo_dentro": 0.6056338028169014,
+    "ia": null
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "08/10/2026",
+    "bot": -0.04107296297153251,
+    "mantener": -0.26597594948577663,
+    "caida_bot": 0.33478069641897157,
+    "caida_mantener": 0.5194486269266135,
+    "operaciones": 9,
+    "comisiones": 9.0,
+    "tiempo_dentro": 0.4838709677419355,
+    "ia": null
+   }
+  },
+  {
+   "nombre": "1 h, 24 h vista + Fear & Greed, mínimo 24 h dentro",
+   "receta": {
+    "intervalo": "1h",
+    "horizonte": 24,
+    "indicadores": [
+     "precio",
+     "sentimiento"
+    ],
+    "estrategia": "ia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.0,
+    "permanencia": 24,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "01/08/2025",
+    "bot": -0.5151766201035407,
+    "mantener": 0.6101621409012055,
+    "caida_bot": 0.5370193577058245,
+    "caida_mantener": 0.35443820044697577,
+    "operaciones": 114,
+    "comisiones": 114.0,
+    "tiempo_dentro": 0.15062597809076683,
+    "ia": {
+     "n": 10224,
+     "aciertos": 0.7586,
+     "aciertos_ingenuo": 0.7225,
+     "brier": 0.17391,
+     "brier_ingenuo": 0.19657,
+     "habilidad": 0.1153,
+     "z": 3.13,
+     "veredicto": "aprende"
+    }
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "09/10/2026",
+    "bot": -0.6251317236743663,
+    "mantener": -0.27717519933681534,
+    "caida_bot": 0.6272693104780479,
+    "caida_mantener": 0.5260717382531981,
+    "operaciones": 98,
+    "comisiones": 98.0,
+    "tiempo_dentro": 0.1265701409531115,
+    "ia": {
+     "n": 10405,
+     "aciertos": 0.7816,
+     "aciertos_ingenuo": 0.7756,
+     "brier": 0.1619,
+     "brier_ingenuo": 0.17614,
+     "habilidad": 0.0809,
+     "z": 2.6,
+     "veredicto": "aprende"
+    }
+   }
+  },
+  {
+   "nombre": "Ídem con comisión del 0,1 %",
+   "receta": {
+    "intervalo": "1h",
+    "horizonte": 24,
+    "indicadores": [
+     "precio",
+     "sentimiento"
+    ],
+    "estrategia": "ia",
+    "tendencia_velas": 50,
+    "tendencia_margen": 0.0,
+    "permanencia": 24,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "0,1 % por orden",
+     "fija": 0.0,
+     "pct": 0.001,
+     "spread": 0.0005
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "01/08/2025",
+    "bot": 0.07302277931388002,
+    "mantener": 0.6216544446130654,
+    "caida_bot": 0.248486301172276,
+    "caida_mantener": 0.3533784095970049,
+    "operaciones": 247,
+    "comisiones": 48.23713729247824,
+    "tiempo_dentro": 0.39661580594679186,
+    "ia": {
+     "n": 10224,
+     "aciertos": 0.6388,
+     "aciertos_ingenuo": 0.5441,
+     "brier": 0.22417,
+     "brier_ingenuo": 0.24855,
+     "habilidad": 0.0981,
+     "z": 3.13,
+     "veredicto": "aprende"
+    }
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "09/10/2026",
+    "bot": -0.30621098552802584,
+    "mantener": -0.26924963568269655,
+    "caida_bot": 0.31170557772631463,
+    "caida_mantener": 0.5235736357733043,
+    "operaciones": 202,
+    "comisiones": 35.18698362438404,
+    "tiempo_dentro": 0.3641768146514527,
+    "ia": {
+     "n": 10405,
+     "aciertos": 0.6402,
+     "aciertos_ingenuo": 0.5586,
+     "brier": 0.22394,
+     "brier_ingenuo": 0.2464,
+     "habilidad": 0.0911,
+     "z": 3.11,
+     "veredicto": "aprende"
+    }
+   }
+  },
+  {
+   "nombre": "Tendencia 20 días",
+   "receta": {
+    "intervalo": "1d",
+    "horizonte": 4,
+    "indicadores": [
+     "precio"
+    ],
+    "estrategia": "tendencia",
+    "tendencia_velas": 20,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "31/07/2025",
+    "bot": 0.20533774778366043,
+    "mantener": 0.6074171286761645,
+    "caida_bot": 0.331127602815607,
+    "caida_mantener": 0.3192283374277656,
+    "operaciones": 44,
+    "comisiones": 44.0,
+    "tiempo_dentro": 0.5422535211267606,
+    "ia": null
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "08/10/2026",
+    "bot": -0.23059223710268983,
+    "mantener": -0.26597594948577663,
+    "caida_bot": 0.3676434259983558,
+    "caida_mantener": 0.5194486269266135,
+    "operaciones": 48,
+    "comisiones": 48.0,
+    "tiempo_dentro": 0.45161290322580644,
+    "ia": null
+   }
+  },
+  {
+   "nombre": "Tendencia 100 días",
+   "receta": {
+    "intervalo": "1d",
+    "horizonte": 4,
+    "indicadores": [
+     "precio"
+    ],
+    "estrategia": "tendencia",
+    "tendencia_velas": 100,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "31/07/2025",
+    "bot": 0.4125399804767744,
+    "mantener": 0.6074171286761645,
+    "caida_bot": 0.25471051541944645,
+    "caida_mantener": 0.3192283374277656,
+    "operaciones": 19,
+    "comisiones": 19.0,
+    "tiempo_dentro": 0.6197183098591549,
+    "ia": null
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "08/10/2026",
+    "bot": -0.16789153215197838,
+    "mantener": -0.26597594948577663,
+    "caida_bot": 0.3603374598858121,
+    "caida_mantener": 0.5194486269266135,
+    "operaciones": 19,
+    "comisiones": 19.0,
+    "tiempo_dentro": 0.33640552995391704,
+    "ia": null
+   }
+  },
+  {
+   "nombre": "Tendencia 200 días",
+   "receta": {
+    "intervalo": "1d",
+    "horizonte": 4,
+    "indicadores": [
+     "precio"
+    ],
+    "estrategia": "tendencia",
+    "tendencia_velas": 200,
+    "tendencia_margen": 0.0,
+    "permanencia": 0,
+    "umbral_compra": 0.58,
+    "umbral_venta": 0.47,
+    "tasa": 0.01,
+    "capital": 200.0,
+    "costes": {
+     "nombre": "1 € por orden",
+     "fija": 1.0,
+     "pct": 0.0,
+     "spread": 0.001
+    }
+   },
+   "A": {
+    "desde": "01/06/2024",
+    "hasta": "31/07/2025",
+    "bot": -0.05230376875319476,
+    "mantener": 0.6074171286761645,
+    "caida_bot": 0.3676996392633714,
+    "caida_mantener": 0.3192283374277656,
+    "operaciones": 17,
+    "comisiones": 17.0,
+    "tiempo_dentro": 0.6924882629107981,
+    "ia": null
+   },
+   "B": {
+    "desde": "01/08/2025",
+    "hasta": "08/10/2026",
+    "bot": -0.003236313097318755,
+    "mantener": -0.26597594948577663,
+    "caida_bot": 0.20383196750907853,
+    "caida_mantener": 0.5194486269266135,
+    "operaciones": 9,
+    "comisiones": 9.0,
+    "tiempo_dentro": 0.31797235023041476,
+    "ia": null
+   }
+  }
+ ],
+ "anos": {
+  "Diario, 5 días vista": {
+   "2021": {
+    "desde": "01/01/2021",
+    "hasta": "31/12/2021",
+    "bot": -0.07762646539758389,
+    "mantener": 0.6713387500332921,
+    "caida_bot": 0.5015929177893272,
+    "caida_mantener": 0.5189056469660486,
+    "operaciones": 20,
+    "comisiones": 20.0,
+    "tiempo_dentro": 0.4684931506849315,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.5452,
+     "aciertos_ingenuo": 0.4658,
+     "brier": 0.25238,
+     "brier_ingenuo": 0.25387,
+     "habilidad": 0.0059,
+     "z": 0.15,
+     "veredicto": "indicios"
+    }
+   },
+   "2022": {
+    "desde": "01/01/2022",
+    "hasta": "31/12/2022",
+    "bot": -0.2770420594365065,
+    "mantener": -0.6407428590540876,
+    "caida_bot": 0.3146572910642002,
+    "caida_mantener": 0.644641898499035,
+    "operaciones": 18,
+    "comisiones": 18.0,
+    "tiempo_dentro": 0.0958904109589041,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6274,
+     "aciertos_ingenuo": 0.6219,
+     "brier": 0.23394,
+     "brier_ingenuo": 0.23927,
+     "habilidad": 0.0223,
+     "z": 0.55,
+     "veredicto": "indicios"
+    }
+   },
+   "2023": {
+    "desde": "01/01/2023",
+    "hasta": "31/12/2023",
+    "bot": -0.021672506556102866,
+    "mantener": 1.4613385943265906,
+    "caida_bot": 0.021672506556102887,
+    "caida_mantener": 0.18356908389065887,
+    "operaciones": 2,
+    "comisiones": 2.0,
+    "tiempo_dentro": 0.0027397260273972603,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6055,
+     "aciertos_ingenuo": 0.6,
+     "brier": 0.24437,
+     "brier_ingenuo": 0.24032,
+     "habilidad": -0.0169,
+     "z": -0.67,
+     "veredicto": "no_aprende"
+    }
+   },
+   "2024": {
+    "desde": "01/01/2024",
+    "hasta": "31/12/2024",
+    "bot": 0.13510201642749475,
+    "mantener": 1.2280585888718418,
+    "caida_bot": 0.022436624340385725,
+    "caida_mantener": 0.2685888688138332,
+    "operaciones": 4,
+    "comisiones": 4.0,
+    "tiempo_dentro": 0.01639344262295082,
+    "ia": {
+     "n": 366,
+     "aciertos": 0.5191,
+     "aciertos_ingenuo": 0.5301,
+     "brier": 0.24894,
+     "brier_ingenuo": 0.25229,
+     "habilidad": 0.0133,
+     "z": 0.48,
+     "veredicto": "indicios"
+    }
+   },
+   "2025": {
+    "desde": "01/01/2025",
+    "hasta": "31/12/2025",
+    "bot": -0.1298227729119812,
+    "mantener": -0.19522582146729694,
+    "caida_bot": 0.20733565280518504,
+    "caida_mantener": 0.31968360166157217,
+    "operaciones": 14,
+    "comisiones": 14.0,
+    "tiempo_dentro": 0.06027397260273973,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6548,
+     "aciertos_ingenuo": 0.6712,
+     "brier": 0.22969,
+     "brier_ingenuo": 0.23125,
+     "habilidad": 0.0067,
+     "z": 0.21,
+     "veredicto": "indicios"
+    }
+   },
+   "2026": {
+    "desde": "01/01/2026",
+    "hasta": "08/10/2026",
+    "bot": -0.1175050470405169,
+    "mantener": -0.04681515129410929,
+    "caida_bot": 0.20896947975464528,
+    "caida_mantener": 0.3856801396264351,
+    "operaciones": 2,
+    "comisiones": 2.0,
+    "tiempo_dentro": 0.028469750889679714,
+    "ia": {
+     "n": 276,
+     "aciertos": 0.6159,
+     "aciertos_ingenuo": 0.6232,
+     "brier": 0.24108,
+     "brier_ingenuo": 0.23735,
+     "habilidad": -0.0157,
+     "z": -0.65,
+     "veredicto": "no_aprende"
+    }
+   }
+  },
+  "Diario + Fear & Greed": {
+   "2021": {
+    "desde": "01/01/2021",
+    "hasta": "31/12/2021",
+    "bot": -0.12402432210216219,
+    "mantener": 0.6713387500332921,
+    "caida_bot": 0.5290209514357336,
+    "caida_mantener": 0.5189056469660486,
+    "operaciones": 24,
+    "comisiones": 24.0,
+    "tiempo_dentro": 0.4849315068493151,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.5342,
+     "aciertos_ingenuo": 0.4658,
+     "brier": 0.25286,
+     "brier_ingenuo": 0.25387,
+     "habilidad": 0.004,
+     "z": 0.09,
+     "veredicto": "indicios"
+    }
+   },
+   "2022": {
+    "desde": "01/01/2022",
+    "hasta": "31/12/2022",
+    "bot": -0.38235236511186765,
+    "mantener": -0.6407428590540876,
+    "caida_bot": 0.3977481975026114,
+    "caida_mantener": 0.644641898499035,
+    "operaciones": 20,
+    "comisiones": 20.0,
+    "tiempo_dentro": 0.11506849315068493,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6219,
+     "aciertos_ingenuo": 0.6219,
+     "brier": 0.23469,
+     "brier_ingenuo": 0.23927,
+     "habilidad": 0.0192,
+     "z": 0.45,
+     "veredicto": "indicios"
+    }
+   },
+   "2023": {
+    "desde": "01/01/2023",
+    "hasta": "31/12/2023",
+    "bot": -0.023589973849743706,
+    "mantener": 1.4613385943265906,
+    "caida_bot": 0.023589973849743727,
+    "caida_mantener": 0.18356908389065887,
+    "operaciones": 2,
+    "comisiones": 2.0,
+    "tiempo_dentro": 0.005479452054794521,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6027,
+     "aciertos_ingenuo": 0.6,
+     "brier": 0.24456,
+     "brier_ingenuo": 0.24032,
+     "habilidad": -0.0176,
+     "z": -0.69,
+     "veredicto": "no_aprende"
+    }
+   },
+   "2024": {
+    "desde": "01/01/2024",
+    "hasta": "31/12/2024",
+    "bot": 0.1835911516358526,
+    "mantener": 1.2280585888718418,
+    "caida_bot": 0.03850336218597677,
+    "caida_mantener": 0.2685888688138332,
+    "operaciones": 4,
+    "comisiones": 4.0,
+    "tiempo_dentro": 0.03825136612021858,
+    "ia": {
+     "n": 366,
+     "aciertos": 0.5219,
+     "aciertos_ingenuo": 0.5301,
+     "brier": 0.24834,
+     "brier_ingenuo": 0.25229,
+     "habilidad": 0.0157,
+     "z": 0.49,
+     "veredicto": "indicios"
+    }
+   },
+   "2025": {
+    "desde": "01/01/2025",
+    "hasta": "31/12/2025",
+    "bot": -0.40633722842614584,
+    "mantener": -0.19522582146729694,
+    "caida_bot": 0.40633722842614584,
+    "caida_mantener": 0.31968360166157217,
+    "operaciones": 16,
+    "comisiones": 16.0,
+    "tiempo_dentro": 0.07397260273972603,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6438,
+     "aciertos_ingenuo": 0.6712,
+     "brier": 0.23161,
+     "brier_ingenuo": 0.23125,
+     "habilidad": -0.0016,
+     "z": -0.05,
+     "veredicto": "no_aprende"
+    }
+   },
+   "2026": {
+    "desde": "01/01/2026",
+    "hasta": "08/10/2026",
+    "bot": 0.010843288081084035,
+    "mantener": -0.04681515129410929,
+    "caida_bot": 0.09384860876966145,
+    "caida_mantener": 0.3856801396264351,
+    "operaciones": 4,
+    "comisiones": 4.0,
+    "tiempo_dentro": 0.02491103202846975,
+    "ia": {
+     "n": 276,
+     "aciertos": 0.6159,
+     "aciertos_ingenuo": 0.6232,
+     "brier": 0.24001,
+     "brier_ingenuo": 0.23735,
+     "habilidad": -0.0112,
+     "z": -0.4,
+     "veredicto": "no_aprende"
+    }
+   }
+  },
+  "Diario + Fear & Greed + futuros": {
+   "2021": {
+    "desde": "01/01/2021",
+    "hasta": "31/12/2021",
+    "bot": 0.21451721275323687,
+    "mantener": 0.6713387500332921,
+    "caida_bot": 0.437034703690495,
+    "caida_mantener": 0.5189056469660486,
+    "operaciones": 22,
+    "comisiones": 22.0,
+    "tiempo_dentro": 0.5561643835616439,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.5644,
+     "aciertos_ingenuo": 0.4658,
+     "brier": 0.24957,
+     "brier_ingenuo": 0.25387,
+     "habilidad": 0.0169,
+     "z": 0.36,
+     "veredicto": "indicios"
+    }
+   },
+   "2022": {
+    "desde": "01/01/2022",
+    "hasta": "31/12/2022",
+    "bot": -0.24104556562712576,
+    "mantener": -0.6407428590540876,
+    "caida_bot": 0.31071561485043503,
+    "caida_mantener": 0.644641898499035,
+    "operaciones": 24,
+    "comisiones": 24.0,
+    "tiempo_dentro": 0.136986301369863,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6055,
+     "aciertos_ingenuo": 0.6219,
+     "brier": 0.23597,
+     "brier_ingenuo": 0.23927,
+     "habilidad": 0.0138,
+     "z": 0.3,
+     "veredicto": "indicios"
+    }
+   },
+   "2023": {
+    "desde": "01/01/2023",
+    "hasta": "31/12/2023",
+    "bot": 0.007348124756012542,
+    "mantener": 1.4613385943265906,
+    "caida_bot": 0.03631629834023744,
+    "caida_mantener": 0.18356908389065887,
+    "operaciones": 4,
+    "comisiones": 4.0,
+    "tiempo_dentro": 0.0410958904109589,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.589,
+     "aciertos_ingenuo": 0.6,
+     "brier": 0.24619,
+     "brier_ingenuo": 0.24032,
+     "habilidad": -0.0244,
+     "z": -0.83,
+     "veredicto": "no_aprende"
+    }
+   },
+   "2024": {
+    "desde": "01/01/2024",
+    "hasta": "31/12/2024",
+    "bot": 0.06792132937758466,
+    "mantener": 1.2280585888718418,
+    "caida_bot": 0.09572649319767691,
+    "caida_mantener": 0.2685888688138332,
+    "operaciones": 4,
+    "comisiones": 4.0,
+    "tiempo_dentro": 0.060109289617486336,
+    "ia": {
+     "n": 366,
+     "aciertos": 0.5027,
+     "aciertos_ingenuo": 0.5301,
+     "brier": 0.24998,
+     "brier_ingenuo": 0.25229,
+     "habilidad": 0.0092,
+     "z": 0.29,
+     "veredicto": "indicios"
+    }
+   },
+   "2025": {
+    "desde": "01/01/2025",
+    "hasta": "31/12/2025",
+    "bot": -0.3413718446900941,
+    "mantener": -0.19522582146729694,
+    "caida_bot": 0.3584472724569572,
+    "caida_mantener": 0.31968360166157217,
+    "operaciones": 20,
+    "comisiones": 20.0,
+    "tiempo_dentro": 0.07397260273972603,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6493,
+     "aciertos_ingenuo": 0.6712,
+     "brier": 0.23094,
+     "brier_ingenuo": 0.23125,
+     "habilidad": 0.0013,
+     "z": 0.04,
+     "veredicto": "indicios"
+    }
+   },
+   "2026": {
+    "desde": "01/01/2026",
+    "hasta": "08/10/2026",
+    "bot": -0.1175050470405169,
+    "mantener": -0.04681515129410929,
+    "caida_bot": 0.20896947975464528,
+    "caida_mantener": 0.3856801396264351,
+    "operaciones": 2,
+    "comisiones": 2.0,
+    "tiempo_dentro": 0.028469750889679714,
+    "ia": {
+     "n": 276,
+     "aciertos": 0.6232,
+     "aciertos_ingenuo": 0.6232,
+     "brier": 0.24007,
+     "brier_ingenuo": 0.23735,
+     "habilidad": -0.0115,
+     "z": -0.4,
+     "veredicto": "no_aprende"
+    }
+   }
+  },
+  "Tendencia 50 días (sin IA)": {
+   "2021": {
+    "desde": "01/01/2021",
+    "hasta": "31/12/2021",
+    "bot": 1.3333689195903422,
+    "mantener": 0.6713387500332921,
+    "caida_bot": 0.2572342735121043,
+    "caida_mantener": 0.5189056469660486,
+    "operaciones": 18,
+    "comisiones": 18.0,
+    "tiempo_dentro": 0.5917808219178082,
+    "ia": null
+   },
+   "2022": {
+    "desde": "01/01/2022",
+    "hasta": "31/12/2022",
+    "bot": -0.5089151051816445,
+    "mantener": -0.6407428590540876,
+    "caida_bot": 0.5100038131809808,
+    "caida_mantener": 0.644641898499035,
+    "operaciones": 20,
+    "comisiones": 20.0,
+    "tiempo_dentro": 0.2547945205479452,
+    "ia": null
+   },
+   "2023": {
+    "desde": "01/01/2023",
+    "hasta": "31/12/2023",
+    "bot": 0.7228571437570956,
+    "mantener": 1.4613385943265906,
+    "caida_bot": 0.28918414058932357,
+    "caida_mantener": 0.18356908389065887,
+    "operaciones": 29,
+    "comisiones": 29.0,
+    "tiempo_dentro": 0.6821917808219178,
+    "ia": null
+   },
+   "2024": {
+    "desde": "01/01/2024",
+    "hasta": "31/12/2024",
+    "bot": 0.6958727405018568,
+    "mantener": 1.2280585888718418,
+    "caida_bot": 0.3143515705352432,
+    "caida_mantener": 0.2685888688138332,
+    "operaciones": 26,
+    "comisiones": 26.0,
+    "tiempo_dentro": 0.6721311475409836,
+    "ia": null
+   },
+   "2025": {
+    "desde": "01/01/2025",
+    "hasta": "31/12/2025",
+    "bot": -0.11925411952235632,
+    "mantener": -0.19522582146729694,
+    "caida_bot": 0.1966851212335552,
+    "caida_mantener": 0.31968360166157217,
+    "operaciones": 22,
+    "comisiones": 22.0,
+    "tiempo_dentro": 0.4191780821917808,
+    "ia": null
+   },
+   "2026": {
+    "desde": "01/01/2026",
+    "hasta": "08/10/2026",
+    "bot": 0.0341429868749592,
+    "mantener": -0.04681515129410929,
+    "caida_bot": 0.26380307573991896,
+    "caida_mantener": 0.3856801396264351,
+    "operaciones": 17,
+    "comisiones": 17.0,
+    "tiempo_dentro": 0.5622775800711743,
+    "ia": null
+   }
+  },
+  "Tendencia 50 días + IA con Fear & Greed": {
+   "2021": {
+    "desde": "01/01/2021",
+    "hasta": "31/12/2021",
+    "bot": 0.3590410054541866,
+    "mantener": 0.6713387500332921,
+    "caida_bot": 0.24892263616595353,
+    "caida_mantener": 0.5189056469660486,
+    "operaciones": 16,
+    "comisiones": 16.0,
+    "tiempo_dentro": 0.23013698630136986,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.5342,
+     "aciertos_ingenuo": 0.4658,
+     "brier": 0.25286,
+     "brier_ingenuo": 0.25387,
+     "habilidad": 0.004,
+     "z": 0.09,
+     "veredicto": "indicios"
+    }
+   },
+   "2022": {
+    "desde": "01/01/2022",
+    "hasta": "31/12/2022",
+    "bot": -0.0745736739782139,
+    "mantener": -0.6407428590540876,
+    "caida_bot": 0.07743630904733635,
+    "caida_mantener": 0.644641898499035,
+    "operaciones": 6,
+    "comisiones": 6.0,
+    "tiempo_dentro": 0.0136986301369863,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6219,
+     "aciertos_ingenuo": 0.6219,
+     "brier": 0.23469,
+     "brier_ingenuo": 0.23927,
+     "habilidad": 0.0192,
+     "z": 0.45,
+     "veredicto": "indicios"
+    }
+   },
+   "2023": {
+    "desde": "01/01/2023",
+    "hasta": "31/12/2023",
+    "bot": 0.0,
+    "mantener": 1.4613385943265906,
+    "caida_bot": 0.0,
+    "caida_mantener": 0.18356908389065887,
+    "operaciones": 0,
+    "comisiones": 0,
+    "tiempo_dentro": 0.0,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6027,
+     "aciertos_ingenuo": 0.6,
+     "brier": 0.24456,
+     "brier_ingenuo": 0.24032,
+     "habilidad": -0.0176,
+     "z": -0.69,
+     "veredicto": "no_aprende"
+    }
+   },
+   "2024": {
+    "desde": "01/01/2024",
+    "hasta": "31/12/2024",
+    "bot": 0.0,
+    "mantener": 1.2280585888718418,
+    "caida_bot": 0.0,
+    "caida_mantener": 0.2685888688138332,
+    "operaciones": 0,
+    "comisiones": 0,
+    "tiempo_dentro": 0.0,
+    "ia": {
+     "n": 366,
+     "aciertos": 0.5219,
+     "aciertos_ingenuo": 0.5301,
+     "brier": 0.24834,
+     "brier_ingenuo": 0.25229,
+     "habilidad": 0.0157,
+     "z": 0.49,
+     "veredicto": "indicios"
+    }
+   },
+   "2025": {
+    "desde": "01/01/2025",
+    "hasta": "31/12/2025",
+    "bot": -0.0802362902145326,
+    "mantener": -0.19522582146729694,
+    "caida_bot": 0.0802362902145326,
+    "caida_mantener": 0.31968360166157217,
+    "operaciones": 4,
+    "comisiones": 4.0,
+    "tiempo_dentro": 0.005479452054794521,
+    "ia": {
+     "n": 365,
+     "aciertos": 0.6438,
+     "aciertos_ingenuo": 0.6712,
+     "brier": 0.23161,
+     "brier_ingenuo": 0.23125,
+     "habilidad": -0.0016,
+     "z": -0.05,
+     "veredicto": "no_aprende"
+    }
+   },
+   "2026": {
+    "desde": "01/01/2026",
+    "hasta": "08/10/2026",
+    "bot": 0.0,
+    "mantener": -0.04681515129410929,
+    "caida_bot": 0.0,
+    "caida_mantener": 0.3856801396264351,
+    "operaciones": 0,
+    "comisiones": 0,
+    "tiempo_dentro": 0.0,
+    "ia": {
+     "n": 276,
+     "aciertos": 0.6159,
+     "aciertos_ingenuo": 0.6232,
+     "brier": 0.24001,
+     "brier_ingenuo": 0.23735,
+     "habilidad": -0.0112,
+     "z": -0.4,
+     "veredicto": "no_aprende"
+    }
+   }
+  },
+  "Tendencia 50 días, margen 3 %": {
+   "2021": {
+    "desde": "01/01/2021",
+    "hasta": "31/12/2021",
+    "bot": 1.676761074330786,
+    "mantener": 0.6713387500332921,
+    "caida_bot": 0.23927185110723673,
+    "caida_mantener": 0.5189056469660486,
+    "operaciones": 6,
+    "comisiones": 6.0,
+    "tiempo_dentro": 0.6,
+    "ia": null
+   },
+   "2022": {
+    "desde": "01/01/2022",
+    "hasta": "31/12/2022",
+    "bot": -0.33926118637570457,
+    "mantener": -0.6407428590540876,
+    "caida_bot": 0.3392611863757045,
+    "caida_mantener": 0.644641898499035,
+    "operaciones": 8,
+    "comisiones": 8.0,
+    "tiempo_dentro": 0.2602739726027397,
+    "ia": null
+   },
+   "2023": {
+    "desde": "01/01/2023",
+    "hasta": "31/12/2023",
+    "bot": 0.8519964229248131,
+    "mantener": 1.4613385943265906,
+    "caida_bot": 0.1895346235184357,
+    "caida_mantener": 0.18356908389065887,
+    "operaciones": 7,
+    "comisiones": 7.0,
+    "tiempo_dentro": 0.7178082191780822,
+    "ia": null
+   },
+   "2024": {
+    "desde": "01/01/2024",
+    "hasta": "31/12/2024",
+    "bot": 0.7890927183757592,
+    "mantener": 1.2280585888718418,
+    "caida_bot": 0.2765337690819439,
+    "caida_mantener": 0.2685888688138332,
+    "operaciones": 9,
+    "comisiones": 9.0,
+    "tiempo_dentro": 0.6502732240437158,
+    "ia": null
+   },
+   "2025": {
+    "desde": "01/01/2025",
+    "hasta": "31/12/2025",
+    "bot": -0.209646045766544,
+    "mantener": -0.19522582146729694,
+    "caida_bot": 0.21443302500747694,
+    "caida_mantener": 0.31968360166157217,
+    "operaciones": 10,
+    "comisiones": 10.0,
+    "tiempo_dentro": 0.410958904109589,
+    "ia": null
+   },
+   "2026": {
+    "desde": "01/01/2026",
+    "hasta": "08/10/2026",
+    "bot": 0.10767810489967,
+    "mantener": -0.04681515129410929,
+    "caida_bot": 0.22099534924917025,
+    "caida_mantener": 0.3856801396264351,
+    "operaciones": 5,
+    "comisiones": 5.0,
+    "tiempo_dentro": 0.6227758007117438,
+    "ia": null
+   }
+  },
+  "Tendencia 20 días": {
+   "2021": {
+    "desde": "01/01/2021",
+    "hasta": "31/12/2021",
+    "bot": -0.016138118220074826,
+    "mantener": 0.6713387500332921,
+    "caida_bot": 0.6230807024987546,
+    "caida_mantener": 0.5189056469660486,
+    "operaciones": 52,
+    "comisiones": 52.0,
+    "tiempo_dentro": 0.5397260273972603,
+    "ia": null
+   },
+   "2022": {
+    "desde": "01/01/2022",
+    "hasta": "31/12/2022",
+    "bot": -0.6269643885190745,
+    "mantener": -0.6407428590540876,
+    "caida_bot": 0.6501250453883509,
+    "caida_mantener": 0.644641898499035,
+    "operaciones": 42,
+    "comisiones": 42.0,
+    "tiempo_dentro": 0.3643835616438356,
+    "ia": null
+   },
+   "2023": {
+    "desde": "01/01/2023",
+    "hasta": "31/12/2023",
+    "bot": 0.0952975394468687,
+    "mantener": 1.4613385943265906,
+    "caida_bot": 0.30131919673003127,
+    "caida_mantener": 0.18356908389065887,
+    "operaciones": 52,
+    "comisiones": 52.0,
+    "tiempo_dentro": 0.6246575342465753,
+    "ia": null
+   },
+   "2024": {
+    "desde": "01/01/2024",
+    "hasta": "31/12/2024",
+    "bot": 0.5029125270368702,
+    "mantener": 1.2280585888718418,
+    "caida_bot": 0.3721143271023798,
+    "caida_mantener": 0.2685888688138332,
+    "operaciones": 38,
+    "comisiones": 38.0,
+    "tiempo_dentro": 0.6065573770491803,
+    "ia": null
+   },
+   "2025": {
+    "desde": "01/01/2025",
+    "hasta": "31/12/2025",
+    "bot": -0.3096880218249525,
+    "mantener": -0.19522582146729694,
+    "caida_bot": 0.335286996845918,
+    "caida_mantener": 0.31968360166157217,
+    "operaciones": 42,
+    "comisiones": 42.0,
+    "tiempo_dentro": 0.41643835616438357,
+    "ia": null
+   },
+   "2026": {
+    "desde": "01/01/2026",
+    "hasta": "08/10/2026",
+    "bot": 0.0225478488983748,
+    "mantener": -0.04681515129410929,
+    "caida_bot": 0.23433023133174763,
+    "caida_mantener": 0.3856801396264351,
+    "operaciones": 30,
+    "comisiones": 30.0,
+    "tiempo_dentro": 0.5409252669039146,
+    "ia": null
+   }
+  },
+  "Tendencia 100 días": {
+   "2021": {
+    "desde": "01/01/2021",
+    "hasta": "31/12/2021",
+    "bot": 0.8557840870270883,
+    "mantener": 0.6713387500332921,
+    "caida_bot": 0.3458027622075406,
+    "caida_mantener": 0.5189056469660486,
+    "operaciones": 8,
+    "comisiones": 8.0,
+    "tiempo_dentro": 0.7068493150684931,
+    "ia": null
+   },
+   "2022": {
+    "desde": "01/01/2022",
+    "hasta": "31/12/2022",
+    "bot": -0.4548313473768497,
+    "mantener": -0.6407428590540876,
+    "caida_bot": 0.4814200314514119,
+    "caida_mantener": 0.644641898499035,
+    "operaciones": 24,
+    "comisiones": 24.0,
+    "tiempo_dentro": 0.10684931506849316,
+    "ia": null
+   },
+   "2023": {
+    "desde": "01/01/2023",
+    "hasta": "31/12/2023",
+    "bot": 0.6347070324710693,
+    "mantener": 1.4613385943265906,
+    "caida_bot": 0.2653120500125619,
+    "caida_mantener": 0.18356908389065887,
+    "operaciones": 11,
+    "comisiones": 11.0,
+    "tiempo_dentro": 0.7890410958904109,
+    "ia": null
+   },
+   "2024": {
+    "desde": "01/01/2024",
+    "hasta": "31/12/2024",
+    "bot": 0.5878142191913722,
+    "mantener": 1.2280585888718418,
+    "caida_bot": 0.3913603730887389,
+    "caida_mantener": 0.2685888688138332,
+    "operaciones": 19,
+    "comisiones": 19.0,
+    "tiempo_dentro": 0.7486338797814208,
+    "ia": null
+   },
+   "2025": {
+    "desde": "01/01/2025",
+    "hasta": "31/12/2025",
+    "bot": -0.1394976379247196,
+    "mantener": -0.19522582146729694,
+    "caida_bot": 0.2605316687558052,
+    "caida_mantener": 0.31968360166157217,
+    "operaciones": 20,
+    "comisiones": 20.0,
+    "tiempo_dentro": 0.5123287671232877,
+    "ia": null
+   },
+   "2026": {
+    "desde": "01/01/2026",
+    "hasta": "08/10/2026",
+    "bot": 0.08022763418326595,
+    "mantener": -0.04681515129410929,
+    "caida_bot": 0.1345235333997514,
+    "caida_mantener": 0.3856801396264351,
+    "operaciones": 5,
+    "comisiones": 5.0,
+    "tiempo_dentro": 0.33807829181494664,
+    "ia": null
+   }
+  },
+  "Tendencia 200 días": {
+   "2021": {
+    "desde": "01/01/2021",
+    "hasta": "31/12/2021",
+    "bot": -0.07800176005040893,
+    "mantener": 0.6713387500332921,
+    "caida_bot": 0.5786709872770693,
+    "caida_mantener": 0.5189056469660486,
+    "operaciones": 14,
+    "comisiones": 14.0,
+    "tiempo_dentro": 0.7397260273972602,
+    "ia": null
+   },
+   "2022": {
+    "desde": "01/01/2022",
+    "hasta": "31/12/2022",
+    "bot": -0.05706883550187525,
+    "mantener": -0.6407428590540876,
+    "caida_bot": 0.05706883550187527,
+    "caida_mantener": 0.644641898499035,
+    "operaciones": 4,
+    "comisiones": 4.0,
+    "tiempo_dentro": 0.0136986301369863,
+    "ia": null
+   },
+   "2023": {
+    "desde": "01/01/2023",
+    "hasta": "31/12/2023",
+    "bot": 0.46472637955274787,
+    "mantener": 1.4613385943265906,
+    "caida_bot": 0.20743589188791176,
+    "caida_mantener": 0.18356908389065887,
+    "operaciones": 11,
+    "comisiones": 11.0,
+    "tiempo_dentro": 0.8191780821917808,
+    "ia": null
+   },
+   "2024": {
+    "desde": "01/01/2024",
+    "hasta": "31/12/2024",
+    "bot": 0.8491007640963744,
+    "mantener": 1.2280585888718418,
+    "caida_bot": 0.24875487208712027,
+    "caida_mantener": 0.2685888688138332,
+    "operaciones": 7,
+    "comisiones": 7.0,
+    "tiempo_dentro": 0.7814207650273224,
+    "ia": null
+   },
+   "2025": {
+    "desde": "01/01/2025",
+    "hasta": "31/12/2025",
+    "bot": -0.3454048295130603,
+    "mantener": -0.19522582146729694,
+    "caida_bot": 0.40763272385296584,
+    "caida_mantener": 0.31968360166157217,
+    "operaciones": 18,
+    "comisiones": 18.0,
+    "tiempo_dentro": 0.6821917808219178,
+    "ia": null
+   },
+   "2026": {
+    "desde": "01/01/2026",
+    "hasta": "08/10/2026",
+    "bot": 0.1529511365092977,
+    "mantener": -0.04681515129410929,
+    "caida_bot": 0.062460256029523736,
+    "caida_mantener": 0.3856801396264351,
+    "operaciones": 1,
+    "comisiones": 1.0,
+    "tiempo_dentro": 0.17793594306049823,
+    "ia": null
+   }
+  }
+ }
+}

@@ -9,6 +9,15 @@ import aprendizaje
 import config
 
 
+def _duracion(velas, intervalo):
+    minutos = {"15m": 15, "1h": 60, "4h": 240, "1d": 1440}.get(intervalo, 60) * velas
+    if intervalo == "1d":
+        dias = minutos // 1440
+        return f"{dias} día" + ("s" if dias != 1 else "")
+    horas = minutos / 60
+    return f"{horas:g} hora" + ("s" if horas != 1 else "")
+
+
 def exportar_panel(estado, cerebro, cartera):
     clave, lineas = aprendizaje.veredicto(estado)
     icono, titulo, explicacion = aprendizaje.VEREDICTOS[clave]
@@ -42,6 +51,10 @@ def exportar_panel(estado, cerebro, cartera):
                       for n, w, o in cerebro.lo_aprendido()],
         "eventos": estado.get("eventos", [])[-50:],
         "version": config.VERSION_MODELO,
+        "estrategia": config.ESTRATEGIA,
+        "ia_decide": config.ESTRATEGIA in ("ia", "tendencia_ia"),
+        "tendencia": estado.get("tendencia"),
+        "horizonte_texto": _duracion(config.HORIZONTE, estado["intervalo"]),
         "aprendizaje": {"veredicto": clave, "icono": icono, "titulo": titulo, "explicacion": explicacion,
                         "periodos": [dict(r, nombre=nombre) for nombre, r in lineas]},
     }

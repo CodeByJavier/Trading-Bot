@@ -1,10 +1,14 @@
 """
 Bot de trading SIMULADO: precios reales, dinero ficticio.
 
-- La primera vez estudia los últimos meses de precios (preentrenamiento).
-- Después, cada vez que cierra una vela: aprende de lo que pasó, decide y
-  "opera" con dinero ficticio.
-- Guarda todo en datos_bot/ y actualiza el panel (docs/datos.json).
+Cada vez que se ejecuta (GitHub lo hace cada hora):
+  1. La IA aprende de las velas nuevas (comprueba las predicciones que hizo hace HORIZONTE velas).
+  2. Quien decide (config.ESTRATEGIA) compra, vende o espera con el dinero ficticio:
+       - "tendencia": la regla de la media de 50 días, revisada una vez al día con velas diarias.
+       - "ia" / "tendencia_ia": la IA participa en la decisión.
+  3. Guarda todo en datos_bot/ y actualiza el panel (docs/datos.json) y el informe de aprendizaje.
+
+La primera vez (o al cambiar VERSION_MODELO) la IA estudia los últimos meses antes de empezar.
 
 Uso:
   python bot.py            se queda funcionando en tu PC (Ctrl+C para parar)
@@ -13,21 +17,26 @@ Uso:
 import csv
 import json
 import os
+import shutil
 import sys
 import time
 from datetime import datetime
 
 import aprendizaje
 import config
+import fuentes
+import indicadores
 from cerebro import Cerebro
 from datos import descargar_velas
 from indicadores import HISTORIA_NECESARIA, NOMBRES, caracteristicas
 from panel import exportar_panel
-from simulador import Cartera, decidir, valor_comprar_y_mantener
+from simulador import Cartera, decidir, respetar_permanencia, valor_comprar_y_mantener
 
 RUTA_ESTADO = os.path.join(config.CARPETA_DATOS, "estado.json")
 RUTA_OPERACIONES = os.path.join(config.CARPETA_DATOS, "operaciones.csv")
+CARPETA_ARCHIVO = os.path.join(config.CARPETA_DATOS, "archivo")
 VELAS_POR_CICLO = HISTORIA_NECESARIA + config.HORIZONTE + 200
+MINUTOS = {"1m": 1, "5m": 5, "15m": 15, "1h": 60, "4h": 240, "6h": 360, "1d": 1440}
 
 
 def fecha_de(vela):
@@ -66,14 +75,45 @@ def anotar_operacion(op):
                            "" if op["resultado"] is None else f'{op["resultado"]:.2f}'])
 
 
-def crear_estado():
-    print(f"Primera vez: estudiando {config.VELAS_PREENTRENAMIENTO} velas de "
+def velas_ia(cantidad):
+    """Velas con las que aprende la IA, con los datos externos que necesiten sus indicadores."""
+    velas = descargar_velas(config.SIMBOLO, config.INTERVALO, cantidad)
+    fng = tasas = None
+    if indicadores.necesita(config.INDICADORES, "sentimiento"):
+        try:
+            fng = fuentes.miedo_codicia(fuentes.dias_necesarios(velas))
+        except ConnectionError as error:
+            print(f"  (aviso) Sin datos de Fear & Greed ({error}); esos indicadores valdrán 0 esta vez.")
+    if indicadores.necesita(config.INDICADORES, "futuros"):
+        try:
+            tasas = fuentes.funding(velas[0]["t"] - 3 * fuentes.DIA_MS)
+        except ConnectionError as error:
+            print(f"  (aviso) Sin datos de funding ({error}); esos indicadores valdrán 0 esta vez.")
+    return fuentes.enriquecer(velas, fng, tasas)
+
+
+def archivar(estado_previo=None):
+    """Mueve la simulación actual a datos_bot/archivo/ (no se borra nada). Devuelve la carpeta."""
+    archivos = [r for r in (RUTA_ESTADO, RUTA_OPERACIONES, aprendizaje.RUTA_DIARIO) if os.path.exists(r)]
+    if not archivos:
+        return None
+    version = (estado_previo or {}).get("version", "1.0")
+    destino = os.path.join(CARPETA_ARCHIVO, f"v{version}_{datetime.now().strftime('%Y-%m-%d_%H%M')}")
+    os.makedirs(destino, exist_ok=True)
+    for ruta in archivos:
+        shutil.move(ruta, os.path.join(destino, os.path.basename(ruta)))
+    return os.path.relpath(destino, config.CARPETA_PROYECTO).replace("\\", "/")
+
+
+def crear_estado(motivo=None):
+    print(f"Nueva simulación v{config.VERSION_MODELO}: la IA estudia {config.VELAS_PREENTRENAMIENTO} velas de "
           f"{config.SIMBOLO} ({config.INTERVALO})...")
-    velas = descargar_velas(config.SIMBOLO, config.INTERVALO, config.VELAS_PREENTRENAMIENTO)
+    velas = velas_ia(config.VELAS_PREENTRENAMIENTO)
     cerebro = Cerebro(NOMBRES, config.TASA_APRENDIZAJE)
     h = config.HORIZONTE
     evaluaciones = []
-    for i in range(HISTORIA_NECESARIA - 1 + h, len(velas)):
+    # Hasta la penúltima vela: la última la procesa el primer ciclo (así ninguna lección se repite)
+    for i in range(HISTORIA_NECESARIA - 1 + h, len(velas) - 1):
         j = i - h
         subio = cubre_costes(velas[j]["cierre"], velas[i]["cierre"])
         prediccion, ingenua = cerebro.aprender(caracteristicas(velas, j), subio)
@@ -88,42 +128,69 @@ def crear_estado():
     cartera = Cartera(config.CAPITAL_INICIAL, config.COMISION_FIJA,
                       config.COMISION_PORCENTAJE, config.SPREAD)
     estado = {
+        "version": config.VERSION_MODELO,
         "simbolo": config.SIMBOLO,
         "intervalo": config.INTERVALO,
+        "nombres": NOMBRES,
         "creado": datetime.now().strftime("%d/%m/%Y %H:%M"),
         "precio_inicio": velas[-1]["cierre"],
-        "ultimo_t": velas[-2]["t"],  # la última vela se procesa en el primer ciclo
+        "ultimo_t": velas[-2]["t"],
+        "ultima_tendencia_t": None,
+        "compra_t": None,
         "historial": [],
         "eventos": [],
         "evaluaciones": [],
         "preentrenamiento": resumen_previo,
     }
-    anotar_evento(estado, f"Simulación creada con {config.CAPITAL_INICIAL:.0f} € ficticios "
-                          f"en {config.SIMBOLO} ({cerebro.lecciones} lecciones de preentrenamiento)")
+    if motivo:
+        anotar_evento(estado, motivo)
+    anotar_evento(estado, f"Simulación v{config.VERSION_MODELO} creada con {config.CAPITAL_INICIAL:.0f} € ficticios "
+                          f"en {config.SIMBOLO}. Decide: {config.ESTRATEGIA}. "
+                          f"La IA empieza con {cerebro.lecciones} lecciones de preentrenamiento")
     return estado, cerebro, cartera
 
 
 def cargar_o_crear():
-    """Devuelve (estado, cerebro, cartera), o None si el estado no encaja con config.py."""
+    """Carga la simulación. Si la configuración cambió de forma incompatible, archiva la vieja y crea otra."""
     if not os.path.exists(RUTA_ESTADO):
         return crear_estado()
     with open(RUTA_ESTADO, encoding="utf-8") as archivo:
         estado = json.load(archivo)
-    if (estado["simbolo"], estado["intervalo"]) != (config.SIMBOLO, config.INTERVALO):
-        print(f"El estado guardado es de {estado['simbolo']} {estado['intervalo']}, pero la "
-              f"configuración dice {config.SIMBOLO} {config.INTERVALO}.\nUsa 'reiniciar_simulacion' "
-              f"en el panel de control o borra la carpeta datos_bot para empezar de cero.")
-        return None
+    antes = (estado.get("version", "1.0"), estado["simbolo"], estado["intervalo"], estado["cerebro"]["nombres"])
+    ahora = (config.VERSION_MODELO, config.SIMBOLO, config.INTERVALO, NOMBRES)
+    if antes != ahora:
+        carpeta = archivar(estado)
+        print(f"La configuración cambió (v{antes[0]} {antes[1]} {antes[2]} -> v{ahora[0]} {ahora[1]} {ahora[2]}). "
+              f"Simulación anterior guardada en {carpeta}.")
+        return crear_estado(f"Nueva versión del bot (v{antes[0]} → v{ahora[0]}). "
+                            f"La simulación anterior se guardó en {carpeta}")
     return estado, Cerebro.desde_dict(estado["cerebro"]), Cartera.desde_dict(estado["cartera"])
+
+
+def revisar_tendencia(estado, cartera):
+    """Mira la regla de tendencia con velas diarias. Devuelve (alcista, ¿hay vela diaria nueva?)."""
+    n, margen = config.TENDENCIA_VELAS, config.TENDENCIA_MARGEN
+    diarias = descargar_velas(config.SIMBOLO, config.TENDENCIA_INTERVALO, n + 2)
+    i = len(diarias) - 1
+    media = indicadores.media(diarias, i, n)
+    alcista = indicadores.tendencia_alcista(diarias, i, n, margen, cartera.en_posicion)
+    estado["tendencia"] = {
+        "fecha": fecha_de(diarias[i]), "precio": diarias[i]["cierre"], "media": media, "dias": n,
+        "margen": margen, "alcista": alcista, "entrar": media * (1 + margen), "salir": media * (1 - margen),
+    }
+    nueva = diarias[i]["t"] != estado.get("ultima_tendencia_t")
+    estado["ultima_tendencia_t"] = diarias[i]["t"]
+    return alcista, nueva
 
 
 def ciclo(estado, cerebro, cartera):
     """Procesa las velas nuevas. Devuelve True si había alguna."""
-    velas = descargar_velas(config.SIMBOLO, config.INTERVALO, VELAS_POR_CICLO)
+    velas = velas_ia(VELAS_POR_CICLO)
     nuevas = [i for i, v in enumerate(velas) if v["t"] > estado["ultimo_t"]]
     if not nuevas:
         return False
 
+    # 1) La IA aprende de cada vela nueva
     h = config.HORIZONTE
     for i in nuevas:
         j = i - h
@@ -135,21 +202,34 @@ def ciclo(estado, cerebro, cartera):
                  "y": int(subio), "v": config.VERSION_MODELO})
         estado["ultimo_t"] = velas[i]["t"]
 
-    # Solo opera con la vela más reciente (si estuvo parado, las velas
-    # antiguas sirven para aprender, no para operar con precios pasados).
+    # 2) Decide (solo con la vela más reciente: si estuvo parado, las antiguas sirven para
+    #    aprender, no para operar con precios pasados)
     i = nuevas[-1]
     vela = velas[i]
     precio = vela["cierre"]
     probabilidad = cerebro.predecir(caracteristicas(velas, i))
+    accion = None
+    if config.ESTRATEGIA == "ia":
+        accion = decidir(probabilidad, cartera.en_posicion, config.UMBRAL_COMPRA, config.UMBRAL_VENTA, "ia")
+        velas_dentro = None
+        if estado.get("compra_t") is not None:
+            velas_dentro = (vela["t"] - estado["compra_t"]) // (MINUTOS[config.INTERVALO] * 60000)
+        accion = respetar_permanencia(accion, velas_dentro, config.PERMANENCIA_MINIMA)
+    else:
+        alcista, vela_diaria_nueva = revisar_tendencia(estado, cartera)
+        if vela_diaria_nueva:  # la regla de tendencia solo se revisa una vez al día
+            accion = decidir(probabilidad, cartera.en_posicion, config.UMBRAL_COMPRA, config.UMBRAL_VENTA,
+                             config.ESTRATEGIA, alcista)
+
     operacion = None
     if not config.PAUSADO:
-        accion = decidir(probabilidad, cartera.en_posicion, config.UMBRAL_COMPRA, config.UMBRAL_VENTA)
         if accion == "comprar":
             operacion = cartera.comprar(precio, fecha_de(vela))
         elif accion == "vender":
             operacion = cartera.vender(precio, fecha_de(vela))
     if operacion:
         anotar_operacion(operacion)
+        estado["compra_t"] = vela["t"] if operacion["tipo"] == "COMPRA" else None
 
     valor = cartera.valor(precio)
     referencia = valor_comprar_y_mantener(config.CAPITAL_INICIAL, estado["precio_inicio"], precio,
@@ -159,20 +239,19 @@ def ciclo(estado, cerebro, cartera):
     aprendizaje.actualizar_diario(estado, cerebro, cartera)
 
     acierto = cerebro.tasa_acierto()
+    tendencia = estado.get("tendencia")
+    texto_tendencia = "" if not tendencia else f" | tendencia {'ALCISTA' if tendencia['alcista'] else 'bajista'}"
     texto_op = f"  >>> {operacion['tipo']} a {precio:,.2f} €" if operacion else ""
     pausa = "  (EN PAUSA)" if config.PAUSADO else ""
-    print(f"[{fecha_de(vela)}] precio {precio:,.2f} € | prob. de cubrir costes {probabilidad * 100:4.1f} % | "
+    print(f"[{fecha_de(vela)}] precio {precio:,.2f} €{texto_tendencia} | IA {probabilidad * 100:4.1f} % | "
           f"{'DENTRO' if cartera.en_posicion else 'fuera '} | bot {valor:7.2f} € | "
-          f"comprar y mantener {referencia:7.2f} € | aciertos {acierto * 100:.0f} % "
+          f"comprar y mantener {referencia:7.2f} € | aciertos IA {acierto * 100:.0f} % "
           f"(sin pensar {cerebro.acierto_sin_pensar() * 100:.0f} %){texto_op}{pausa}")
     return True
 
 
 def main():
-    cargado = cargar_o_crear()
-    if cargado is None:
-        sys.exit(1)
-    estado, cerebro, cartera = cargado
+    estado, cerebro, cartera = cargar_o_crear()
 
     if "--una-vez" in sys.argv:
         if not ciclo(estado, cerebro, cartera):
@@ -180,7 +259,8 @@ def main():
         guardar(estado, cerebro, cartera)
         return
 
-    print(f"Simulación iniciada el {estado['creado']} ({cerebro.lecciones} lecciones aprendidas).")
+    print(f"Simulación v{estado.get('version', '1.0')} iniciada el {estado['creado']} "
+          f"({cerebro.lecciones} lecciones aprendidas).")
     print("Bot en marcha con DINERO FICTICIO. Revisa el mercado cada minuto; Ctrl+C para parar.\n")
     try:
         while True:

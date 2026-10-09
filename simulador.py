@@ -72,9 +72,39 @@ def valor_comprar_y_mantener(capital, precio_inicio, precio_actual, comision_fij
     return cantidad * precio_actual * (1 - spread) - comision_fija
 
 
-def decidir(probabilidad_subida, en_posicion, umbral_compra, umbral_venta):
-    if not en_posicion and probabilidad_subida >= umbral_compra:
+def respetar_permanencia(accion, velas_desde_compra, minimo):
+    """No deja vender antes de `minimo` velas desde la compra (evita comprar y vender sin parar)."""
+    if accion == "vender" and velas_desde_compra is not None and velas_desde_compra < minimo:
+        return None
+    return accion
+
+
+def decidir(probabilidad_subida, en_posicion, umbral_compra, umbral_venta,
+            estrategia="ia", tendencia_alcista=None):
+    """Devuelve "comprar", "vender" o None según la estrategia.
+
+    - "ia":           según la probabilidad del cerebro.
+    - "tendencia":    regla sin IA: dentro con tendencia alcista, fuera con bajista.
+    - "tendencia_ia": compra solo si hay tendencia alcista Y el cerebro está de acuerdo;
+                      vende si la tendencia se rompe o el cerebro deja de estarlo.
+    """
+    if estrategia == "tendencia":
+        quiere_estar = tendencia_alcista
+    elif estrategia == "tendencia_ia":
+        if not en_posicion:
+            quiere_estar = tendencia_alcista and probabilidad_subida >= umbral_compra
+        else:
+            quiere_estar = tendencia_alcista and probabilidad_subida >= umbral_venta
+    elif estrategia == "ia":
+        if not en_posicion:
+            quiere_estar = probabilidad_subida >= umbral_compra
+        else:
+            quiere_estar = probabilidad_subida >= umbral_venta
+    else:
+        raise ValueError(f"Estrategia desconocida: {estrategia}")
+
+    if quiere_estar and not en_posicion:
         return "comprar"
-    if en_posicion and probabilidad_subida < umbral_venta:
+    if not quiere_estar and en_posicion:
         return "vender"
     return None

@@ -18,12 +18,14 @@ from datetime import datetime, timedelta
 
 import config
 
-MINIMO_EVALUACIONES = 168  # una semana de velas de 1 h antes de opinar
+# Predicciones independientes mínimas para opinar. Como cada predicción mira HORIZONTE velas
+# hacia delante y se solapan, cuentan como total / HORIZONTE.
+MINIMO_INDEPENDIENTES = 30
 RUTA_DIARIO = os.path.join(config.CARPETA_DATOS, "diario.jsonl")
 RUTA_INFORME = os.path.join(config.CARPETA_PROYECTO, "INFORME_APRENDIZAJE.md")
 
 VEREDICTOS = {
-    "pocos_datos": ("⏳", "Pocos datos todavía", "Hace falta al menos una semana de predicciones para opinar."),
+    "pocos_datos": ("⏳", "Pocos datos todavía", "Aún no hay suficientes predicciones independientes (unas 30) para opinar."),
     "aprende": ("✅", "Aprende algo útil", "Se equivoca menos que el adivino ingenuo y es muy improbable que sea suerte."),
     "indicios": ("🟡", "Indicios, sin confirmar", "Va algo mejor que el adivino ingenuo, pero todavía podría ser suerte."),
     "no_aprende": ("⚪", "No supera al adivino", "Sus predicciones no son mejores que decir siempre lo que suele pasar."),
@@ -56,7 +58,7 @@ def resumir(evaluaciones, horizonte=None):
     error_tipico = math.sqrt(varianza / max(1.0, total / horizonte))
     z = media / error_tipico if error_tipico > 0 else 0.0
 
-    if total < MINIMO_EVALUACIONES:
+    if total / horizonte < MINIMO_INDEPENDIENTES:
         veredicto = "pocos_datos"
     elif z >= 2:
         veredicto = "aprende"
@@ -77,7 +79,7 @@ def periodos(estado):
     resultado = []
     if evaluaciones:
         fin = evaluaciones[-1]["t"]
-        for nombre, dias in (("Últimos 7 días", 7), ("Últimos 30 días", 30)):
+        for nombre, dias in (("Últimos 30 días", 30), ("Últimos 90 días", 90)):
             grupo = [e for e in evaluaciones if e["t"] > fin - dias * 86400000]
             resultado.append((nombre, resumir(grupo)))
         resultado.append(("Desde el inicio (en directo)", resumir(evaluaciones)))
@@ -86,10 +88,10 @@ def periodos(estado):
 
 
 def veredicto(estado):
-    """Devuelve (clave del veredicto, periodos). Se basa en los últimos 30 días en directo:
-    una semana da demasiados vaivenes y el total tarda mucho en reflejar mejoras."""
+    """Devuelve (clave del veredicto, periodos). Se basa en los últimos 90 días en directo:
+    menos da demasiados vaivenes y el total tarda mucho en reflejar mejoras."""
     lineas = periodos(estado)
-    principal = next((r for nombre, r in lineas if nombre == "Últimos 30 días"), None)
+    principal = next((r for nombre, r in lineas if nombre == "Últimos 90 días"), None)
     return (principal["veredicto"] if principal else "pocos_datos"), lineas
 
 
@@ -148,7 +150,9 @@ def escribir_informe(estado, cerebro, cartera):
     diario = leer_diario()
     evaluaciones = estado.get("evaluaciones", [])
     creado = datetime.strptime(estado["creado"], "%d/%m/%Y %H:%M")
-    proxima = creado + timedelta(days=21)
+    minutos = {"15m": 15, "1h": 60, "4h": 240, "1d": 1440}.get(config.INTERVALO, 60)
+    dias_minimos = math.ceil(MINIMO_INDEPENDIENTES * config.HORIZONTE * minutos / 1440)
+    proxima = creado + timedelta(days=max(21, dias_minimos))
     while proxima < datetime.now():
         proxima += timedelta(days=30)
 
@@ -161,6 +165,11 @@ def escribir_informe(estado, cerebro, cartera):
         f"## {icono} Veredicto: {titulo}",
         "",
         explicacion,
+        "",
+        ("**Quién decide ahora:** la regla de tendencia (media de "
+         f"{config.TENDENCIA_VELAS} días, margen {config.TENDENCIA_MARGEN * 100:.0f} %). La IA está **en prácticas**: "
+         "aprende y se la evalúa, pero no compra ni vende hasta que demuestre que mejora los resultados."
+         if config.ESTRATEGIA == "tendencia" else f"**Quién decide ahora:** estrategia `{config.ESTRATEGIA}`."),
         "",
         "## ¿Cómo se mide?",
         "",
@@ -221,7 +230,7 @@ def escribir_informe(estado, cerebro, cartera):
     md += ["", "## ¿Cuándo revisar y retocar?", "",
            f"- **Próxima revisión recomendada: {proxima.strftime('%d/%m/%Y')}**. "
            f"Llevamos {len(evaluaciones)} predicciones evaluadas en directo.",
-           "- No toques nada antes de 3 semanas (~500 predicciones): con menos datos cualquier "
+           f"- No toques nada antes de {max(21, dias_minimos)} días: con menos datos cualquier "
            "conclusión es ruido.",
            "- Después, revisa **una vez al mes**. Cambia **una sola cosa** cada vez, sube "
            "`VERSION_MODELO` en `config.py` y apunta el cambio en `CAMBIOS.md`.",

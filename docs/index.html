@@ -171,6 +171,25 @@ details summary:hover { color: var(--texto); }
 .medidor .etiqueta-umbral { font-size: 10.5px; fill: var(--texto-2); font-weight: 500; }
 .texto-piensa { font-size: .88rem; color: var(--texto-2); text-align: center; max-width: 46ch; margin: 0 auto; }
 
+/* Regla de tendencia */
+.etiqueta-bloque { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-3); margin: 14px 0 8px; }
+.bloque-decision { padding: 16px; border-radius: 16px; background: var(--vidrio); border: 1px solid var(--borde-suave); margin-top: 12px; }
+.bloque-decision .etiqueta-bloque { margin-top: 0; }
+.estado-tendencia { font-size: 1.3rem; font-weight: 700; letter-spacing: -.01em; }
+.estado-tendencia.alcista { color: var(--bien); } .estado-tendencia.bajista { color: var(--mal); }
+.escala-tendencia { position: relative; margin: 34px 4px 6px; }
+.pista-tendencia { position: relative; height: 10px; border-radius: 99px; background: var(--rejilla); overflow: hidden; }
+.pista-tendencia .zona { position: absolute; top: 0; bottom: 0; }
+.pista-tendencia .zona.salida { left: 0; background: color-mix(in srgb, var(--mal) 45%, transparent); }
+.pista-tendencia .zona.entrada { background: color-mix(in srgb, var(--bien) 45%, transparent); }
+.pista-tendencia .marca-media { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--texto-3); }
+.escala-tendencia .marcador { position: absolute; top: -6px; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%;
+  background: var(--texto); border: 4px solid var(--bot); box-shadow: 0 0 14px var(--bot); transition: left 1s cubic-bezier(.2, .7, .2, 1); }
+.escala-tendencia .marcador span { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+  font-size: .75rem; font-weight: 600; color: var(--texto); background: var(--tooltip); border: 1px solid var(--borde); padding: 1px 7px; border-radius: 6px; }
+.extremos-tendencia { display: flex; justify-content: space-between; gap: 8px; font-size: .74rem; color: var(--texto-3); margin-bottom: 10px; }
+.bloque-decision .texto-piensa { text-align: left; max-width: none; }
+
 /* Veredicto */
 .veredicto { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-radius: 16px; margin: 12px 0;
   background: color-mix(in srgb, var(--color-veredicto, var(--bot)) 12%, transparent);
@@ -355,8 +374,19 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
   <div class="dos">
     <section class="vidrio tarjeta aparece" style="animation-delay:.3s">
       <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg><h2>¿Qué piensa ahora?</h2></div>
-      <p class="nota">Probabilidad de que el precio suba lo suficiente para pagar las comisiones.</p>
-      <div class="medidor"><svg id="medidor" viewBox="0 0 240 150" role="img" aria-label="Probabilidad actual frente a los umbrales"></svg></div>
+      <div class="bloque-decision" id="bloque-tendencia" hidden>
+        <div class="etiqueta-bloque">Decide · Regla de tendencia</div>
+        <div class="estado-tendencia" id="estado-tendencia"></div>
+        <p class="nota" id="tendencia-detalle"></p>
+        <div class="escala-tendencia" id="escala-tendencia" aria-hidden="true">
+          <div class="pista-tendencia"><div class="zona salida"></div><div class="zona entrada"></div><div class="marca-media"></div></div>
+          <div class="marcador"><span></span></div>
+        </div>
+        <div class="extremos-tendencia"><span id="tendencia-salir"></span><span>media</span><span id="tendencia-entrar"></span></div>
+        <p class="texto-piensa" id="texto-tendencia"></p>
+      </div>
+      <div class="etiqueta-bloque" id="etiqueta-ia" style="margin-top:18px">IA</div>
+      <div class="medidor"><svg id="medidor" viewBox="0 0 240 150" role="img" aria-label="Probabilidad que da la IA"></svg></div>
       <p class="texto-piensa" id="piensa-texto"></p>
     </section>
 
@@ -461,14 +491,15 @@ $("tema").addEventListener("click", () => {
   document.documentElement.dataset.theme = nuevo;
   document.querySelector('meta[name="theme-color"]').content = nuevo === "light" ? "#eef2fb" : "#060912";
   try { localStorage.setItem("tema", nuevo); } catch (e) {}
-  if (datos) { pintarGrafica(); pintarMedidor(); }
+  if (datos) { pintarGrafica(); pintarMedidor(); pintarTendencia(); }
 });
 
 /* ---------- Cabecera y KPIs ---------- */
 function pintarKpis() {
   const d = datos, u = d.ultimo, cap = d.capital_inicial;
   $("kpis").classList.remove("cargando");
-  $("subtitulo").textContent = `${d.simbolo} · velas de ${d.intervalo} · ${eurosCortos.format(cap)} ficticios desde el ${d.creado.split(" ")[0]} · modelo v${d.version || "1.0"}`;
+  const quien = d.estrategia === "tendencia" ? "decide la tendencia diaria" : d.estrategia === "tendencia_ia" ? "deciden tendencia + IA" : "decide la IA";
+  $("subtitulo").textContent = `${d.simbolo} · ${quien} · ${eurosCortos.format(cap)} ficticios desde el ${d.creado.split(" ")[0]} · v${d.version || "1.0"}`;
   const estado = $("estado-bot");
   estado.querySelector(".punto").classList.toggle("pausa", d.pausado);
   estado.lastChild.textContent = d.pausado ? "En pausa" : "Activo";
@@ -514,11 +545,45 @@ function pintarKpis() {
   $("comisiones").textContent = euros.format(d.comisiones) + " en comisiones";
 }
 
-/* ---------- Medidor semicircular ---------- */
+/* ---------- Regla de tendencia (quien decide en la v2.0) ---------- */
+function pintarTendencia() {
+  const d = datos, t = d.tendencia, bloque = $("bloque-tendencia");
+  bloque.hidden = d.estrategia === "ia" || !t;
+  if (bloque.hidden) return;
+  const estado = $("estado-tendencia");
+  estado.textContent = t.alcista ? "▲ Tendencia alcista" : "▼ Tendencia bajista";
+  estado.className = "estado-tendencia " + (t.alcista ? "alcista" : "bajista");
+  $("tendencia-detalle").textContent =
+    `Cierre diario ${euros.format(t.precio)} · media de ${t.dias} días ${euros.format(t.media)} (${pct((t.precio / t.media - 1) * 100)})`;
+
+  // Escala: de la zona de salida a la de entrada, con el precio dentro
+  const bajo = Math.min(t.salir, t.precio) * 0.985, alto = Math.max(t.entrar, t.precio) * 1.015;
+  const pos = (v) => ((v - bajo) / (alto - bajo)) * 100 + "%";
+  const escala = $("escala-tendencia");
+  escala.querySelector(".zona.salida").style.width = pos(t.salir);
+  const entrada = escala.querySelector(".zona.entrada");
+  entrada.style.left = pos(t.entrar); entrada.style.right = "0";
+  escala.querySelector(".marca-media").style.left = pos(t.media);
+  const marcador = escala.querySelector(".marcador");
+  marcador.style.left = pos(t.precio);
+  marcador.querySelector("span").textContent = eurosCortos.format(t.precio);
+  $("tendencia-salir").textContent = "Sale bajo " + eurosCortos.format(t.salir);
+  $("tendencia-entrar").textContent = "Entra sobre " + eurosCortos.format(t.entrar);
+
+  const moneda = d.simbolo.slice(0, -3);
+  let texto;
+  if (d.pausado) texto = "Está en pausa: sigue mirando el mercado, pero no opera.";
+  else if (d.en_posicion) texto = `Tiene ${moneda}. Seguirá dentro mientras el cierre diario no baje de ${euros.format(t.salir)} (la media −${Math.round(t.margen * 100)} %).`;
+  else texto = `Está en euros. Comprará cuando un cierre diario supere ${euros.format(t.entrar)} (la media +${Math.round(t.margen * 100)} %).`;
+  $("texto-tendencia").textContent = texto + " Se revisa una vez al día.";
+}
+
+/* ---------- Medidor semicircular de la IA ---------- */
 function pintarMedidor() {
   const d = datos, u = d.ultimo, svg = $("medidor");
   svg.replaceChildren();
   if (!u) return;
+  $("etiqueta-ia").textContent = d.ia_decide ? "Decide · IA" : "IA en prácticas · todavía no decide";
   const cx = 120, cy = 122, r = 92, grosor = 16;
   const punto = (v, radio = r) => { const a = Math.PI * (1 - v); return [cx + radio * Math.cos(a), cy - radio * Math.sin(a)]; };
   const arco = (desde, hasta) => { const [x1, y1] = punto(desde), [x2, y2] = punto(hasta); return `M${x1} ${y1} A${r} ${r} 0 ${hasta - desde > .5 ? 1 : 0} 1 ${x2} ${y2}`; };
@@ -528,8 +593,9 @@ function pintarMedidor() {
   svgEl(grad, "stop", { offset: "1", style: "stop-color:var(--bot-2)" });
 
   svgEl(svg, "path", { d: arco(0, 1), fill: "none", stroke: "var(--rejilla)", "stroke-width": grosor, "stroke-linecap": "round" });
-  // Zona de compra resaltada
-  svgEl(svg, "path", { d: arco(d.umbral_compra, 1), fill: "none", stroke: "var(--bien)", "stroke-opacity": .22, "stroke-width": grosor, "stroke-linecap": "round" });
+  if (d.ia_decide) {
+    svgEl(svg, "path", { d: arco(d.umbral_compra, 1), fill: "none", stroke: "var(--bien)", "stroke-opacity": .22, "stroke-width": grosor, "stroke-linecap": "round" });
+  }
   const p = Math.max(0.001, Math.min(1, u.prob));
   const valor = svgEl(svg, "path", { d: arco(0, p), fill: "none", stroke: "url(#grad-medidor)", "stroke-width": grosor, "stroke-linecap": "round" });
   const largo = valor.getTotalLength();
@@ -537,20 +603,24 @@ function pintarMedidor() {
   valor.getBoundingClientRect();
   valor.style.transition = "stroke-dashoffset 1.2s cubic-bezier(.2,.7,.2,1)"; valor.style.strokeDashoffset = 0;
 
-  [[d.umbral_venta, "venta"], [d.umbral_compra, "compra"]].forEach(([v, nombre]) => {
-    const [x1, y1] = punto(v, r - grosor / 2 - 3), [x2, y2] = punto(v, r + grosor / 2 + 3), [tx, ty] = punto(v, r + grosor / 2 + 14);
-    svgEl(svg, "line", { x1, y1, x2, y2, stroke: "var(--texto)", "stroke-width": 2, "stroke-linecap": "round" });
-    svgEl(svg, "text", { x: tx, y: ty, "text-anchor": v < .5 ? "end" : "start", class: "etiqueta-umbral" }, `${nombre} ${Math.round(v * 100)}%`);
-  });
+  if (d.ia_decide) {
+    [[d.umbral_venta, "venta"], [d.umbral_compra, "compra"]].forEach(([v, nombre]) => {
+      const [x1, y1] = punto(v, r - grosor / 2 - 3), [x2, y2] = punto(v, r + grosor / 2 + 3), [tx, ty] = punto(v, r + grosor / 2 + 14);
+      svgEl(svg, "line", { x1, y1, x2, y2, stroke: "var(--texto)", "stroke-width": 2, "stroke-linecap": "round" });
+      svgEl(svg, "text", { x: tx, y: ty, "text-anchor": v < .5 ? "end" : "start", class: "etiqueta-umbral" }, `${nombre} ${Math.round(v * 100)}%`);
+    });
+  }
   const [px, py] = punto(p);
   svgEl(svg, "circle", { cx: px, cy: py, r: 6, fill: "var(--texto)", stroke: "var(--bot)", "stroke-width": 3 });
   svgEl(svg, "text", { x: cx, y: cy - 14, "text-anchor": "middle", class: "valor-medidor" }, pctSimple(u.prob));
-  svgEl(svg, "text", { x: cx, y: cy + 6, "text-anchor": "middle", class: "sub-medidor" }, "probabilidad actual");
+  svgEl(svg, "text", { x: cx, y: cy + 6, "text-anchor": "middle", class: "sub-medidor" }, "probabilidad");
 
   const objetivo = (d.movimiento_minimo * 100).toFixed(1).replace(".", ",");
-  let texto = `Necesita que el precio suba más de un ${objetivo} % en las próximas ${d.horizonte} velas. `;
-  if (d.pausado) texto += "Está en pausa, así que no opera.";
-  else if (d.en_posicion) texto += `Tiene ${d.simbolo.slice(0, -3)} y venderá si baja del ${Math.round(d.umbral_venta * 100)} %.`;
+  const plazo = d.horizonte_texto || `${d.horizonte} velas`;
+  let texto = `Probabilidad, según la IA, de que el precio suba más de un ${objetivo} % (lo que cuestan las comisiones) en un plazo de ${plazo}. `;
+  if (!d.ia_decide) texto += "Solo observa y aprende: no compra ni vende hasta que demuestre que mejora los resultados.";
+  else if (d.pausado) texto += "Está en pausa, así que no opera.";
+  else if (d.en_posicion) texto += `Venderá si baja del ${Math.round(d.umbral_venta * 100)} %.`;
   else texto += `Comprará si llega al ${Math.round(d.umbral_compra * 100)} %.`;
   $("piensa-texto").textContent = texto;
 }
@@ -752,7 +822,7 @@ async function cargar() {
     $("estado-bot").lastChild.textContent = "Sin datos";
     return;
   }
-  pintarKpis(); pintarMedidor(); pintarAprendizaje(); pintarPesos(); pintarOperaciones(); pintarEventos(); pintarControles(); pintarGrafica();
+  pintarKpis(); pintarTendencia(); pintarMedidor(); pintarAprendizaje(); pintarPesos(); pintarOperaciones(); pintarEventos(); pintarControles(); pintarGrafica();
 }
 cargar();
 setInterval(cargar, 5 * 60 * 1000);
