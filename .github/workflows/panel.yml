@@ -1,0 +1,34 @@
+name: Publicar panel
+
+# Publica la web en cuanto se sube un cambio del panel (sin esperar a la ejecución horaria del bot)
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/index.html"
+      - ".github/workflows/panel.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: bot-trading
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: docs
+      - id: despliegue
+        uses: actions/deploy-pages@v4
