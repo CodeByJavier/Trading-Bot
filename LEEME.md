@@ -55,6 +55,7 @@ Si cambias cómo piensa o decide el bot, sube `VERSION_MODELO`: la simulación a
 | Comando | Qué hace |
 |---|---|
 | `python laboratorio.py` | Prueba ideas con la historia real (unos 2 minutos). Ver abajo. |
+| `python multimercado.py` | Compara criptomonedas, euro/dólar y bolsa (unos 5 minutos) → `laboratorio/MULTIMERCADO.md`. |
 | `python bot.py` | Simulación en directo en tu PC (Ctrl+C para parar). |
 | `python estado.py` | Resumen en la terminal + `datos_bot/informe_bot.html`. |
 | `python control.py pausar` | Las mismas acciones de control, en local. |
