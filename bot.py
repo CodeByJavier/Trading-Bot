@@ -202,6 +202,16 @@ def ciclo(estado, cerebro, cartera):
                  "y": int(subio), "v": config.VERSION_MODELO})
         estado["ultimo_t"] = velas[i]["t"]
 
+    # Si GitHub se saltó alguna ejecución, apunta también esas horas en el historial
+    # (con la cartera tal como estaba: en ellas no se pudo operar)
+    for k in nuevas[:-1]:
+        anterior = velas[k]
+        estado["historial"].append({
+            "t": anterior["t"], "fecha": fecha_de(anterior), "precio": anterior["cierre"],
+            "bot": cartera.valor(anterior["cierre"]), "prob": None,
+            "referencia": valor_comprar_y_mantener(config.CAPITAL_INICIAL, estado["precio_inicio"],
+                                                   anterior["cierre"], config.COMISION_FIJA, config.SPREAD)})
+
     # 2) Decide (solo con la vela más reciente: si estuvo parado, las antiguas sirven para
     #    aprender, no para operar con precios pasados)
     i = nuevas[-1]
@@ -254,9 +264,10 @@ def main():
     estado, cerebro, cartera = cargar_o_crear()
 
     if "--una-vez" in sys.argv:
-        if not ciclo(estado, cerebro, cartera):
-            print("No hay velas nuevas todavía.")
-        guardar(estado, cerebro, cartera)
+        if ciclo(estado, cerebro, cartera):
+            guardar(estado, cerebro, cartera)
+        else:
+            print("No hay velas nuevas todavía: no cambia nada.")
         return
 
     print(f"Simulación v{estado.get('version', '1.0')} iniciada el {estado['creado']} "

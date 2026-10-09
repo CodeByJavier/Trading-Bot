@@ -2,7 +2,10 @@ name: Bot cada hora
 
 on:
   schedule:
-    - cron: "7 * * * *"   # minuto 7 de cada hora (GitHub puede retrasarlo unos minutos)
+    # Dos intentos por hora: GitHub a veces retrasa o se salta tareas programadas.
+    # Si el primero ya procesó la vela, el segundo no hace nada.
+    - cron: "7 * * * *"
+    - cron: "37 * * * *"
   workflow_dispatch:       # botón "Run workflow" para ejecutarlo a mano
 
 permissions:

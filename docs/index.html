@@ -508,12 +508,12 @@ function pintarKpis() {
 
   const horas = (Date.now() - new Date(d.actualizado)) / 3600000;
   const aviso = $("aviso"); aviso.replaceChildren();
-  if (horas > 3) {
+  if (horas > 6) {  // GitHub a veces retrasa las ejecuciones un par de horas: no es un fallo
     const caja = el("div", null, "vidrio aviso");
     caja.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>';
     const texto = el("div");
     texto.appendChild(el("strong", `El bot no se actualiza desde hace ${Math.round(horas)} horas. `));
-    texto.appendChild(document.createTextNode("Revisa la pestaña Actions de GitHub por si ha fallado o se ha desactivado."));
+    texto.appendChild(document.createTextNode("GitHub a veces se retrasa; si pasa de 12 horas, revisa la pestaña Actions por si ha fallado o se ha desactivado."));
     caja.appendChild(texto); aviso.appendChild(caja);
   }
   if (!u) return;
