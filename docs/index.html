@@ -101,6 +101,7 @@ a { color: inherit; }
 .solo-oscuro { display: none; } :root[data-theme="light"] .solo-oscuro { display: block; } :root[data-theme="light"] .solo-claro { display: none; }
 
 /* ===================== Contenido ===================== */
+section, #aviso { scroll-margin-top: 90px; }
 main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 40px; display: grid; gap: 16px; }
 .tarjeta { padding: 20px; min-width: 0; }
 .titulo-tarjeta { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
@@ -211,14 +212,26 @@ tr:last-child td { border-bottom: 0; }
 .eventos .cuando { display: block; color: var(--texto-3); font-size: .76rem; }
 
 /* Controles */
-.acciones { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; margin: 14px 0 16px; }
-.accion { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 16px; background: var(--vidrio); border: 1px solid var(--borde-suave);
-  transition: background .2s, transform .2s, border-color .2s; }
+.pasos { list-style: none; counter-reset: paso; padding: 0; margin: 16px 0 0; display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+.pasos li { counter-increment: paso; display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: 14px;
+  background: var(--vidrio); border: 1px solid var(--borde-suave); font-size: .86rem; color: var(--texto-2); }
+.pasos li::before { content: counter(paso); flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: .8rem; color: #fff; background: linear-gradient(135deg, var(--bot), var(--bot-2)); }
+.pasos strong { color: var(--texto); }
+.subtitulo-seccion { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-3); margin: 22px 0 10px; }
+.acciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; margin: 0 0 20px; }
+.accion { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; border-radius: 16px; min-width: 0;
+  background: var(--vidrio); border: 1px solid var(--borde-suave); transition: background .2s, transform .2s, border-color .2s; }
 .accion:hover { background: var(--vidrio-fuerte); border-color: var(--borde); transform: translateY(-2px); }
-.accion .icono { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none;
+.accion .icono { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; flex: none;
   background: color-mix(in srgb, var(--bot) 16%, transparent); color: var(--bot); }
-.accion code { font: 600 .82rem/1.3 ui-monospace, "Cascadia Code", Consolas, monospace; display: block; margin-bottom: 2px; }
-.accion p { font-size: .8rem; color: var(--texto-3); }
+.accion .texto-accion { min-width: 0; flex: 1; }
+.accion strong { display: block; font-size: .95rem; margin-bottom: 3px; }
+.accion p { font-size: .84rem; color: var(--texto-2); line-height: 1.45; }
+.accion code { display: inline-block; max-width: 100%; margin-top: 10px; padding: 3px 9px; border-radius: 7px; overflow-wrap: anywhere;
+  font: 500 .74rem/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; color: var(--texto-3);
+  background: var(--vidrio-fuerte); border: 1px solid var(--borde-suave); }
 .botones { display: flex; flex-wrap: wrap; gap: 10px; }
 .boton { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: .88rem;
   background: linear-gradient(135deg, var(--bot), var(--bot-2)); color: #fff; box-shadow: 0 8px 24px -8px var(--bot); transition: transform .2s, box-shadow .2s; }
@@ -376,13 +389,19 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
 
   <section class="vidrio tarjeta aparece" style="animation-delay:.55s" id="controles">
     <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><h2>Controlar el bot</h2></div>
-    <p class="nota">Los controles están en GitHub y solo funcionan con tu sesión iniciada. Pulsa <strong>Abrir controles</strong> → <strong>Run workflow</strong>, elige la acción y confirma. El panel se actualiza en un par de minutos.</p>
+    <p class="nota">Los controles están en GitHub y solo funcionan con tu sesión iniciada (mejor desde el ordenador).</p>
+    <ol class="pasos">
+      <li><span>Pulsa <strong>Abrir controles</strong> (abajo).</span></li>
+      <li><span>A la derecha de la franja azul, pulsa <strong>Run workflow ▾</strong>.</span></li>
+      <li><span>Elige la acción en <strong>¿Qué quieres hacer?</strong> y pulsa el botón verde <strong>Run workflow</strong>. En 1-2 minutos se ve aquí.</span></li>
+    </ol>
+    <h3 class="subtitulo-seccion">Acciones disponibles</h3>
     <div class="acciones">
-      <div class="accion"><div class="icono"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></div><div><code>pausar</code><p>Deja de operar, pero sigue aprendiendo.</p></div></div>
-      <div class="accion"><div class="icono"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></div><div><code>reanudar</code><p>Vuelve a operar.</p></div></div>
-      <div class="accion"><div class="icono"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div><code>vender_y_pausar</code><p>Vende al precio actual y se pausa.</p></div></div>
-      <div class="accion"><div class="icono"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/><circle cx="9" cy="8" r="2" fill="currentColor"/><circle cx="15" cy="16" r="2" fill="currentColor"/></svg></div><div><code>cambiar_umbrales</code><p>Más o menos exigente para operar.</p></div></div>
-      <div class="accion"><div class="icono"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg></div><div><code>reiniciar_simulacion</code><p>Empieza de cero (capital y moneda).</p></div></div>
+      <div class="accion"><div class="icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></div><div class="texto-accion"><strong>Pausar</strong><p>Deja de operar, pero sigue aprendiendo cada hora.</p><code>pausar</code></div></div>
+      <div class="accion"><div class="icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"/></svg></div><div class="texto-accion"><strong>Reanudar</strong><p>Vuelve a operar con normalidad.</p><code>reanudar</code></div></div>
+      <div class="accion"><div class="icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></div><div class="texto-accion"><strong>Vender y pausar</strong><p>Vende lo que tenga al precio actual y se queda en pausa.</p><code>vender_y_pausar</code></div></div>
+      <div class="accion"><div class="icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/><circle cx="9" cy="8" r="2" fill="currentColor"/><circle cx="15" cy="16" r="2" fill="currentColor"/></svg></div><div class="texto-accion"><strong>Cambiar umbrales</strong><p>Rellena los campos de compra y venta (por ejemplo 0.60 y 0.45).</p><code>cambiar_umbrales</code></div></div>
+      <div class="accion"><div class="icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg></div><div class="texto-accion"><strong>Reiniciar simulación</strong><p>Empieza de cero. Opcional: otro capital u otra moneda.</p><code>reiniciar_simulacion</code></div></div>
     </div>
     <div class="botones" id="botones-control"></div>
   </section>
@@ -550,7 +569,7 @@ function pintarAprendizaje() {
   const cab = document.createElement("thead"); cab.appendChild(fila([["Periodo"], ["Predic.", "num col-n"], ["Habilidad", "num"], ["z", "num"]], true));
   const cuerpo = document.createElement("tbody");
   ap.periodos.forEach((p) => cuerpo.appendChild(fila([[p.nombre.replace(" (en directo)", "").replace(" (historia previa)", "")],
-    [p.n.toLocaleString("es-ES"), "num col-n"], [pct(p.habilidad * 100), "num " + (p.habilidad > 0 ? "bien" : "mal")], [p.z.toFixed(2).replace(".", ","), "num"]])));
+    [p.n.toLocaleString("es-ES"), "num col-n"], [p.veredicto === "pocos_datos" ? "pocos datos" : pct(p.habilidad * 100), "num " + (p.veredicto === "pocos_datos" ? "" : p.habilidad > 0 ? "bien" : "mal")], [p.z.toFixed(2).replace(".", ","), "num"]])));
   t.append(cab, cuerpo);
 
   const enlace = $("enlace-informe"); enlace.replaceChildren();
