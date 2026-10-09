@@ -1,10 +1,12 @@
 # Informe de aprendizaje del bot
 
-Actualizado: 09/10/2026 15:25 · Moneda: BTCEUR · Versión del modelo: 1.0 · Simulación iniciada: 09/10/2026 15:25
+Actualizado: 09/10/2026 16:12 · Moneda: BTCEUR · Versión del modelo: 2.0 · Simulación iniciada: 09/10/2026 16:12
 
 ## ⏳ Veredicto: Pocos datos todavía
 
-Hace falta al menos una semana de predicciones para opinar.
+Aún no hay suficientes predicciones independientes (unas 30) para opinar.
+
+**Quién decide ahora:** la regla de tendencia (media de 50 días, margen 3 %). La IA está **en prácticas**: aprende y se la evalúa, pero no compra ni vende hasta que demuestre que mejora los resultados.
 
 ## ¿Cómo se mide?
 
@@ -15,16 +17,16 @@ Antes de conocer cada resultado se guardan dos predicciones de *"¿subirá lo su
 
 | Periodo | Predicciones | Aciertos cerebro | Aciertos adivino | Habilidad | z | Veredicto |
 |---|---:|---:|---:|---:|---:|---|
-| Últimos 7 días | 1 | 100.0 % | 100.0 % | -777.2 % | +0.00 | Pocos datos todavía |
-| Últimos 30 días | 1 | 100.0 % | 100.0 % | -777.2 % | +0.00 | Pocos datos todavía |
-| Desde el inicio (en directo) | 1 | 100.0 % | 100.0 % | -777.2 % | +0.00 | Pocos datos todavía |
-| Preentrenamiento (historia previa) | 2400 | 95.0 % | 95.3 % | -5.1 % | -0.72 | No supera al adivino |
+| Últimos 30 días | 1 | 100.0 % | 100.0 % | +43.3 % | +0.00 | Pocos datos todavía |
+| Últimos 90 días | 1 | 100.0 % | 100.0 % | +43.3 % | +0.00 | Pocos datos todavía |
+| Desde el inicio (en directo) | 1 | 100.0 % | 100.0 % | +43.3 % | +0.00 | Pocos datos todavía |
+| Preentrenamiento (historia previa) | 2379 | 80.3 % | 78.1 % | +16.2 % | +2.05 | Aprende algo útil |
 
 ## Resultado de la cartera ficticia
 
-- Bot: **200.00 €** (+0.0 %)
+- Bot: **197.60 €** (-1.2 %)
 - Comprar y mantener: **197.60 €** (-1.2 %)
-- Operaciones: 0 · Comisiones pagadas: 0.00 €
+- Operaciones: 1 · Comisiones pagadas: 1.00 €
 
 ## Evolución por semanas
 
@@ -32,7 +34,7 @@ Una semana sola es poco para juzgar: lo importante es la tendencia de varias sem
 
 | Semana del | Versión | Predicciones | Habilidad | z | Veredicto | Bot al final | Referencia al final |
 |---|---|---:|---:|---:|---|---:|---:|
-| 05/10/2026 | 1.0 | 1 | -777.2 % | +0.00 | Pocos datos todavía | - | - |
+| 05/10/2026 | 2.0 | 1 | +43.3 % | +0.00 | Pocos datos todavía | - | - |
 
 ## Lo que ha aprendido (pesos del cerebro)
 
@@ -40,20 +42,22 @@ Si un peso cambia mucho de signo de una semana a otra, el cerebro está persigui
 
 | Indicador | Peso al empezar el diario | Peso ahora |
 |---|---:|---:|
-| Cambio última vela | - | -0.040 |
-| Cambio últimas 4 velas | - | -0.036 |
-| Cambio últimas 24 velas | - | +0.107 |
-| Distancia a la media de 24 velas | - | +0.067 |
-| Distancia a la media de 96 velas | - | -0.157 |
-| RSI 14 (fuerza compradora) | - | +0.157 |
-| Volatilidad 24 velas | - | +0.279 |
-| Volumen relativo | - | +0.086 |
-| Tamaño de la última vela | - | +0.041 |
+| Cambio última vela | - | +0.068 |
+| Cambio últimas 4 velas | - | +0.113 |
+| Cambio últimas 24 velas | - | -0.166 |
+| Distancia a la media de 24 velas | - | +0.162 |
+| Distancia a la media de 96 velas | - | -0.231 |
+| RSI 14 (fuerza compradora) | - | +0.090 |
+| Volatilidad 24 velas | - | -0.052 |
+| Volumen relativo | - | +0.100 |
+| Tamaño de la última vela | - | -0.062 |
+| Fear & Greed (miedo/codicia) | - | -0.652 |
+| Cambio del Fear & Greed en 7 días | - | -0.264 |
 
 ## ¿Cuándo revisar y retocar?
 
-- **Próxima revisión recomendada: 30/10/2026**. Llevamos 1 predicciones evaluadas en directo.
-- No toques nada antes de 3 semanas (~500 predicciones): con menos datos cualquier conclusión es ruido.
+- **Próxima revisión recomendada: 08/11/2026**. Llevamos 1 predicciones evaluadas en directo.
+- No toques nada antes de 30 días: con menos datos cualquier conclusión es ruido.
 - Después, revisa **una vez al mes**. Cambia **una sola cosa** cada vez, sube `VERSION_MODELO` en `config.py` y apunta el cambio en `CAMBIOS.md`.
 - Si tras 2-3 meses ninguna versión llega a "Aprende algo útil", lo más probable es que no haya patrón aprovechable con estos indicadores: es un resultado válido, no un fallo.
 
