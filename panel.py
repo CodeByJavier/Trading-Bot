@@ -5,10 +5,13 @@ import json
 import os
 from datetime import datetime, timezone
 
+import aprendizaje
 import config
 
 
 def exportar_panel(estado, cerebro, cartera):
+    clave, lineas = aprendizaje.veredicto(estado)
+    icono, titulo, explicacion = aprendizaje.VEREDICTOS[clave]
     historial = estado["historial"]
     ultimo = historial[-1] if historial else None
     acierto = cerebro.tasa_acierto()
@@ -38,6 +41,9 @@ def exportar_panel(estado, cerebro, cartera):
         "aprendido": [{"nombre": n, "peso": round(w, 4), "opinion": o}
                       for n, w, o in cerebro.lo_aprendido()],
         "eventos": estado.get("eventos", [])[-50:],
+        "version": config.VERSION_MODELO,
+        "aprendizaje": {"veredicto": clave, "icono": icono, "titulo": titulo, "explicacion": explicacion,
+                        "periodos": [dict(r, nombre=nombre) for nombre, r in lineas]},
     }
     os.makedirs(config.CARPETA_PANEL, exist_ok=True)
     ruta = os.path.join(config.CARPETA_PANEL, "datos.json")

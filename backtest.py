@@ -7,6 +7,7 @@ Uso:  python backtest.py
 import os
 from datetime import datetime
 
+import aprendizaje
 import config
 from cerebro import Cerebro
 from datos import descargar_velas
@@ -34,19 +35,16 @@ def main():
                       config.COMISION_PORCENTAJE, config.SPREAD)
     precio_inicio = velas[inicio_operar]["cierre"]
     serie_bot, serie_ref = [], []
-    predicciones = {}
-    aciertos = subidas = evaluadas = 0
+    evaluaciones = []
 
     for i in range(inicio, len(velas)):
         # 1) Aprender de lo que pasó con la predicción de hace `h` velas
         j = i - h
         if j >= inicio:
             subio = velas[i]["cierre"] / velas[j]["cierre"] - 1 > config.MOVIMIENTO_MINIMO
-            cerebro.aprender(caracteristicas(velas, j), subio)
-            if j in predicciones:
-                evaluadas += 1
-                subidas += subio
-                aciertos += (predicciones.pop(j) >= 0.5) == subio
+            prediccion, ingenua = cerebro.aprender(caracteristicas(velas, j), subio)
+            if j >= inicio_operar:
+                evaluaciones.append({"p": prediccion, "n": ingenua, "y": int(subio)})
 
         if i < inicio_operar:
             continue  # calentamiento: solo estudia, no opera
@@ -54,7 +52,6 @@ def main():
         # 2) Predecir y decidir con la información disponible en ese momento
         precio = velas[i]["cierre"]
         probabilidad = cerebro.predecir(caracteristicas(velas, i))
-        predicciones[i] = probabilidad
         accion = decidir(probabilidad, cartera.en_posicion,
                          config.UMBRAL_COMPRA, config.UMBRAL_VENTA)
         if accion == "comprar":
@@ -70,6 +67,7 @@ def main():
     ventas = [op for op in cartera.operaciones if op["tipo"] == "VENTA"]
     ganadoras = sum(1 for op in ventas if op["resultado"] > 0)
     capital = config.CAPITAL_INICIAL
+    medida = aprendizaje.resumir(evaluaciones)
 
     resumen = [
         ("Periodo probado", f"{fecha_de(velas[inicio_operar])} a {fecha_de(velas[-1])}"),
@@ -81,9 +79,11 @@ def main():
         ("Ventas con ganancia", f"{ganadoras} de {len(ventas)}"),
         ("Comisiones pagadas", f"{cartera.comisiones_pagadas:.2f} €"),
         ("Subida mínima para cubrir costes", f"{config.MOVIMIENTO_MINIMO * 100:.2f} %"),
-        ("Aciertos del cerebro ('¿cubrirá costes?')", f"{aciertos / max(1, evaluadas) * 100:.1f} %"),
-        ("Acertaría respondiendo siempre lo mismo",
-         f"{max(subidas, evaluadas - subidas) / max(1, evaluadas) * 100:.1f} %"),
+        ("Versión del modelo", config.VERSION_MODELO),
+        ("Aciertos cerebro / adivino ingenuo",
+         f"{medida['aciertos'] * 100:.1f} % / {medida['aciertos_ingenuo'] * 100:.1f} %"),
+        ("Habilidad frente al adivino (z)", f"{medida['habilidad'] * 100:+.1f} % (z = {medida['z']:+.2f})"),
+        ("¿Aprende?", aprendizaje.VEREDICTOS[medida["veredicto"]][1]),
     ]
 
     print()

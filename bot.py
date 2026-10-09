@@ -17,6 +17,7 @@ import sys
 import time
 from datetime import datetime
 
+import aprendizaje
 import config
 from cerebro import Cerebro
 from datos import descargar_velas
@@ -50,6 +51,7 @@ def guardar(estado, cerebro, cartera):
     with open(temporal, "w", encoding="utf-8") as archivo:
         json.dump(estado, archivo)
     os.replace(temporal, RUTA_ESTADO)
+    aprendizaje.escribir_informe(estado, cerebro, cartera)
     exportar_panel(estado, cerebro, cartera)
 
 
@@ -70,10 +72,18 @@ def crear_estado():
     velas = descargar_velas(config.SIMBOLO, config.INTERVALO, config.VELAS_PREENTRENAMIENTO)
     cerebro = Cerebro(NOMBRES, config.TASA_APRENDIZAJE)
     h = config.HORIZONTE
+    evaluaciones = []
     for i in range(HISTORIA_NECESARIA - 1 + h, len(velas)):
         j = i - h
-        cerebro.aprender(caracteristicas(velas, j), cubre_costes(velas[j]["cierre"], velas[i]["cierre"]))
-    print(f"Preentrenamiento listo: {cerebro.lecciones} lecciones aprendidas.\n")
+        subio = cubre_costes(velas[j]["cierre"], velas[i]["cierre"])
+        prediccion, ingenua = cerebro.aprender(caracteristicas(velas, j), subio)
+        evaluaciones.append({"p": prediccion, "n": ingenua, "y": int(subio)})
+    # Las 500 primeras lecciones son de "arranque en frío": no cuentan para evaluar
+    resumen_previo = aprendizaje.resumir(evaluaciones[500:])
+    print(f"Preentrenamiento listo: {cerebro.lecciones} lecciones aprendidas.")
+    if resumen_previo:
+        print(f"Con la historia previa: habilidad {resumen_previo['habilidad'] * 100:+.1f} % frente al "
+              f"adivino ingenuo -> {aprendizaje.VEREDICTOS[resumen_previo['veredicto']][1]}\n")
 
     cartera = Cartera(config.CAPITAL_INICIAL, config.COMISION_FIJA,
                       config.COMISION_PORCENTAJE, config.SPREAD)
@@ -85,6 +95,8 @@ def crear_estado():
         "ultimo_t": velas[-2]["t"],  # la última vela se procesa en el primer ciclo
         "historial": [],
         "eventos": [],
+        "evaluaciones": [],
+        "preentrenamiento": resumen_previo,
     }
     anotar_evento(estado, f"Simulación creada con {config.CAPITAL_INICIAL:.0f} € ficticios "
                           f"en {config.SIMBOLO} ({cerebro.lecciones} lecciones de preentrenamiento)")
@@ -116,7 +128,11 @@ def ciclo(estado, cerebro, cartera):
     for i in nuevas:
         j = i - h
         if j >= HISTORIA_NECESARIA - 1:
-            cerebro.aprender(caracteristicas(velas, j), cubre_costes(velas[j]["cierre"], velas[i]["cierre"]))
+            subio = cubre_costes(velas[j]["cierre"], velas[i]["cierre"])
+            prediccion, ingenua = cerebro.aprender(caracteristicas(velas, j), subio)
+            estado.setdefault("evaluaciones", []).append(
+                {"t": velas[j]["t"], "p": round(prediccion, 4), "n": round(ingenua, 4),
+                 "y": int(subio), "v": config.VERSION_MODELO})
         estado["ultimo_t"] = velas[i]["t"]
 
     # Solo opera con la vela más reciente (si estuvo parado, las velas
@@ -140,6 +156,7 @@ def ciclo(estado, cerebro, cartera):
                                           config.COMISION_FIJA, config.SPREAD)
     estado["historial"].append({"t": vela["t"], "fecha": fecha_de(vela), "precio": precio,
                                 "bot": valor, "referencia": referencia, "prob": probabilidad})
+    aprendizaje.actualizar_diario(estado, cerebro, cartera)
 
     acierto = cerebro.tasa_acierto()
     texto_op = f"  >>> {operacion['tipo']} a {precio:,.2f} €" if operacion else ""

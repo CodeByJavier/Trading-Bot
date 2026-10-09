@@ -98,6 +98,7 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; }
   background: var(--boton); color: var(--boton-texto); }
 .boton.secundario { background: transparent; color: var(--texto); border: 1px solid var(--borde); }
 .aviso { border: 1px solid var(--aviso-borde); background: var(--aviso-fondo); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+.veredicto { font-size: .9rem; margin-bottom: 6px; }
 .eventos li { margin-bottom: 4px; } .eventos { padding-left: 18px; margin: 0; font-size: .85rem; }
 details summary { cursor: pointer; color: var(--texto-2); font-size: .85rem; margin-top: 8px; }
 footer { margin-top: 24px; }
@@ -148,14 +149,15 @@ footer { margin-top: 24px; }
       <h2>¿Qué piensa ahora?</h2>
       <p class="nota" id="piensa-texto"></p>
       <div class="medidor" id="medidor"><div class="relleno"></div></div>
-      <h2 style="margin-top:20px">¿Aprende de verdad?</h2>
-      <p class="nota" style="margin-bottom:8px">Aciertos del cerebro frente a responder siempre lo mismo, en sus últimas 500 lecciones. Solo es útil si supera a la referencia.</p>
-      <table>
-        <tr><th>Aciertos del cerebro</th><td class="num" id="ac-cerebro">-</td></tr>
-        <tr><th>Respondiendo siempre lo mismo</th><td class="num" id="ac-ref">-</td></tr>
+      <h2 style="margin-top:20px">¿Está aprendiendo?</h2>
+      <p class="veredicto" id="veredicto"></p>
+      <p class="nota" style="margin-bottom:8px">Habilidad: cuánto menos se equivoca que un adivino que siempre dice "lo que suele pasar". Por encima de 0 % es mejor; z mayor que 2 significa que no parece suerte.</p>
+      <div class="tabla"><table id="tabla-aprendizaje"></table></div>
+      <table style="margin-top:8px">
         <tr><th>Lecciones aprendidas</th><td class="num" id="lecciones">-</td></tr>
         <tr><th>Comisiones pagadas</th><td class="num" id="comisiones">-</td></tr>
       </table>
+      <div class="botones" style="margin-top:12px" id="enlace-informe"></div>
     </section>
     <section class="tarjeta">
       <h2>Lo que ha aprendido</h2>
@@ -269,9 +271,21 @@ function pintarPiensa() {
     marca.appendChild(el("span", `${nombre} ${Math.round(v * 100)} %`));
     medidor.appendChild(marca);
   });
-  $("ac-cerebro").textContent = d.aciertos == null ? "-" : pctSimple(d.aciertos);
-  $("ac-ref").textContent = d.aciertos_sin_pensar == null ? "-" : pctSimple(d.aciertos_sin_pensar);
-  if (d.aciertos != null) $("ac-cerebro").className = "num " + (d.aciertos > d.aciertos_sin_pensar ? "bien" : "mal");
+  const ap = d.aprendizaje;
+  if (ap) {
+    const v = $("veredicto"); v.replaceChildren();
+    v.append(el("span", ap.icono + " "), el("strong", ap.titulo), document.createTextNode(". " + ap.explicacion));
+    const t = $("tabla-aprendizaje"); t.replaceChildren();
+    t.appendChild(fila([["Periodo"], ["Predicciones", "num"], ["Habilidad", "num"], ["z", "num"]], true));
+    ap.periodos.forEach((p) => t.appendChild(fila([[p.nombre], [p.n.toLocaleString("es-ES"), "num"],
+      [pct(p.habilidad * 100), "num " + (p.habilidad > 0 ? "bien" : "mal")], [p.z.toFixed(2).replace(".", ","), "num"]])));
+    const enlace = $("enlace-informe"); enlace.replaceChildren();
+    if (d.repo) {
+      const a = el("a", "Ver informe completo", "boton secundario");
+      a.href = "https://github.com/" + d.repo + "/blob/main/INFORME_APRENDIZAJE.md"; a.target = "_blank"; a.rel = "noopener";
+      enlace.appendChild(a);
+    }
+  }
   $("lecciones").textContent = d.lecciones.toLocaleString("es-ES");
   $("comisiones").textContent = euros.format(d.comisiones);
 }

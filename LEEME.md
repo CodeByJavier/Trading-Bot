@@ -23,6 +23,7 @@ Funciona gratis en GitHub las 24 horas, con un panel web que puedes mirar desde 
 3. Sube este proyecto (Claude te ayuda con este paso) con:
    `git remote add origin https://github.com/TU_USUARIO/bot-trading.git` y `git push -u origin main`.
 4. En el repositorio: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+   ⚠ Si se queda en *Deploy from a branch*, la web da **error 404** (el panel lo publica el bot, no la rama).
 5. Pestaña **Actions** → si te lo pide, pulsa *I understand my workflows, go ahead and enable them*.
    Luego elige **Bot cada hora → Run workflow** para la primera ejecución (tarda 1-2 minutos).
 6. Tu panel estará en `https://TU_USUARIO.github.io/bot-trading/`.
@@ -55,6 +56,21 @@ Otros ajustes (comisiones, horizonte...) se cambian editando `config.py` en GitH
 
 Ojo: si el bot ya funciona en GitHub, ejecuta antes `git pull` para traer su estado y
 no mezcles las dos simulaciones.
+
+## ¿Está aprendiendo de verdad?
+
+Antes de conocer cada resultado, el bot guarda su predicción y la de un **adivino ingenuo** que
+siempre dice "lo que suele pasar". Si el cerebro no se equivoca menos que el adivino, no aprende nada útil.
+
+- **`INFORME_APRENDIZAJE.md`**: el veredicto (✅ aprende, 🟡 indicios, ⚪ no supera al adivino,
+  🔴 peor), tabla por periodos y por semanas, evolución de los pesos y cuándo revisar.
+  Se actualiza cada hora y se lee directamente en GitHub.
+- **`datos_bot/diario.jsonl`**: una línea por día con todas las métricas y los pesos del cerebro.
+- **`CAMBIOS.md`**: qué se cambió en cada versión del modelo y por qué.
+
+**Ritmo de revisión:** no tocar nada las primeras 3 semanas (~500 predicciones); después,
+revisar una vez al mes y cambiar una sola cosa cada vez (subiendo `VERSION_MODELO`).
+Para revisarlo con Claude: `git pull` y pedirle que lea esos tres archivos.
 
 ## Cómo leer los resultados
 

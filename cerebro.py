@@ -45,8 +45,17 @@ class Cerebro:
         return _sigmoide(self.sesgo + sum(w * zi for w, zi in zip(self.pesos, z)))
 
     def aprender(self, x, subio):
+        """Aprende de un resultado ya conocido.
+
+        Devuelve (predicción del cerebro, predicción ingenua), ambas hechas ANTES
+        de ver el resultado, para poder evaluar honestamente si aprende algo.
+        La predicción ingenua es "lo que suele pasar": el porcentaje de subidas recientes.
+        """
         y = 1.0 if subio else 0.0
-        self.ultimos_aciertos.append(1 if (self.predecir(x) >= 0.5) == subio else 0)
+        prediccion = self.predecir(x)
+        recientes = self.ultimos_resultados
+        ingenua = sum(recientes) / len(recientes) if recientes else 0.5
+        self.ultimos_aciertos.append(1 if (prediccion >= 0.5) == subio else 0)
         self.ultimos_aciertos = self.ultimos_aciertos[-500:]
         self.ultimos_resultados = (self.ultimos_resultados + [int(y)])[-500:]
 
@@ -62,6 +71,7 @@ class Cerebro:
             self.pesos[k] -= self.tasa * (error * z[k] + self.regularizacion * self.pesos[k])
         self.sesgo -= self.tasa * error
         self.lecciones += 1
+        return prediccion, ingenua
 
     def tasa_acierto(self):
         if not self.ultimos_aciertos:

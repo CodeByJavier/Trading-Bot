@@ -22,7 +22,8 @@ COMISION_PORCENTAJE = 0.0 # parte del importe (0.001 = 0,1 %)
 SPREAD = 0.001            # diferencia estimada entre precio de compra y venta (0,1 %)
 
 # --- Cerebro (la IA propia) ----------------------------------------------
-HORIZONTE = 4                  # cuántas velas hacia el futuro intenta adivinar
+VERSION_MODELO = "1.0"         # súbela cada vez que cambies cómo piensa el bot (y apúntalo en CAMBIOS.md)
+HORIZONTE = 4                 # cuántas velas hacia el futuro intenta adivinar
 TASA_APRENDIZAJE = 0.01        # cuánto corrige su forma de pensar tras cada lección
 VELAS_PREENTRENAMIENTO = 3000  # historia que estudia antes de empezar a operar
 
