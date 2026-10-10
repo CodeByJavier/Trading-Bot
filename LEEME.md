@@ -108,6 +108,40 @@ comen su pequeña ventaja). La regla de tendencia de 50 días perdió −4 % en 
 de mantener, y de 2021 a 2026 gana a mantener en el total con caídas mucho menores. **No gana
 siempre**: en años bajistas también pierde (menos) y en años muy alcistas puede ganar menos.
 
+## Despertador externo (para que se ejecute cada hora sin falta)
+
+GitHub, en su plan gratuito, se salta muchas ejecuciones programadas. Para que el bot se ejecute
+de verdad cada hora, un servicio gratuito (cron-job.org) le "llama" a GitHub cada hora.
+Las ejecuciones programadas de GitHub siguen activas como respaldo; si coinciden, la segunda no hace nada.
+
+**1. Crear una clave limitada en GitHub** (solo sirve para lanzar el bot de este repositorio):
+
+1. En GitHub: tu foto (arriba a la derecha) → **Settings** → abajo a la izquierda **Developer settings**
+   → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**.
+2. *Token name*: `despertador bot trading`. *Expiration*: la más larga que te deje (y renuévala cuando caduque).
+3. *Repository access*: **Only select repositories** → elige `Trading-Bot`.
+4. *Permissions* → **Repository permissions** → **Actions**: **Read and write**.
+5. **Generate token** y cópiala (solo se muestra una vez). **No se la des a nadie**, tampoco a Claude:
+   solo se pega en cron-job.org.
+
+**2. Programar la llamada en [cron-job.org](https://cron-job.org)** (cuenta gratuita):
+
+1. **Create cronjob**. *Title*: `Bot trading`.
+   *URL*: `https://api.github.com/repos/CodeByJavier/Trading-Bot/actions/workflows/bot.yml/dispatches`
+2. *Execution schedule*: cada hora, en el minuto 5.
+3. Pestaña **Advanced**:
+   - *Request method*: **POST**
+   - *Headers* (uno por línea, botón *Add*):
+     - `Accept` → `application/vnd.github+json`
+     - `Authorization` → `Bearer ` seguido de tu clave
+     - `X-GitHub-Api-Version` → `2022-11-28`
+   - *Request body*: `{"ref":"main"}`
+4. **Create**, y después **Test run**: si responde **204**, funciona. En GitHub → **Actions** aparecerá
+   una ejecución de *Bot cada hora* lanzada por `workflow_dispatch`.
+
+Si algún día la clave caduca, las llamadas fallarán (cron-job.org te avisa por correo): crea otra y
+cámbiala en el encabezado *Authorization*.
+
 ## Cosas a vigilar
 
 - GitHub desactiva las tareas programadas de repositorios sin actividad durante 60 días.
