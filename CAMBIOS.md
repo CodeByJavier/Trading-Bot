@@ -10,6 +10,23 @@ Reglas:
 - Antes de subir un cambio, probarlo en el laboratorio (`python laboratorio.py`): debe funcionar
   en el tramo B (validación) y año a año, no solo en el tramo usado para elegirlo.
 
+## Red neuronal multimercado 1.0 (11/10/2026) — simulación aparte
+
+**Una segunda simulación, con sus propios 1.000 € ficticios, en paralelo al bot de Bitcoin.**
+
+- Qué hace: una red neuronal (una capa oculta de 24 neuronas, sin librerías) recibe a la vez los
+  indicadores de 8 mercados (Bitcoin, Ethereum, BNB, XRP, Solana, dólar, S&P 500 e IBEX 35) y el
+  Fear & Greed, y prevé cuánto subirá cada uno en 5 días. Reparte según su confianza: solo invierte
+  donde la subida prevista supera lo que cuestan las comisiones. Aprende cada día; revisa el reparto
+  una vez por semana y solo cambia una posición si se desvía más de un 15 %.
+- Por qué así (ver `laboratorio/RED.md`): decidiendo cada día o cada hora hizo más de 1.000
+  operaciones en 14 meses y perdió más del 95 % en comisiones. La versión semanal (regla fijada antes
+  de ver el resultado) quedó en +20 % (tramo A) y −14 % (tramo B), peor que comprar y mantener
+  repartido y que el bot de Bitcoin.
+- Lo más importante: no acierta la dirección de ningún mercado (IC ≈ 0). Está en marcha porque el
+  usuario quiere verla en directo y compararla, no porque se espere que gane.
+- El bot de Bitcoin (v2.1) sigue igual.
+
 ## 2.1 (09/10/2026)
 
 **La IA aprende de 4 criptomonedas y el capital ficticio sube a 1.000 €.**

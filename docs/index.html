@@ -48,6 +48,7 @@
 
 /* ===================== Base ===================== */
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; min-height: 100vh; background: var(--fondo); color: var(--texto);
@@ -266,6 +267,28 @@ tr:last-child td { border-bottom: 0; }
 
 footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 8px 16px 32px; }
 
+/* Pestañas */
+.pestanas { max-width: 1180px; margin: 12px auto 0; padding: 0 16px; }
+.pestanas-int { display: flex; gap: 6px; padding: 6px; border-radius: 16px; }
+.pestanas button { flex: 1; font: inherit; font-size: .9rem; font-weight: 600; padding: 10px 14px; border-radius: 11px; border: 0; cursor: pointer;
+  background: transparent; color: var(--texto-2); display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .2s, color .2s; }
+.pestanas button span { font-weight: 400; font-size: .78rem; color: var(--texto-3); }
+.pestanas button:hover { color: var(--texto); background: var(--vidrio-fuerte); }
+.pestanas button[aria-selected="true"] { background: linear-gradient(135deg, var(--bot), var(--bot-2)); color: #fff; box-shadow: 0 6px 18px -6px var(--bot); }
+.pestanas button[aria-selected="true"] span { color: rgba(255, 255, 255, .8); }
+.pestanas button:focus-visible { outline: 2px solid var(--bot); outline-offset: 2px; }
+.aviso-red { border-color: color-mix(in srgb, var(--bot-2) 50%, transparent); }
+.aviso-red svg { color: var(--bot-2); }
+/* Tabla de mercados de la red */
+.tabla-mercados td { vertical-align: middle; }
+.mercado-nombre { display: flex; flex-direction: column; line-height: 1.25; }
+.mercado-nombre .nota { font-size: .74rem; }
+.prevision { display: grid; grid-template-columns: minmax(110px, 1fr) 64px; gap: 10px; align-items: center; min-width: 190px; }
+.prevision .num { text-align: right; font-variant-numeric: tabular-nums; }
+.prevision .barra-peso { overflow: visible; }
+.marca-umbral { position: absolute; top: -5px; bottom: -5px; border-left: 2px solid var(--bien); margin-left: -1px; opacity: .8; }
+@media (max-width: 420px) { .pestanas button span { display: none; } }
+
 /* ===================== Responsive ===================== */
 @media (max-width: 960px) {
   .kpis { grid-template-columns: 1fr 1fr; grid-template-areas: "dest dest" "a b" "c d"; }
@@ -313,7 +336,14 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
   </div>
 </header>
 
-<main>
+<nav class="pestanas" aria-label="Simulaciones">
+  <div class="pestanas-int vidrio" role="tablist">
+    <button type="button" role="tab" data-vista="bot" aria-selected="true">₿ Bot Bitcoin <span>regla de tendencia</span></button>
+    <button type="button" role="tab" data-vista="red" aria-selected="false">🧠 Red neuronal <span>8 mercados</span></button>
+  </div>
+</nav>
+
+<main id="vista-bot">
   <div id="aviso"></div>
 
   <section class="kpis cargando" id="kpis" aria-label="Resumen">
@@ -359,7 +389,7 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
         <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 6-7"/></svg><h2>Bot frente a comprar y mantener</h2></div>
         <p class="nota">Si la línea del bot no supera a la de referencia, el bot no aporta nada.</p>
       </div>
-      <div class="filtros" role="group" aria-label="Periodo de la gráfica">
+      <div class="filtros" role="group" aria-label="Periodo de la gráfica" data-grafica="bot">
         <button type="button" data-dias="1">24 h</button><button type="button" data-dias="7">7 d</button><button type="button" data-dias="30">30 d</button><button type="button" data-dias="0" aria-pressed="true">Todo</button>
       </div>
     </div>
@@ -435,6 +465,95 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
       <div class="accion"><div class="icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg></div><div class="texto-accion"><strong>Reiniciar simulación</strong><p>Empieza de cero. Opcional: otro capital u otra moneda.</p><code>reiniciar_simulacion</code></div></div>
     </div>
     <div class="botones" id="botones-control"></div>
+  </section>
+</main>
+
+<main id="vista-red" hidden>
+  <div class="vidrio aviso aviso-red">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/><path d="M7.5 15h9"/></svg>
+    <div><strong>Experimento con dinero ficticio aparte.</strong> Una red neuronal mira a la vez criptomonedas, el dólar y la bolsa, y reparte 1.000 € según su confianza.
+      Aprende cada día y revisa el reparto una vez por semana. En el laboratorio lo hizo <strong>peor que comprar y mantener</strong>; está aquí para verla en directo y compararla con el bot de Bitcoin.</div>
+  </div>
+  <div class="vidrio tarjeta" id="red-vacia" hidden><p>La red todavía no ha empezado. Aparecerá tras la próxima ejecución del bot (como mucho, en una hora).</p></div>
+
+  <section class="kpis" aria-label="Resumen de la red">
+    <article class="vidrio kpi destacada aparece">
+      <div class="etiqueta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M16 13h2M2 10h20"/></svg>Valor de la cartera (dinero ficticio)</div>
+      <div>
+        <div class="valor num" id="red-valor">—</div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px">
+          <span class="insignia" id="red-valor-d"></span>
+          <span class="detalle" id="red-diferencia"></span>
+        </div>
+      </div>
+      <div class="comparacion" aria-hidden="true">
+        <div class="fila-barra"><span>Red</span><div class="pista"><span id="red-barra-bot" style="background:linear-gradient(90deg,var(--bot),var(--bot-2))"></span></div><span class="num" id="red-barra-bot-t"></span></div>
+        <div class="fila-barra"><span>Mantener</span><div class="pista"><span id="red-barra-ref" style="background:var(--ref)"></span></div><span class="num" id="red-barra-ref-t"></span></div>
+      </div>
+    </article>
+    <article class="vidrio kpi aparece" style="animation-delay:.05s">
+      <div class="etiqueta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/></svg>Invertido</div>
+      <div class="valor num" id="red-invertido">—</div>
+      <div class="detalle" id="red-efectivo"></div>
+    </article>
+    <article class="vidrio kpi aparece" style="animation-delay:.1s">
+      <div class="etiqueta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Comprar y mantener repartido</div>
+      <div class="valor num" id="red-referencia-v">—</div>
+      <div class="detalle" id="red-referencia-d"></div>
+    </article>
+    <article class="vidrio kpi aparece" style="animation-delay:.15s">
+      <div class="etiqueta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg>Operaciones</div>
+      <div class="valor num" id="red-ops">0</div>
+      <div class="detalle" id="red-ops-d"></div>
+    </article>
+    <article class="vidrio kpi aparece" style="animation-delay:.2s">
+      <div class="etiqueta"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Próxima revisión del reparto</div>
+      <div class="valor num" id="red-revision">—</div>
+      <div class="detalle"><span id="red-lecciones">0</span> lecciones · aprende cada día</div>
+    </article>
+  </section>
+
+  <section class="vidrio tarjeta aparece" style="animation-delay:.25s">
+    <div class="cabecera-grafica">
+      <div>
+        <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 6-7"/></svg><h2>Red neuronal frente a comprar y mantener repartido</h2></div>
+        <p class="nota">La referencia compra los 8 mercados a partes iguales el primer día y no toca nada. Se actualiza cada hora.</p>
+      </div>
+      <div class="filtros" role="group" aria-label="Periodo de la gráfica" data-grafica="red">
+        <button type="button" data-dias="1">24 h</button><button type="button" data-dias="7">7 d</button><button type="button" data-dias="30">30 d</button><button type="button" data-dias="0" aria-pressed="true">Todo</button>
+      </div>
+    </div>
+    <div class="leyenda">
+      <span><span class="clave" style="border-color:var(--bot)"></span>Red neuronal</span>
+      <span><span class="clave" style="border-color:var(--ref); border-top-style:dashed"></span>Comprar y mantener repartido</span>
+    </div>
+    <div class="grafica"><svg id="svg-red" role="img" aria-label="Evolución de la cartera de la red y de comprar y mantener repartido"></svg><div class="tooltip vidrio" id="tooltip-red"></div></div>
+    <details><summary>Ver los datos en tabla</summary><div class="tabla"><table id="tabla-historial-red"></table></div></details>
+  </section>
+
+  <section class="vidrio tarjeta aparece" style="animation-delay:.3s">
+    <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3 0-5 2-5 4.5 0 1 .3 1.8.8 2.5A4 4 0 0 0 6 17a3.5 3.5 0 0 0 6 2.5A3.5 3.5 0 0 0 18 17a4 4 0 0 0-1.8-7c.5-.7.8-1.5.8-2.5C17 5 15 3 12 3zM12 3v16.5"/></svg><h2>¿Qué piensa la red de cada mercado?</h2></div>
+    <p class="nota" style="margin-bottom:8px">Cuánto cree que subirá cada mercado en los próximos 5 días, mirando todos a la vez. Solo invierte donde la subida prevista supera
+      un <span id="red-umbral">1</span> % (lo que cuestan las comisiones); la raya vertical marca ese límite. "Tiene" es su reparto actual; "Quiere", el que buscará en la próxima revisión.</p>
+    <div class="tabla"><table id="tabla-mercados" class="tabla-mercados"></table></div>
+  </section>
+
+  <div class="dos">
+    <section class="vidrio tarjeta aparece" style="animation-delay:.35s">
+      <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><h2>¿Acierta la red?</h2></div>
+      <p class="nota" style="margin-bottom:8px">IC: relación entre lo que prevé y lo que pasa (0 = como el azar; ✅ = muy improbable que sea suerte). Dirección: % de veces que acierta si sube o baja. Hacen falta meses para juzgarla.</p>
+      <div class="tabla"><table id="tabla-acierto" class="mini-tabla"></table></div>
+    </section>
+    <section class="vidrio tarjeta aparece" style="animation-delay:.4s">
+      <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><h2>Historial de eventos</h2></div>
+      <ul class="eventos" id="eventos-red"></ul>
+    </section>
+  </div>
+
+  <section class="vidrio tarjeta aparece" style="animation-delay:.45s">
+    <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><h2>Operaciones de la red</h2></div>
+    <p class="nota" style="margin-bottom:8px">Más recientes primero. Todo con dinero ficticio.</p>
+    <div class="tabla"><table id="tabla-ops-red"></table></div>
   </section>
 </main>
 
@@ -706,33 +825,31 @@ function pintarControles() {
   });
 }
 
-/* ---------- Gráfica ---------- */
-function serieVisible() {
-  const h = datos.historial;
-  if (!dias || !h.length) return h;
-  const limite = parseFecha(h[h.length - 1].f).getTime() - dias * 86400000;
-  return h.filter((p) => parseFecha(p.f).getTime() >= limite);
+/* ---------- Gráficas (la misma pieza para las dos simulaciones) ---------- */
+const diasGrafica = { bot: 0, red: 0 };
+function recortar(historial, dias) {
+  if (!dias || !historial.length) return historial;
+  const limite = parseFecha(historial[historial.length - 1].f).getTime() - dias * 86400000;
+  return historial.filter((p) => parseFecha(p.f).getTime() >= limite);
 }
-function pintarGrafica() {
-  const svg = $("svg"), tip = $("tooltip");
-  const serie = serieVisible();
+function dibujarGrafica({ id, svg, tip, tabla, serie, principal, referencia, capital, extra, columnas }) {
   svg.replaceChildren(); tip.classList.remove("visible");
   const ancho = svg.clientWidth || 800, alto = svg.clientHeight || 320;
   const mi = ancho < 500 ? 48 : 60, md = 10, ms = 12, mb = 28;
   svg.setAttribute("viewBox", `0 0 ${ancho} ${alto}`);
   if (serie.length < 2) { svgEl(svg, "text", { x: ancho / 2, y: alto / 2, "text-anchor": "middle" }, "La gráfica aparecerá tras un par de horas de funcionamiento."); return; }
 
-  const valores = serie.flatMap((p) => [p.b, p.r]);
+  const valores = serie.flatMap((p) => [p[principal.k], p[referencia.k]]);
   let min = Math.min(...valores), max = Math.max(...valores);
   const margen = Math.max((max - min) * 0.1, 1); min -= margen; max += margen;
   const x = (i) => mi + (ancho - mi - md) * i / (serie.length - 1);
   const y = (v) => ms + (alto - ms - mb) * (1 - (v - min) / (max - min));
 
   const defs = svgEl(svg, "defs", {});
-  const area = svgEl(defs, "linearGradient", { id: "grad-area", x1: "0", y1: "0", x2: "0", y2: "1" });
+  const area = svgEl(defs, "linearGradient", { id: "grad-area-" + id, x1: "0", y1: "0", x2: "0", y2: "1" });
   svgEl(area, "stop", { offset: "0", style: "stop-color:var(--bot);stop-opacity:.35" });
   svgEl(area, "stop", { offset: "1", style: "stop-color:var(--bot);stop-opacity:0" });
-  const trazo = svgEl(defs, "linearGradient", { id: "grad-linea", x1: "0", y1: "0", x2: "1", y2: "0" });
+  const trazo = svgEl(defs, "linearGradient", { id: "grad-linea-" + id, x1: "0", y1: "0", x2: "1", y2: "0" });
   svgEl(trazo, "stop", { offset: "0", style: "stop-color:var(--bot)" });
   svgEl(trazo, "stop", { offset: "1", style: "stop-color:var(--bot-2)" });
 
@@ -741,9 +858,8 @@ function pintarGrafica() {
     svgEl(svg, "line", { x1: mi, x2: ancho - md, y1: y(v), y2: y(v), stroke: "var(--rejilla)" });
     svgEl(svg, "text", { x: mi - 8, y: y(v) + 4, "text-anchor": "end" }, eurosCortos.format(v));
   }
-  // Línea del capital inicial como referencia
-  if (datos.capital_inicial > min && datos.capital_inicial < max) {
-    svgEl(svg, "line", { x1: mi, x2: ancho - md, y1: y(datos.capital_inicial), y2: y(datos.capital_inicial), stroke: "var(--eje)", "stroke-dasharray": "2 4" });
+  if (capital > min && capital < max) {  // línea del capital inicial
+    svgEl(svg, "line", { x1: mi, x2: ancho - md, y1: y(capital), y2: y(capital), stroke: "var(--eje)", "stroke-dasharray": "2 4" });
   }
   const etiquetas = Math.min(ancho < 520 ? 3 : 5, serie.length);
   for (let k = 0; k < etiquetas; k++) {
@@ -752,11 +868,11 @@ function pintarGrafica() {
     svgEl(svg, "text", { x: x(i), y: alto - 8, "text-anchor": k === 0 ? "start" : k === etiquetas - 1 ? "end" : "middle" }, fecha.slice(0, 5) + " " + hora);
   }
 
-  const puntosBot = serie.map((p, i) => `${x(i).toFixed(1)},${y(p.b).toFixed(1)}`);
-  svgEl(svg, "path", { d: `M${x(0)},${alto - mb} L${puntosBot.join(" L")} L${x(serie.length - 1)},${alto - mb} Z`, fill: "url(#grad-area)" });
-  svgEl(svg, "polyline", { points: serie.map((p, i) => `${x(i).toFixed(1)},${y(p.r).toFixed(1)}`).join(" "),
+  const puntos = serie.map((p, i) => `${x(i).toFixed(1)},${y(p[principal.k]).toFixed(1)}`);
+  svgEl(svg, "path", { d: `M${x(0)},${alto - mb} L${puntos.join(" L")} L${x(serie.length - 1)},${alto - mb} Z`, fill: `url(#grad-area-${id})` });
+  svgEl(svg, "polyline", { points: serie.map((p, i) => `${x(i).toFixed(1)},${y(p[referencia.k]).toFixed(1)}`).join(" "),
     fill: "none", stroke: "var(--ref)", "stroke-width": 2, "stroke-dasharray": "5 4", "stroke-linejoin": "round" });
-  const linea = svgEl(svg, "polyline", { points: puntosBot.join(" "), fill: "none", stroke: "url(#grad-linea)", "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" });
+  const linea = svgEl(svg, "polyline", { points: puntos.join(" "), fill: "none", stroke: `url(#grad-linea-${id})`, "stroke-width": 2.5, "stroke-linejoin": "round", "stroke-linecap": "round" });
   const largo = linea.getTotalLength ? linea.getTotalLength() : 0;
   if (largo) {
     linea.style.strokeDasharray = largo; linea.style.strokeDashoffset = largo;
@@ -764,11 +880,11 @@ function pintarGrafica() {
     linea.style.transition = "stroke-dashoffset 1.4s cubic-bezier(.2,.7,.2,1)"; linea.style.strokeDashoffset = 0;
   }
   const ultimo = serie.length - 1;
-  svgEl(svg, "circle", { cx: x(ultimo), cy: y(serie[ultimo].b), r: 4.5, fill: "var(--bot-2)", stroke: "var(--fondo)", "stroke-width": 2 });
+  svgEl(svg, "circle", { cx: x(ultimo), cy: y(serie[ultimo][principal.k]), r: 4.5, fill: "var(--bot-2)", stroke: "var(--fondo)", "stroke-width": 2 });
 
   const cruz = svgEl(svg, "line", { y1: ms, y2: alto - mb, stroke: "var(--eje)", "stroke-dasharray": "3 3", visibility: "hidden" });
-  const puntoB = svgEl(svg, "circle", { r: 5, fill: "var(--bot)", stroke: "var(--fondo)", "stroke-width": 2, visibility: "hidden" });
-  const puntoR = svgEl(svg, "circle", { r: 4.5, fill: "var(--ref)", stroke: "var(--fondo)", "stroke-width": 2, visibility: "hidden" });
+  const puntoA = svgEl(svg, "circle", { r: 5, fill: "var(--bot)", stroke: "var(--fondo)", "stroke-width": 2, visibility: "hidden" });
+  const puntoB = svgEl(svg, "circle", { r: 4.5, fill: "var(--ref)", stroke: "var(--fondo)", "stroke-width": 2, visibility: "hidden" });
   const zona = svgEl(svg, "rect", { x: mi, y: 0, width: ancho - mi - md, height: alto, fill: "transparent" });
 
   function mostrar(evento) {
@@ -776,41 +892,206 @@ function pintarGrafica() {
     const px = (evento.clientX - caja.left) * ancho / caja.width;
     const i = Math.max(0, Math.min(ultimo, Math.round((px - mi) / (ancho - mi - md) * ultimo)));
     const p = serie[i];
-    [cruz, puntoB, puntoR].forEach((e) => e.setAttribute("visibility", "visible"));
+    [cruz, puntoA, puntoB].forEach((e) => e.setAttribute("visibility", "visible"));
     cruz.setAttribute("x1", x(i)); cruz.setAttribute("x2", x(i));
-    puntoB.setAttribute("cx", x(i)); puntoB.setAttribute("cy", y(p.b));
-    puntoR.setAttribute("cx", x(i)); puntoR.setAttribute("cy", y(p.r));
+    puntoA.setAttribute("cx", x(i)); puntoA.setAttribute("cy", y(p[principal.k]));
+    puntoB.setAttribute("cx", x(i)); puntoB.setAttribute("cy", y(p[referencia.k]));
     tip.replaceChildren(el("div", p.f, "fecha"));
-    [[p.b, "Bot", "var(--bot)", false], [p.r, "Mantener", "var(--ref)", true]].forEach(([v, nombre, c, disc]) => {
+    [[p[principal.k], principal.nombre, "var(--bot)", false], [p[referencia.k], referencia.nombre, "var(--ref)", true]].forEach(([v, nombre, c, disc]) => {
       const l = el("div", null, "linea"), clave = el("span", null, "clave");
       clave.style.borderColor = c; if (disc) clave.style.borderTopStyle = "dashed";
       l.append(clave, el("strong", euros.format(v)), el("span", nombre, "nombre"));
       tip.appendChild(l);
     });
-    tip.appendChild(el("div", "Precio " + euros.format(p.p), "nombre"));
+    const texto = extra && extra(p);
+    if (texto) tip.appendChild(el("div", texto, "nombre"));
     tip.classList.add("visible");
     const izquierda = x(i) * caja.width / ancho;
     const derecha = izquierda + 16 + tip.offsetWidth > caja.width;
     tip.style.left = Math.max(0, derecha ? izquierda - tip.offsetWidth - 16 : izquierda + 16) + "px";
   }
-  function ocultar() { tip.classList.remove("visible"); [cruz, puntoB, puntoR].forEach((e) => e.setAttribute("visibility", "hidden")); }
+  function ocultar() { tip.classList.remove("visible"); [cruz, puntoA, puntoB].forEach((e) => e.setAttribute("visibility", "hidden")); }
   zona.addEventListener("pointermove", mostrar);
   zona.addEventListener("pointerdown", mostrar);
   zona.addEventListener("pointerleave", ocultar);
 
-  const t = $("tabla-historial"); t.replaceChildren();
-  const cab = document.createElement("thead"); cab.appendChild(fila([["Fecha"], ["Precio", "num"], ["Bot", "num"], ["Mantener", "num"]], true));
+  tabla.replaceChildren();
+  const cab = document.createElement("thead"); cab.appendChild(fila(columnas.map(([titulo, clase]) => [titulo, clase]), true));
   const cuerpo = document.createElement("tbody");
-  serie.slice(-72).reverse().forEach((p) => cuerpo.appendChild(fila([[p.f], [euros.format(p.p), "num"], [euros.format(p.b), "num"], [euros.format(p.r), "num"]])));
-  t.append(cab, cuerpo);
+  serie.slice(-72).reverse().forEach((p) => cuerpo.appendChild(fila(columnas.map(([, clase, valor]) => [valor(p), clase]))));
+  tabla.append(cab, cuerpo);
+}
+
+function pintarGrafica() {
+  dibujarGrafica({
+    id: "bot", svg: $("svg"), tip: $("tooltip"), tabla: $("tabla-historial"),
+    serie: recortar(datos.historial, diasGrafica.bot), capital: datos.capital_inicial,
+    principal: { k: "b", nombre: "Bot" }, referencia: { k: "r", nombre: "Mantener" },
+    extra: (p) => "Precio " + euros.format(p.p),
+    columnas: [["Fecha", "", (p) => p.f], ["Precio", "num", (p) => euros.format(p.p)],
+               ["Bot", "num", (p) => euros.format(p.b)], ["Mantener", "num", (p) => euros.format(p.r)]],
+  });
 }
 
 document.querySelectorAll(".filtros button").forEach((b) => b.addEventListener("click", () => {
-  document.querySelectorAll(".filtros button").forEach((o) => o.setAttribute("aria-pressed", o === b));
-  dias = Number(b.dataset.dias); pintarGrafica();
+  const grupo = b.closest(".filtros"), cual = grupo.dataset.grafica;
+  grupo.querySelectorAll("button").forEach((o) => o.setAttribute("aria-pressed", o === b));
+  diasGrafica[cual] = Number(b.dataset.dias);
+  cual === "red" ? pintarGraficaRed() : pintarGrafica();
 }));
 let temporizador;
-window.addEventListener("resize", () => { clearTimeout(temporizador); temporizador = setTimeout(() => datos && pintarGrafica(), 150); });
+window.addEventListener("resize", () => {
+  clearTimeout(temporizador);
+  temporizador = setTimeout(() => { if (vista === "red" && red) pintarGraficaRed(); else if (datos) pintarGrafica(); }, 150);
+});
+
+/* ---------- Pestaña: red neuronal multimercado ---------- */
+let red = null;
+const TIPOS = { cripto: "Cripto", divisa: "Divisa", bolsa: "Bolsa" };
+
+function pintarCabeceraRed() {
+  if (!red) return;
+  $("subtitulo").textContent = `8 mercados · decide la red neuronal · ${eurosCortos.format(red.capital)} ficticios desde el ${red.creado.split(" ")[0]} · v${red.version}`;
+  const estado = $("estado-bot");
+  estado.querySelector(".punto").classList.toggle("pausa", red.pausado);
+  estado.lastChild.textContent = red.pausado ? "En pausa" : "Experimento";
+  estado.title = "Simulación aparte con su propio dinero ficticio";
+  $("actualizado").textContent = "Actualizado " + hace(red.actualizado);
+}
+
+function pintarGraficaRed() {
+  dibujarGrafica({
+    id: "red", svg: $("svg-red"), tip: $("tooltip-red"), tabla: $("tabla-historial-red"),
+    serie: recortar(red.historial, diasGrafica.red), capital: red.capital,
+    principal: { k: "v", nombre: "Red neuronal" }, referencia: { k: "r", nombre: "Mantener repartido" },
+    columnas: [["Fecha", "", (p) => p.f], ["Red neuronal", "num", (p) => euros.format(p.v)],
+               ["Mantener repartido", "num", (p) => euros.format(p.r)]],
+  });
+}
+
+function pintarRed() {
+  pintarCabeceraRed();
+  const cap = red.capital, rv = (red.valor / cap - 1) * 100, rr = (red.referencia / cap - 1) * 100;
+  $("red-valor").textContent = euros.format(red.valor);
+  const insignia = $("red-valor-d");
+  insignia.textContent = (rv >= 0 ? "▲ " : "▼ ") + pct(rv);
+  insignia.style.color = rv >= 0 ? "var(--bien)" : "var(--mal)";
+  const dif = red.valor - red.referencia;
+  $("red-diferencia").textContent = `${dif >= 0 ? "+" : "−"}${euros.format(Math.abs(dif))} frente a mantener repartido`;
+  const maximo = Math.max(red.valor, red.referencia, cap) * 1.02;
+  requestAnimationFrame(() => {
+    $("red-barra-bot").style.width = (red.valor / maximo) * 100 + "%";
+    $("red-barra-ref").style.width = (red.referencia / maximo) * 100 + "%";
+  });
+  $("red-barra-bot-t").textContent = eurosCortos.format(red.valor);
+  $("red-barra-ref-t").textContent = eurosCortos.format(red.referencia);
+  $("red-invertido").textContent = Math.round(red.invertido * 100) + " %";
+  $("red-efectivo").textContent = euros.format(red.efectivo) + " en euros";
+  const ventas = red.operaciones.filter((o) => o.tipo === "VENTA");
+  $("red-ops").textContent = red.operaciones.length;
+  $("red-ops-d").textContent = `${euros.format(red.comisiones)} en comisiones · ${ventas.filter((o) => o.resultado > 0).length} de ${ventas.length} ventas con ganancia`;
+  $("red-revision").textContent = red.proxima_revision.split(" ")[0];
+  $("red-lecciones").textContent = red.lecciones.toLocaleString("es-ES");
+  $("red-referencia-v").textContent = euros.format(red.referencia);
+  $("red-referencia-d").textContent = pct(rr) + " comprando de todo a partes iguales";
+  $("red-referencia-d").style.color = rr >= 0 ? "var(--bien)" : "var(--mal)";
+
+  // Qué piensa: un mercado por fila
+  const umbral = red.umbral * 100;
+  $("red-umbral").textContent = umbral.toFixed(1).replace(".", ",");
+  const escala = Math.max(umbral * 2, ...red.mercados.map((m) => Math.abs((m.prediccion || 0) * 100)));
+  const t = $("tabla-mercados"); t.replaceChildren();
+  const cab = document.createElement("thead");
+  cab.appendChild(fila([["Mercado"], ["Precio", "num"], ["1 día", "num"], ["7 días", "num"], ["Prevé a 5 días"], ["Tiene", "num"], ["Quiere", "num"]], true));
+  const cuerpo = document.createElement("tbody");
+  red.mercados.forEach((m) => {
+    const nombre = el("div", null, "mercado-nombre");
+    nombre.append(el("strong", m.nombre), el("span", TIPOS[m.tipo] + (m.abierto ? "" : " · cerrado"), "nota"));
+    const barra = el("div", null, "prevision");
+    if (m.prediccion == null) barra.appendChild(el("span", "aprendiendo…", "nota"));
+    else {
+      const v = m.prediccion * 100, pista = el("div", null, "barra-peso"), trozo = document.createElement("span");
+      const ancho = Math.min(50, Math.abs(v) / escala * 50);
+      trozo.style.width = ancho + "%"; trozo.style.left = v >= 0 ? "50%" : 50 - ancho + "%";
+      trozo.style.background = v >= umbral ? "linear-gradient(90deg, var(--bien), var(--bot))" : v >= 0 ? "var(--positivo)" : "var(--negativo)";
+      const marca = el("i", null, "marca-umbral"); marca.style.left = 50 + Math.min(50, umbral / escala * 50) + "%";
+      pista.append(trozo, marca);
+      barra.append(pista, el("span", pct(v), "num " + (v >= umbral ? "bien" : v < 0 ? "mal" : "")));
+    }
+    const cambio = (v) => v == null ? ["—", "num"] : [pct(v * 100), "num " + (v >= 0 ? "bien" : "mal")];
+    cuerpo.appendChild(fila([[nombre], [m.precio == null ? "—" : euros.format(m.precio), "num"], cambio(m.cambio_24h), cambio(m.cambio_7d),
+      [barra], [Math.round(m.peso * 100) + " %", "num"], [Math.round(m.objetivo * 100) + " %", "num"]]));
+  });
+  t.append(cab, cuerpo);
+
+  // ¿Acierta?
+  const a = $("tabla-acierto"); a.replaceChildren();
+  const cabA = document.createElement("thead");
+  cabA.appendChild(fila([["Mercado"], ["Predicciones", "num col-n"], ["IC", "num"], ["Dirección", "num"]], true));
+  const cuerpoA = document.createElement("tbody");
+  let alguno = false;
+  red.mercados.forEach((m) => {
+    const h = m.habilidad;
+    if (!h) return;
+    alguno = true;
+    cuerpoA.appendChild(fila([[m.nombre], [h.n.toLocaleString("es-ES"), "num col-n"],
+      [(h.ic >= 0 ? "+" : "") + h.ic.toFixed(3).replace(".", ",") + (h.z >= 2 ? " ✅" : ""), "num " + (h.z >= 2 ? "bien" : "")],
+      [Math.round(h.acierto * 100) + " %", "num"]]));
+  });
+  if (!alguno) {
+    const tr = fila([["Aún no hay predicciones comprobadas: la primera se comprueba 5 días después de empezar."]]);
+    tr.firstChild.colSpan = 4; tr.firstChild.style.color = "var(--texto-3)"; cuerpoA.appendChild(tr);
+  }
+  a.append(cabA, cuerpoA);
+
+  // Operaciones y eventos
+  const o = $("tabla-ops-red"); o.replaceChildren();
+  const cabO = document.createElement("thead");
+  cabO.appendChild(fila([["Fecha"], ["Mercado"], ["Tipo"], ["Importe", "num"], ["Comisión", "num"], ["Resultado", "num"]], true));
+  const cuerpoO = document.createElement("tbody");
+  if (!red.operaciones.length) {
+    const tr = fila([["Todavía no ha operado: solo invierte cuando la subida prevista supera lo que cuestan las comisiones."]]);
+    tr.firstChild.colSpan = 6; tr.firstChild.style.color = "var(--texto-3)"; cuerpoO.appendChild(tr);
+  }
+  [...red.operaciones].reverse().forEach((op) => {
+    const chip = el("span", op.tipo === "COMPRA" ? "Compra" : "Venta", "chip " + (op.tipo === "COMPRA" ? "compra" : "venta"));
+    const res = op.resultado == null ? ["", "num"] : [(op.resultado >= 0 ? "+" : "−") + euros.format(Math.abs(op.resultado)), "num " + (op.resultado >= 0 ? "bien" : "mal")];
+    cuerpoO.appendChild(fila([[op.fecha], [op.nombre], [chip], [euros.format(op.euros), "num"], [euros.format(op.comision), "num"], res]));
+  });
+  o.append(cabO, cuerpoO);
+
+  const ul = $("eventos-red"); ul.replaceChildren();
+  [...red.eventos].reverse().forEach((e) => { const li = el("li"); li.append(el("span", e.fecha, "cuando"), document.createTextNode(e.texto)); ul.appendChild(li); });
+  pintarGraficaRed();
+}
+
+async function cargarRed() {
+  try {
+    const r = await fetch("red.json?" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error(r.status);
+    red = await r.json();
+  } catch (e) {
+    red = null;
+    $("red-vacia").hidden = false;
+    return;
+  }
+  $("red-vacia").hidden = true;
+  if (vista === "red") pintarRed();
+}
+
+/* ---------- Pestañas ---------- */
+let vista = "bot";
+function mostrarVista(nueva) {
+  vista = nueva;
+  $("vista-bot").hidden = nueva !== "bot";
+  $("vista-red").hidden = nueva !== "red";
+  document.querySelectorAll(".pestanas button").forEach((b) => b.setAttribute("aria-selected", b.dataset.vista === nueva));
+  try { localStorage.setItem("vista", nueva); } catch (e) {}
+  history.replaceState(null, "", nueva === "red" ? "#red" : location.pathname + location.search);
+  if (nueva === "red") { red ? pintarRed() : cargarRed(); }
+  else if (datos) { pintarKpis(); pintarGrafica(); }
+}
+document.querySelectorAll(".pestanas button").forEach((b) => b.addEventListener("click", () => mostrarVista(b.dataset.vista)));
 
 /* ---------- Carga ---------- */
 async function cargar() {
@@ -824,10 +1105,13 @@ async function cargar() {
     return;
   }
   pintarKpis(); pintarTendencia(); pintarMedidor(); pintarAprendizaje(); pintarPesos(); pintarOperaciones(); pintarEventos(); pintarControles(); pintarGrafica();
+  if (vista === "red") pintarCabeceraRed();
 }
-cargar();
-setInterval(cargar, 5 * 60 * 1000);
-setInterval(() => datos && ($("actualizado").textContent = "Actualizado " + hace(datos.actualizado)), 60 * 1000);
+let inicial = "bot";
+try { inicial = location.hash === "#red" ? "red" : (localStorage.getItem("vista") || "bot"); } catch (e) {}
+cargar().then(cargarRed).then(() => mostrarVista(inicial === "red" ? "red" : "bot"));
+setInterval(() => { cargar(); cargarRed(); }, 5 * 60 * 1000);
+setInterval(() => { const d = vista === "red" ? red : datos; if (d) $("actualizado").textContent = "Actualizado " + hace(d.actualizado); }, 60 * 1000);
 </script>
 </body>
 </html>

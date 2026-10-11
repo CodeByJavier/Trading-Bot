@@ -19,6 +19,20 @@ Funciona gratis en GitHub las 24 horas, con un panel web que puedes mirar desde 
 
 Más detalles del porqué en [CAMBIOS.md](CAMBIOS.md) y [laboratorio/RESULTADOS.md](laboratorio/RESULTADOS.md).
 
+## Segunda simulación: red neuronal multimercado
+
+En el panel hay dos pestañas. **"Bot Bitcoin"** es la simulación principal (arriba). **"Red neuronal"**
+es un experimento aparte con **otros 1.000 € ficticios**: una red neuronal mira a la vez criptomonedas
+(Bitcoin, Ethereum, BNB, XRP, Solana), el dólar y la bolsa (S&P 500, IBEX 35), prevé cuánto subirá cada
+uno en 5 días y reparte el dinero según su confianza. Aprende cada día y revisa el reparto una vez por
+semana. Todo se mide en euros (el S&P 500 se convierte de dólares).
+
+- Programa: `bot_red.py` (estado en `datos_red/`, informe en `INFORME_RED.md`).
+- Ajustes: apartado `RED_...` de `config.py` (`RED_ACTIVA = False` la apaga).
+- Pruebas: `python laboratorio_red.py` → [laboratorio/RED.md](laboratorio/RED.md). En el laboratorio
+  **lo hizo peor que comprar y mantener** y no acertó la dirección de ningún mercado: está para verla
+  en directo y compararla, no porque se espere que gane.
+
 ## Ponerlo en marcha en GitHub (una sola vez)
 
 1. Crea una cuenta gratuita en [github.com](https://github.com) si no tienes.
@@ -57,6 +71,7 @@ Si cambias cómo piensa o decide el bot, sube `VERSION_MODELO`: la simulación a
 | Comando | Qué hace |
 |---|---|
 | `python laboratorio.py` | Prueba ideas con la historia real (unos 2 minutos). Ver abajo. |
+| `python laboratorio_red.py` | Prueba la red neuronal multimercado con la historia (unos 10 minutos) → `laboratorio/RED.md`. |
 | `python multimercado.py` | Compara criptomonedas, euro/dólar y bolsa (unos 5 minutos) → `laboratorio/MULTIMERCADO.md`. |
 | `python bot.py` | Simulación en directo en tu PC (Ctrl+C para parar). |
 | `python estado.py` | Resumen en la terminal + `datos_bot/informe_bot.html`. |

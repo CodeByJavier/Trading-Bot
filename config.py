@@ -54,9 +54,22 @@ INDICADORES = ["precio", "sentimiento"]
 # pero la IA estudia también los demás: en el laboratorio así predijo Bitcoin el doble de bien.
 MERCADOS_IA = ["BTCEUR", "ETHEUR", "BNBEUR", "XRPEUR"]
 
+# --- Red neuronal multimercado (simulación aparte, con su propio dinero ficticio) ----------
+# Una red neuronal mira a la vez criptomonedas, el dólar y la bolsa, y reparte la cartera según
+# su confianza. En el laboratorio (laboratorio/RED.md) lo hizo peor que comprar y mantener: está
+# en marcha para verla en directo y compararla con el bot principal.
+RED_ACTIVA = True
+RED_VERSION = "1.0"
+RED_MERCADOS = ["BTC", "ETH", "BNB", "XRP", "SOL", "USD", "SP500", "IBEX"]  # ver mercados.py
+RED_CAPITAL = 1000.0
+RED_HORIZONTE = 5          # predice 5 días vista
+RED_CADA_DIAS = 7          # revisa el reparto una vez por semana (aprende todos los días)
+RED_BANDA = 0.15           # solo cambia una posición si se desvía más de un 15 % de lo que quiere
+
 # --- Archivos ------------------------------------------------------------
 CARPETA_DATOS = os.path.join(CARPETA_PROYECTO, "datos_bot")
 CARPETA_PANEL = os.path.join(CARPETA_PROYECTO, "docs")
+CARPETA_RED = os.path.join(CARPETA_PROYECTO, "datos_red")
 RUTA_AJUSTES = os.path.join(CARPETA_PROYECTO, "ajustes.json")
 
 # Ajustes que el panel de control puede cambiar (se guardan en ajustes.json)

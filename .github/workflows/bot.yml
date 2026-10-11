@@ -36,11 +36,16 @@ jobs:
       - name: Procesar velas nuevas
         run: python bot.py --una-vez
 
+      - name: Red neuronal multimercado (simulación aparte)
+        continue-on-error: true   # si falla, el bot principal sigue funcionando igual
+        run: python bot_red.py --una-vez
+
       - name: Guardar estado en el repositorio
         run: |
           git config user.name "bot-trading"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add datos_bot docs INFORME_APRENDIZAJE.md
+          git add datos_red INFORME_RED.md 2>/dev/null || true
           if ! git diff --cached --quiet; then
             git commit -m "Bot: vela procesada"
             git pull --rebase
