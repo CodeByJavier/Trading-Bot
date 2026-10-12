@@ -1,6 +1,6 @@
 # Informe de aprendizaje del bot
 
-Actualizado: 12/10/2026 09:00 · Moneda: BTCEUR · Versión del modelo: 2.1 · Simulación iniciada: 10/10/2026 01:09
+Actualizado: 12/10/2026 09:51 · Moneda: BTCEUR · Versión del modelo: 2.1 · Simulación iniciada: 10/10/2026 01:09
 
 ## ⏳ Veredicto: Pocos datos todavía
 
@@ -28,7 +28,7 @@ Antes de conocer cada resultado se guardan dos predicciones de *"¿subirá lo su
 
 - Bot: **1014.11 €** (+1.4 %)
 - Comprar y mantener: **1014.11 €** (+1.4 %)
-- Operaciones: 1 · Comisiones pagadas: 1.00 €
+- Operaciones: 2 · Comisiones pagadas: 2.00 €
 
 ## Evolución por semanas
 
