@@ -1,6 +1,6 @@
 # Informe de aprendizaje del bot
 
-Actualizado: 12/10/2026 09:51 · Moneda: BTCEUR · Versión del modelo: 2.1 · Simulación iniciada: 10/10/2026 01:09
+Actualizado: 12/10/2026 09:59 · Moneda: BTCEUR · Versión del modelo: 2.1 · Simulación iniciada: 10/10/2026 01:09
 
 ## ⏳ Veredicto: Pocos datos todavía
 
