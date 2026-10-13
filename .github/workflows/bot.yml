@@ -6,26 +6,26 @@ on:
     # Si el primero ya procesó la vela, el segundo no hace nada.
     - cron: "7 * * * *"
     - cron: "37 * * * *"
-  workflow_dispatch:       # botón "Run workflow" para ejecutarlo a mano
+  workflow_dispatch:       # botón "Run workflow" (y el despertador externo de cron-job.org)
 
 permissions:
   contents: write
   pages: write
   id-token: write
 
-concurrency:
-  group: bot-trading
-  cancel-in-progress: false
-
 env:
   TZ: Europe/Madrid
 
 jobs:
+  # 1) Calcular y guardar. No depende de la web: si publicar se atasca, esto sigue funcionando.
   ejecutar:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.despliegue.outputs.page_url }}
+    timeout-minutes: 20
+    concurrency:
+      group: bot-estado        # una sola a la vez, para que no se pisen al guardar
+      cancel-in-progress: false
+    outputs:
+      cambios: ${{ steps.guardar.outputs.cambios }}
     steps:
       - uses: actions/checkout@v5
 
@@ -41,6 +41,7 @@ jobs:
         run: python bot_red.py --una-vez
 
       - name: Guardar estado en el repositorio
+        id: guardar
         run: |
           git config user.name "bot-trading"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -50,8 +51,27 @@ jobs:
             git commit -m "Bot: vela procesada"
             git pull --rebase
             git push
+            echo "cambios=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "cambios=false" >> "$GITHUB_OUTPUT"
           fi
 
+  # 2) Publicar la web, solo si hubo cambios. Si una publicación se atasca, la siguiente la sustituye.
+  publicar:
+    needs: ejecutar
+    if: needs.ejecutar.outputs.cambios == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: bot-web
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main              # la versión recién guardada
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

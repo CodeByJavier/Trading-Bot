@@ -35,19 +35,16 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: bot-trading
-  cancel-in-progress: false
-
 env:
   TZ: Europe/Madrid
 
 jobs:
   controlar:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.despliegue.outputs.page_url }}
+    timeout-minutes: 20
+    concurrency:
+      group: bot-estado        # la misma cola que el bot: nunca guardan a la vez
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v5
 
@@ -81,6 +78,20 @@ jobs:
             git push
           fi
 
+  publicar:
+    needs: controlar
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: bot-web
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

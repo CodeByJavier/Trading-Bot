@@ -15,12 +15,13 @@ permissions:
   id-token: write
 
 concurrency:
-  group: bot-trading
-  cancel-in-progress: false
+  group: bot-web
+  cancel-in-progress: true
 
 jobs:
   publicar:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.despliegue.outputs.page_url }}
