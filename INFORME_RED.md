@@ -1,8 +1,8 @@
 # Informe de la red neuronal multimercado
 
-Actualizado: 20/10/2026 17:01 · Versión 1.0 · Creada: 11/10/2026 08:46
+Actualizado: 20/10/2026 18:01 · Versión 1.0 · Creada: 11/10/2026 08:46
 
-**Cartera:** 979.75 € (empezó con 1000 €) · comprar y mantener repartido: 967.99 € · invertido 100 % · comisiones 4 €
+**Cartera:** 966.76 € (empezó con 1000 €) · comprar y mantener repartido: 961.53 € · invertido 100 % · comisiones 4 €
 
 **¿Acierta la dirección?** Todavía en ningún mercado (hace falta z ≥ 2; en el laboratorio no lo consiguió).
 
