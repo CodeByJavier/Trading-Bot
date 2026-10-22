@@ -1,6 +1,6 @@
 # Informe de aprendizaje del bot
 
-Actualizado: 22/10/2026 14:01 · Moneda: BTCEUR · Versión del modelo: 2.1 · Simulación iniciada: 10/10/2026 01:09
+Actualizado: 22/10/2026 15:01 · Moneda: BTCEUR · Versión del modelo: 2.1 · Simulación iniciada: 10/10/2026 01:09
 
 ## ⏳ Veredicto: Pocos datos todavía
 
@@ -19,15 +19,15 @@ Antes de conocer cada resultado se guardan dos predicciones de *"¿subirá lo su
 
 | Periodo | Predicciones | Aciertos cerebro | Aciertos adivino | Habilidad | z | Veredicto |
 |---|---:|---:|---:|---:|---:|---|
-| Últimos 30 días | 302 | 64.9 % | 54.3 % | +9.3 % | +0.53 | Pocos datos todavía |
-| Últimos 90 días | 302 | 64.9 % | 54.3 % | +9.3 % | +0.53 | Pocos datos todavía |
-| Desde el inicio (en directo) | 302 | 64.9 % | 54.3 % | +9.3 % | +0.53 | Pocos datos todavía |
+| Últimos 30 días | 303 | 65.0 % | 54.5 % | +9.4 % | +0.53 | Pocos datos todavía |
+| Últimos 90 días | 303 | 65.0 % | 54.5 % | +9.4 % | +0.53 | Pocos datos todavía |
+| Desde el inicio (en directo) | 303 | 65.0 % | 54.5 % | +9.4 % | +0.53 | Pocos datos todavía |
 | Preentrenamiento (historia previa) | 2379 | 72.6 % | 56.2 % | +24.1 % | +3.44 | Aprende algo útil |
 
 ## Resultado de la cartera ficticia
 
-- Bot: **983.94 €** (-1.6 %)
-- Comprar y mantener: **985.39 €** (-1.5 %)
+- Bot: **982.39 €** (-1.8 %)
+- Comprar y mantener: **983.83 €** (-1.6 %)
 - Operaciones: 3 · Comisiones pagadas: 3.00 €
 
 ## Evolución por semanas
@@ -38,7 +38,7 @@ Una semana sola es poco para juzgar: lo importante es la tendencia de varias sem
 |---|---|---:|---:|---:|---|---:|---:|
 | 05/10/2026 | 2.1 | 72 | -13.6 % | -0.41 | Pocos datos todavía | 1007.05 € | 1007.05 € |
 | 12/10/2026 | 2.1 | 168 | +12.6 % | +0.49 | Pocos datos todavía | 977.31 € | 978.75 € |
-| 19/10/2026 | 2.1 | 62 | +28.1 % | +1.01 | Pocos datos todavía | 1001.59 € | 1003.06 € |
+| 19/10/2026 | 2.1 | 63 | +28.2 % | +1.02 | Pocos datos todavía | 1001.64 € | 1003.11 € |
 
 ## Lo que ha aprendido (pesos del cerebro)
 
@@ -47,20 +47,20 @@ Si un peso cambia mucho de signo de una semana a otra, el cerebro está persigui
 | Indicador | Peso al empezar el diario | Peso ahora |
 |---|---:|---:|
 | Cambio última vela | -0.120 | +0.136 |
-| Cambio últimas 4 velas | -0.100 | +0.055 |
-| Cambio últimas 24 velas | -0.261 | -0.230 |
-| Distancia a la media de 24 velas | +0.134 | +0.052 |
-| Distancia a la media de 96 velas | -1.542 | -1.459 |
-| RSI 14 (fuerza compradora) | +0.118 | -0.110 |
+| Cambio últimas 4 velas | -0.100 | +0.053 |
+| Cambio últimas 24 velas | -0.261 | -0.238 |
+| Distancia a la media de 24 velas | +0.134 | +0.048 |
+| Distancia a la media de 96 velas | -1.542 | -1.464 |
+| RSI 14 (fuerza compradora) | +0.118 | -0.116 |
 | Volatilidad 24 velas | +0.306 | -0.334 |
-| Volumen relativo | +0.095 | +0.097 |
-| Tamaño de la última vela | +0.072 | -0.046 |
-| Fear & Greed (miedo/codicia) | -1.276 | -1.009 |
-| Cambio del Fear & Greed en 7 días | -0.411 | -0.940 |
+| Volumen relativo | +0.095 | +0.101 |
+| Tamaño de la última vela | +0.072 | -0.040 |
+| Fear & Greed (miedo/codicia) | -1.276 | -1.013 |
+| Cambio del Fear & Greed en 7 días | -0.411 | -0.936 |
 
 ## ¿Cuándo revisar y retocar?
 
-- **Próxima revisión recomendada: 09/11/2026**. Llevamos 302 predicciones evaluadas en directo.
+- **Próxima revisión recomendada: 09/11/2026**. Llevamos 303 predicciones evaluadas en directo.
 - No toques nada antes de 30 días: con menos datos cualquier conclusión es ruido.
 - Después, revisa **una vez al mes**. Cambia **una sola cosa** cada vez, sube `VERSION_MODELO` en `config.py` y apunta el cambio en `CAMBIOS.md`.
 - Si tras 2-3 meses ninguna versión llega a "Aprende algo útil", lo más probable es que no haya patrón aprovechable con estos indicadores: es un resultado válido, no un fallo.
