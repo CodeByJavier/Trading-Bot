@@ -1,8 +1,8 @@
 # Informe de la red neuronal multimercado
 
-Actualizado: 15/11/2026 00:01 · Versión 1.0 · Creada: 11/10/2026 08:46
+Actualizado: 15/11/2026 01:01 · Versión 1.0 · Creada: 11/10/2026 08:46
 
-**Cartera:** 805.52 € (empezó con 1000 €) · comprar y mantener repartido: 811.45 € · invertido 59 % · comisiones 11 €
+**Cartera:** 809.06 € (empezó con 1000 €) · comprar y mantener repartido: 817.88 € · invertido 90 % · comisiones 13 €
 
 **¿Acierta la dirección?** Todavía en ningún mercado (hace falta z ≥ 2; en el laboratorio no lo consiguió).
 
@@ -10,13 +10,13 @@ IC = correlación entre lo que prevé y lo que pasa (0 = azar). Sus predicciones
 
 | Mercado | Peso ahora | Prevé (5 días) | IC en directo |
 |---|---:|---:|---|
-| Bitcoin | 0 % | +7.2 % | -0.131 (z -0.3) · dirección 37 % · 35 predicciones |
-| Ethereum | 18 % | +10.0 % | -0.297 (z -0.8) · dirección 29 % · 35 predicciones |
-| BNB | 0 % | +5.7 % | +0.051 (z +0.1) · dirección 40 % · 35 predicciones |
-| XRP | 20 % | +8.2 % | -0.245 (z -0.6) · dirección 40 % · 35 predicciones |
-| Solana | 20 % | +9.8 % | -0.013 (z -0.0) · dirección 31 % · 35 predicciones |
-| Dólar | 0 % | -0.1 % | +0.296 (z +0.8) · dirección 66 % · 35 predicciones |
-| S&P 500 | 0 % | +1.8 % | +0.180 (z +0.5) · dirección 43 % · 35 predicciones |
-| IBEX 35 | 0 % | +1.2 % | +0.132 (z +0.3) · dirección 57 % · 35 predicciones |
+| Bitcoin | 15 % | +8.0 % | +0.094 (z +0.3) · dirección 39 % · 36 predicciones |
+| Ethereum | 18 % | +11.1 % | -0.087 (z -0.2) · dirección 31 % · 36 predicciones |
+| BNB | 16 % | +8.0 % | +0.237 (z +0.6) · dirección 42 % · 36 predicciones |
+| XRP | 21 % | +9.0 % | -0.098 (z -0.3) · dirección 42 % · 36 predicciones |
+| Solana | 20 % | +13.6 % | +0.181 (z +0.5) · dirección 33 % · 36 predicciones |
+| Dólar | 0 % | -0.3 % | +0.242 (z +0.6) · dirección 64 % · 36 predicciones |
+| S&P 500 | 0 % | +0.6 % | +0.154 (z +0.4) · dirección 44 % · 36 predicciones |
+| IBEX 35 | 0 % | +0.1 % | +0.125 (z +0.3) · dirección 58 % · 36 predicciones |
 
 **Con la historia previa (último año antes de empezar):** Bitcoin IC -0.095, Ethereum IC -0.033, BNB IC +0.035, XRP IC -0.014, Solana IC -0.069, Dólar IC -0.052, S&P 500 IC +0.131, IBEX 35 IC -0.006
