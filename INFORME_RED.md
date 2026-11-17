@@ -1,8 +1,8 @@
 # Informe de la red neuronal multimercado
 
-Actualizado: 17/11/2026 06:01 · Versión 1.0 · Creada: 11/10/2026 08:46
+Actualizado: 17/11/2026 07:01 · Versión 1.0 · Creada: 11/10/2026 08:46
 
-**Cartera:** 834.89 € (empezó con 1000 €) · comprar y mantener repartido: 829.89 € · invertido 91 % · comisiones 13 €
+**Cartera:** 832.14 € (empezó con 1000 €) · comprar y mantener repartido: 828.20 € · invertido 91 % · comisiones 13 €
 
 **¿Acierta la dirección?** Todavía en ningún mercado (hace falta z ≥ 2; en el laboratorio no lo consiguió).
 
@@ -11,7 +11,7 @@ IC = correlación entre lo que prevé y lo que pasa (0 = azar). Sus predicciones
 | Mercado | Peso ahora | Prevé (5 días) | IC en directo |
 |---|---:|---:|---|
 | Bitcoin | 15 % | -5.7 % | +0.172 (z +0.5) · dirección 42 % · 38 predicciones |
-| Ethereum | 18 % | -7.3 % | -0.016 (z -0.0) · dirección 34 % · 38 predicciones |
+| Ethereum | 19 % | -7.3 % | -0.016 (z -0.0) · dirección 34 % · 38 predicciones |
 | BNB | 15 % | -7.3 % | +0.322 (z +0.9) · dirección 45 % · 38 predicciones |
 | XRP | 21 % | -5.4 % | -0.063 (z -0.2) · dirección 45 % · 38 predicciones |
 | Solana | 20 % | -5.7 % | +0.230 (z +0.6) · dirección 37 % · 38 predicciones |
