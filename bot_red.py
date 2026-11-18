@@ -184,7 +184,8 @@ def exportar(estado, est, cartera, datos):
         "operaciones": [dict(o, nombre=M.nombre(o["mercado"])) for o in cartera.operaciones[-200:]],
         "eventos": estado.get("eventos", [])[-50:],
         "preentrenamiento": estado.get("preentrenamiento"),
-        "riesgo": riesgo.comparar([h["valor"] for h in historial], [h["referencia"] for h in historial]),
+        "riesgo": riesgo.comparar([h["valor"] for h in historial], [h["referencia"] for h in historial],
+                                  inicial=config.RED_CAPITAL),
     }
     os.makedirs(config.CARPETA_PANEL, exist_ok=True)
     with open(RUTA_PANEL, "w", encoding="utf-8") as archivo:

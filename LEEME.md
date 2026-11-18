@@ -72,6 +72,7 @@ Si cambias cómo piensa o decide el bot, sube `VERSION_MODELO`: la simulación a
 |---|---|
 | `python laboratorio.py` | Prueba ideas con la historia real (unos 2 minutos). Ver abajo. |
 | `python laboratorio_red.py` | Prueba la red neuronal multimercado con la historia (unos 10 minutos) → `laboratorio/RED.md`. |
+| `python laboratorio_riesgo.py` | ¿Cuánto meter en cada compra? Tamaño de posición y filtros (funding, Fear & Greed) sobre la regla de tendencia (1 minuto) → `laboratorio/RIESGO.md`. Ninguno mejoró a invertirlo todo. |
 | `python multimercado.py` | Compara criptomonedas, euro/dólar y bolsa (unos 5 minutos) → `laboratorio/MULTIMERCADO.md`. |
 | `python bot.py` | Simulación en directo en tu PC (Ctrl+C para parar). |
 | `python estado.py` | Resumen en la terminal + `datos_bot/informe_bot.html`. |

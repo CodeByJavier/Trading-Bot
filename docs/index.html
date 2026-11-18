@@ -1163,7 +1163,7 @@ function pintarRiesgo(id, riesgo, nombre) {
     caja.appendChild(dl);
     cont.appendChild(caja);
   });
-  if (e.pocos_datos) cont.appendChild(el("p", "Con menos de una semana de datos estas cifras todavía cambian mucho.", "nota"));
+  if (e.pocos_datos) cont.appendChild(el("p", "Con menos de 3 meses de datos estas cifras, sobre todo el Sharpe, todavía cambian mucho: no saques conclusiones aún.", "nota"));
 }
 
 /* ---------- Pestañas ---------- */

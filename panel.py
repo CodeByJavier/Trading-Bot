@@ -65,7 +65,8 @@ def exportar_panel(estado, cerebro, cartera):
         "tendencia": estado.get("tendencia"),
         "horizonte_texto": _duracion(config.HORIZONTE, estado["intervalo"]),
         "mercados_ia": [nombre_mercado(m) for m in estado.get("mercados_ia", [estado["simbolo"]])],
-        "riesgo": riesgo.comparar([p["bot"] for p in historial], [p["referencia"] for p in historial]),
+        "riesgo": riesgo.comparar([p["bot"] for p in historial], [p["referencia"] for p in historial],
+                                  inicial=config.CAPITAL_INICIAL),
         "aprendizaje": {"veredicto": clave, "icono": icono, "titulo": titulo, "explicacion": explicacion,
                         "periodos": [dict(r, nombre=nombre) for nombre, r in lineas]},
     }
