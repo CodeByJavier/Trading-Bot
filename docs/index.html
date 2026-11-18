@@ -103,7 +103,8 @@ a { color: inherit; }
 
 /* ===================== Contenido ===================== */
 section, #aviso { scroll-margin-top: 90px; }
-main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 40px; display: grid; gap: 16px; }
+main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 40px; }
+.vista { display: grid; gap: 16px; }
 .tarjeta { padding: 20px; min-width: 0; }
 .titulo-tarjeta { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
 .titulo-tarjeta h2 { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
@@ -112,7 +113,7 @@ main { max-width: 1180px; margin: 0 auto; padding: 20px 16px 40px; display: grid
 .bien { color: var(--bien); } .mal { color: var(--mal); }
 
 /* Aparición escalonada */
-.aparece { opacity: 0; transform: translateY(10px); animation: aparecer .6s cubic-bezier(.2, .7, .2, 1) forwards; }
+.kpis > .aparece { opacity: 0; transform: translateY(10px); animation: aparecer .6s cubic-bezier(.2, .7, .2, 1) forwards; }
 @keyframes aparecer { to { opacity: 1; transform: none; } }
 
 /* Aviso de datos antiguos */
@@ -173,7 +174,7 @@ details summary:hover { color: var(--texto); }
 .texto-piensa { font-size: .88rem; color: var(--texto-2); text-align: center; max-width: 46ch; margin: 0 auto; }
 
 /* Regla de tendencia */
-.etiqueta-bloque { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-3); margin: 14px 0 8px; }
+.etiqueta-bloque { font-size: .8rem; font-weight: 600; color: var(--texto-3); margin: 14px 0 8px; }
 .bloque-decision { padding: 16px; border-radius: 16px; background: var(--vidrio); border: 1px solid var(--borde-suave); margin-top: 12px; }
 .bloque-decision .etiqueta-bloque { margin-top: 0; }
 .estado-tendencia { font-size: 1.3rem; font-weight: 700; letter-spacing: -.01em; }
@@ -203,7 +204,7 @@ details summary:hover { color: var(--texto); }
 .tabla { overflow-x: auto; margin: 0 -4px; padding: 0 4px; }
 table { border-collapse: collapse; width: 100%; font-size: .84rem; }
 th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rejilla); white-space: nowrap; }
-th { color: var(--texto-3); font-weight: 500; font-size: .76rem; text-transform: uppercase; letter-spacing: .04em; }
+th { color: var(--texto-3); font-weight: 500; font-size: .8rem; }
 td.num, th.num { text-align: right; }
 tbody tr { transition: background .15s; }
 tbody tr:hover { background: var(--vidrio-fuerte); }
@@ -239,7 +240,7 @@ tr:last-child td { border-bottom: 0; }
 .pasos li::before { content: counter(paso); flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
   font-weight: 700; font-size: .8rem; color: #fff; background: linear-gradient(135deg, var(--bot), var(--bot-2)); }
 .pasos strong { color: var(--texto); }
-.subtitulo-seccion { font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--texto-3); margin: 22px 0 10px; }
+.subtitulo-seccion { font-size: .9rem; font-weight: 600; color: var(--texto-2); margin: 22px 0 10px; }
 .acciones { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 12px; margin: 0 0 20px; }
 .accion { display: grid; grid-template-columns: 38px minmax(0, 1fr); column-gap: 14px; row-gap: 10px; align-items: center;
   align-content: start; padding: 18px 20px; border-radius: 16px; min-width: 0;
@@ -289,6 +290,37 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
 .marca-umbral { position: absolute; top: -5px; bottom: -5px; border-left: 2px solid var(--bien); margin-left: -1px; opacity: .8; }
 @media (max-width: 420px) { .pestanas button span { display: none; } }
 
+
+/* Pestaña elegida: además del color, una raya debajo (se ve también en modo de alto contraste) */
+.pestanas button { position: relative; }
+.pestanas button[aria-selected="true"]::after { content: ""; position: absolute; inset: auto 18% 3px; border-block-end: 3px solid #fff; border-radius: 3px; }
+@media (forced-colors: active) { .pestanas button[aria-selected="true"]::after { border-color: Highlight; } }
+
+/* Tablas: desplazables con teclado; en espacios estrechos, cada fila se convierte en una ficha */
+.tabla { container-type: inline-size; }
+.tabla:focus-visible { outline: 2px solid var(--bot); outline-offset: 2px; border-radius: 8px; }
+@container (width < 560px) {
+  .apilable, .apilable thead, .apilable tbody, .apilable tr, .apilable th, .apilable td { display: block; }
+  .apilable thead { display: none; }
+  .apilable tr { padding: 12px 14px; margin-block-end: 10px; border-radius: 14px; background: var(--vidrio); border: 1px solid var(--borde-suave); }
+  .apilable tbody tr:hover { background: var(--vidrio); }
+  .apilable td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 5px 0; border: 0; white-space: normal; text-align: right; }
+  .apilable td:first-child { justify-content: flex-start; text-align: left; font-weight: 600; padding-block-end: 8px; }
+  .apilable td[data-etiqueta]:not(:first-child)::before { content: attr(data-etiqueta); color: var(--texto-3); font-size: .8rem; text-align: left; }
+  .apilable td[colspan] { justify-content: flex-start; text-align: left; }
+  .apilable .prevision { min-width: 0; flex: 1; max-width: 230px; grid-template-columns: minmax(0, 1fr) auto; }
+}
+
+/* Riesgo */
+.riesgo { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 10px; margin-top: 14px; }
+.medida { padding: 14px 16px; border-radius: 14px; background: var(--vidrio); border: 1px solid var(--borde-suave); }
+.medida h3 { font-size: .9rem; font-weight: 600; margin: 0 0 2px; }
+.medida p { font-size: .8rem; color: var(--texto-3); margin: 0 0 10px; }
+.medida dl { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin: 0; font-size: .86rem; }
+.medida dt { color: var(--texto-2); }
+.medida dd { margin: 0; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.medida dd.mejor::after { content: " ✓"; color: var(--bien); }
+
 /* ===================== Responsive ===================== */
 @media (max-width: 960px) {
   .kpis { grid-template-columns: 1fr 1fr; grid-template-areas: "dest dest" "a b" "c d"; }
@@ -337,13 +369,14 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
 </header>
 
 <nav class="pestanas" aria-label="Simulaciones">
-  <div class="pestanas-int vidrio" role="tablist">
-    <button type="button" role="tab" data-vista="bot" aria-selected="true">₿ Bot Bitcoin <span>regla de tendencia</span></button>
-    <button type="button" role="tab" data-vista="red" aria-selected="false">🧠 Red neuronal <span>8 mercados</span></button>
+  <div class="pestanas-int vidrio" role="tablist" aria-label="Simulaciones">
+    <button type="button" role="tab" id="pestana-bot" data-vista="bot" aria-selected="true" tabindex="0">₿ Bot Bitcoin <span>regla de tendencia</span></button>
+    <button type="button" role="tab" id="pestana-red" data-vista="red" aria-selected="false" tabindex="-1">🧠 Red neuronal <span>8 mercados</span></button>
   </div>
 </nav>
 
-<main id="vista-bot">
+<main id="contenido">
+<div id="vista-bot" class="vista" role="tabpanel" aria-labelledby="pestana-bot">
   <div id="aviso"></div>
 
   <section class="kpis cargando" id="kpis" aria-label="Resumen">
@@ -398,7 +431,13 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
       <span><span class="clave" style="border-color:var(--ref); border-top-style:dashed"></span>Comprar y mantener</span>
     </div>
     <div class="grafica" id="grafica"><svg id="svg" role="img" aria-label="Evolución del valor del bot y de comprar y mantener"></svg><div class="tooltip vidrio" id="tooltip"></div></div>
-    <details><summary>Ver los datos en tabla</summary><div class="tabla"><table id="tabla-historial"></table></div></details>
+    <details><summary>Ver los datos en tabla</summary><div class="tabla" tabindex="0" role="region" aria-label="Historial del bot"><table id="tabla-historial"></table></div></details>
+  </section>
+
+  <section class="vidrio tarjeta">
+    <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/></svg><h2>¿Cuánto riesgo corre?</h2></div>
+    <p class="nota">Ganar no lo es todo: importa cuánto se sufre por el camino. Comparamos el bot con comprar y mantener desde el primer día. La marca ✓ señala el que corre menos riesgo o gana más.</p>
+    <div class="riesgo" id="riesgo-bot"><p class="nota">Aparecerá cuando haya unas horas de datos.</p></div>
   </section>
 
   <div class="dos">
@@ -445,7 +484,7 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
   <section class="vidrio tarjeta aparece" style="animation-delay:.5s">
     <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><h2>Operaciones</h2></div>
     <p class="nota" style="margin-bottom:8px">Más recientes primero. Todo con dinero ficticio.</p>
-    <div class="tabla"><table id="tabla-ops"></table></div>
+    <div class="tabla" tabindex="0" role="region" aria-label="Operaciones del bot"><table id="tabla-ops" class="apilable"></table></div>
   </section>
 
   <section class="vidrio tarjeta aparece" style="animation-delay:.55s" id="controles">
@@ -466,9 +505,9 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
     </div>
     <div class="botones" id="botones-control"></div>
   </section>
-</main>
+</div>
 
-<main id="vista-red" hidden>
+<div id="vista-red" class="vista" role="tabpanel" aria-labelledby="pestana-red" hidden>
   <div class="vidrio aviso aviso-red">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/><path d="M7.5 15h9"/></svg>
     <div><strong>Experimento con dinero ficticio aparte.</strong> Una red neuronal mira a la vez criptomonedas, el dólar y la bolsa, y reparte 1.000 € según su confianza.
@@ -528,14 +567,20 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
       <span><span class="clave" style="border-color:var(--ref); border-top-style:dashed"></span>Comprar y mantener repartido</span>
     </div>
     <div class="grafica"><svg id="svg-red" role="img" aria-label="Evolución de la cartera de la red y de comprar y mantener repartido"></svg><div class="tooltip vidrio" id="tooltip-red"></div></div>
-    <details><summary>Ver los datos en tabla</summary><div class="tabla"><table id="tabla-historial-red"></table></div></details>
+    <details><summary>Ver los datos en tabla</summary><div class="tabla" tabindex="0" role="region" aria-label="Historial de la red"><table id="tabla-historial-red"></table></div></details>
+  </section>
+
+  <section class="vidrio tarjeta">
+    <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/></svg><h2>¿Cuánto riesgo corre?</h2></div>
+    <p class="nota">Ganar no lo es todo: importa cuánto se sufre por el camino. Comparamos la red con comprar y mantener desde el primer día. La marca ✓ señala el que corre menos riesgo o gana más.</p>
+    <div class="riesgo" id="riesgo-red"><p class="nota">Aparecerá cuando haya unas horas de datos.</p></div>
   </section>
 
   <section class="vidrio tarjeta aparece" style="animation-delay:.3s">
     <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3 0-5 2-5 4.5 0 1 .3 1.8.8 2.5A4 4 0 0 0 6 17a3.5 3.5 0 0 0 6 2.5A3.5 3.5 0 0 0 18 17a4 4 0 0 0-1.8-7c.5-.7.8-1.5.8-2.5C17 5 15 3 12 3zM12 3v16.5"/></svg><h2>¿Qué piensa la red de cada mercado?</h2></div>
     <p class="nota" style="margin-bottom:8px">Cuánto cree que subirá cada mercado en los próximos 5 días, mirando todos a la vez. Solo invierte donde la subida prevista supera
       un <span id="red-umbral">1</span> % (lo que cuestan las comisiones); la raya vertical marca ese límite. "Tiene" es su reparto actual; "Quiere", el que buscará en la próxima revisión.</p>
-    <div class="tabla"><table id="tabla-mercados" class="tabla-mercados"></table></div>
+    <div class="tabla" tabindex="0" role="region" aria-label="Qué piensa la red de cada mercado"><table id="tabla-mercados" class="tabla-mercados apilable"></table></div>
   </section>
 
   <div class="dos">
@@ -553,8 +598,9 @@ footer { text-align: center; color: var(--texto-3); font-size: .78rem; padding: 
   <section class="vidrio tarjeta aparece" style="animation-delay:.45s">
     <div class="titulo-tarjeta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><h2>Operaciones de la red</h2></div>
     <p class="nota" style="margin-bottom:8px">Más recientes primero. Todo con dinero ficticio.</p>
-    <div class="tabla"><table id="tabla-ops-red"></table></div>
+    <div class="tabla" tabindex="0" role="region" aria-label="Operaciones de la red"><table id="tabla-ops-red" class="apilable"></table></div>
   </section>
+</div>
 </main>
 
 <footer>Simulación educativa con precios reales y dinero ficticio · No es asesoramiento financiero</footer>
@@ -618,7 +664,7 @@ function pintarKpis() {
   const d = datos, u = d.ultimo, cap = d.capital_inicial;
   $("kpis").classList.remove("cargando");
   const quien = d.estrategia === "tendencia" ? "decide la tendencia diaria" : d.estrategia === "tendencia_ia" ? "deciden tendencia + IA" : "decide la IA";
-  $("subtitulo").textContent = `${d.simbolo} · ${quien} · ${eurosCortos.format(cap)} ficticios desde el ${d.creado.split(" ")[0]} · v${d.version || "1.0"}`;
+  $("subtitulo").textContent = `${eurosCortos.format(cap)} ficticios en ${d.simbolo.slice(0, -3)} desde el ${d.creado.split(" ")[0]}; ${quien} (versión ${d.version || "1.0"}).`;
   const estado = $("estado-bot");
   estado.querySelector(".punto").classList.toggle("pausa", d.pausado);
   estado.lastChild.textContent = d.pausado ? "En pausa" : "Activo";
@@ -806,6 +852,7 @@ function pintarOperaciones() {
     cuerpo.appendChild(fila([[o.fecha], [chip], [euros.format(o.precio), "num"], [euros.format(o.comision), "num"], res]));
   });
   t.append(cab, cuerpo);
+  etiquetar(t);
 }
 function pintarEventos() {
   const ul = $("eventos"); ul.replaceChildren();
@@ -951,7 +998,7 @@ const TIPOS = { cripto: "Cripto", divisa: "Divisa", bolsa: "Bolsa" };
 
 function pintarCabeceraRed() {
   if (!red) return;
-  $("subtitulo").textContent = `8 mercados · decide la red neuronal · ${eurosCortos.format(red.capital)} ficticios desde el ${red.creado.split(" ")[0]} · v${red.version}`;
+  $("subtitulo").textContent = `${eurosCortos.format(red.capital)} ficticios en 8 mercados desde el ${red.creado.split(" ")[0]}; decide la red neuronal (versión ${red.version}).`;
   const estado = $("estado-bot");
   estado.querySelector(".punto").classList.toggle("pausa", red.pausado);
   estado.lastChild.textContent = red.pausado ? "En pausa" : "Experimento";
@@ -1023,6 +1070,7 @@ function pintarRed() {
       [barra], [Math.round(m.peso * 100) + " %", "num"], [Math.round(m.objetivo * 100) + " %", "num"]]));
   });
   t.append(cab, cuerpo);
+  etiquetar(t);
 
   // ¿Acierta?
   const a = $("tabla-acierto"); a.replaceChildren();
@@ -1059,9 +1107,11 @@ function pintarRed() {
     cuerpoO.appendChild(fila([[op.fecha], [op.nombre], [chip], [euros.format(op.euros), "num"], [euros.format(op.comision), "num"], res]));
   });
   o.append(cabO, cuerpoO);
+  etiquetar(o);
 
   const ul = $("eventos-red"); ul.replaceChildren();
   [...red.eventos].reverse().forEach((e) => { const li = el("li"); li.append(el("span", e.fecha, "cuando"), document.createTextNode(e.texto)); ul.appendChild(li); });
+  pintarRiesgo("riesgo-red", red.riesgo, "Red neuronal");
   pintarGraficaRed();
 }
 
@@ -1079,19 +1129,71 @@ async function cargarRed() {
   if (vista === "red") pintarRed();
 }
 
+
+/* Etiqueta cada celda con el nombre de su columna (para la vista en fichas del móvil) */
+function etiquetar(tabla) {
+  const nombres = [...tabla.querySelectorAll("thead th")].map((th) => th.textContent);
+  tabla.querySelectorAll("tbody tr").forEach((tr) => [...tr.children].forEach((td, i) => {
+    if (nombres[i] && !td.hasAttribute("colspan")) td.dataset.etiqueta = nombres[i];
+  }));
+}
+
+/* Riesgo: estrategia frente a comprar y mantener */
+function pintarRiesgo(id, riesgo, nombre) {
+  const cont = $(id);
+  const e = riesgo && riesgo.estrategia, r = riesgo && riesgo.referencia;
+  cont.replaceChildren();
+  if (!e || !r) { cont.appendChild(el("p", "Aparecerá cuando haya unas horas de datos.", "nota")); return; }
+  const p = (v) => v == null ? "—" : pct(v * 100);
+  const n = (v) => v == null ? "—" : v.toFixed(2).replace(".", ",");
+  const medidas = [
+    ["Resultado", "Lo ganado o perdido desde el primer día.", e.rentabilidad, r.rentabilidad, p, true],
+    ["Peor caída", "La mayor bajada desde un máximo: lo peor que se ha llegado a perder por el camino.", e.caida_maxima, r.caida_maxima, (v) => v == null ? "—" : "−" + (v * 100).toFixed(1).replace(".", ",") + " %", false],
+    ["Un día malo", "Lo que se pierde en un día malo (el peor de cada 20 días). " + (e.var_dia == null ? "Necesita al menos 20 días." : ""), e.var_dia, r.var_dia, (v) => v == null ? "—" : "−" + (v * 100).toFixed(1).replace(".", ",") + " %", false],
+    ["Volatilidad", "Cuánto se mueve el valor, en % al año. Menos es más tranquilo.", e.volatilidad, r.volatilidad, (v) => v == null ? "—" : (v * 100).toFixed(0) + " %", false],
+    ["Ratio de Sharpe", "Ganancia por cada unidad de riesgo. Por encima de 1 es bueno; negativo, pierde dinero.", e.sharpe, r.sharpe, n, true],
+  ];
+  medidas.forEach(([titulo, explicacion, ve, vr, formato, mayorEsMejor]) => {
+    const caja = el("article", null, "medida");
+    caja.append(el("h3", titulo), el("p", explicacion));
+    const dl = document.createElement("dl");
+    const mejorE = ve != null && vr != null && (mayorEsMejor ? ve > vr : ve < vr);
+    const mejorR = ve != null && vr != null && (mayorEsMejor ? vr > ve : vr < ve);
+    dl.append(el("dt", nombre), el("dd", formato(ve), mejorE ? "mejor" : ""), el("dt", "Comprar y mantener"), el("dd", formato(vr), mejorR ? "mejor" : ""));
+    caja.appendChild(dl);
+    cont.appendChild(caja);
+  });
+  if (e.pocos_datos) cont.appendChild(el("p", "Con menos de una semana de datos estas cifras todavía cambian mucho.", "nota"));
+}
+
 /* ---------- Pestañas ---------- */
 let vista = "bot";
 function mostrarVista(nueva) {
   vista = nueva;
   $("vista-bot").hidden = nueva !== "bot";
   $("vista-red").hidden = nueva !== "red";
-  document.querySelectorAll(".pestanas button").forEach((b) => b.setAttribute("aria-selected", b.dataset.vista === nueva));
+  document.querySelectorAll(".pestanas button").forEach((b) => {
+    b.setAttribute("aria-selected", b.dataset.vista === nueva);
+    b.tabIndex = b.dataset.vista === nueva ? 0 : -1;  // solo la pestaña elegida es una parada del tabulador
+  });
   try { localStorage.setItem("vista", nueva); } catch (e) {}
   history.replaceState(null, "", nueva === "red" ? "#red" : location.pathname + location.search);
   if (nueva === "red") { red ? pintarRed() : cargarRed(); }
   else if (datos) { pintarKpis(); pintarGrafica(); }
 }
 document.querySelectorAll(".pestanas button").forEach((b) => b.addEventListener("click", () => mostrarVista(b.dataset.vista)));
+// Flechas, Inicio y Fin mueven el foco entre pestañas; Intro o Espacio la eligen (cambia la dirección de la página)
+document.querySelector(".pestanas [role=tablist]").addEventListener("keydown", (evento) => {
+  const pestanas = [...document.querySelectorAll(".pestanas button")];
+  const actual = pestanas.indexOf(document.activeElement);
+  if (actual < 0) return;
+  const destino = { ArrowRight: actual + 1, ArrowLeft: actual - 1, Home: 0, End: pestanas.length - 1 }[evento.key];
+  if (destino === undefined) return;
+  evento.preventDefault();
+  const siguiente = pestanas[(destino + pestanas.length) % pestanas.length];
+  pestanas.forEach((p) => { p.tabIndex = p === siguiente ? 0 : -1; });
+  siguiente.focus();
+});
 
 /* ---------- Carga ---------- */
 async function cargar() {
@@ -1105,6 +1207,7 @@ async function cargar() {
     return;
   }
   pintarKpis(); pintarTendencia(); pintarMedidor(); pintarAprendizaje(); pintarPesos(); pintarOperaciones(); pintarEventos(); pintarControles(); pintarGrafica();
+  pintarRiesgo("riesgo-bot", datos.riesgo, "Bot");
   if (vista === "red") pintarCabeceraRed();
 }
 let inicial = "bot";

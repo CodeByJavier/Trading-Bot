@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 
 import aprendizaje
 import config
+import riesgo
 
 
 NOMBRES_MERCADOS = {"BTCEUR": "Bitcoin", "ETHEUR": "Ethereum", "BNBEUR": "BNB", "XRPEUR": "XRP",
@@ -64,6 +65,7 @@ def exportar_panel(estado, cerebro, cartera):
         "tendencia": estado.get("tendencia"),
         "horizonte_texto": _duracion(config.HORIZONTE, estado["intervalo"]),
         "mercados_ia": [nombre_mercado(m) for m in estado.get("mercados_ia", [estado["simbolo"]])],
+        "riesgo": riesgo.comparar([p["bot"] for p in historial], [p["referencia"] for p in historial]),
         "aprendizaje": {"veredicto": clave, "icono": icono, "titulo": titulo, "explicacion": explicacion,
                         "periodos": [dict(r, nombre=nombre) for nombre, r in lineas]},
     }
