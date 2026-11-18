@@ -16,15 +16,15 @@ permissions:
 
 concurrency:
   group: bot-web
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   publicar:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment:
       name: github-pages
-      url: ${{ steps.despliegue.outputs.page_url }}
+      url: ${{ steps.despliegue.outputs.page_url || steps.reintento.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
@@ -32,4 +32,11 @@ jobs:
         with:
           path: docs
       - id: despliegue
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Esperar antes de reintentar
+        if: steps.despliegue.outcome == 'failure'
+        run: sleep 60
+      - id: reintento
+        if: steps.despliegue.outcome == 'failure'
         uses: actions/deploy-pages@v4

@@ -2,11 +2,10 @@ name: Bot cada hora
 
 on:
   schedule:
-    # Dos intentos por hora: GitHub a veces retrasa o se salta tareas programadas.
-    # Si el primero ya procesó la vela, el segundo no hace nada.
+    # Respaldo por si falla el despertador externo (cron-job.org). GitHub a veces se los salta.
     - cron: "7 * * * *"
     - cron: "37 * * * *"
-  workflow_dispatch:       # botón "Run workflow" (y el despertador externo de cron-job.org)
+  workflow_dispatch:       # botón "Run workflow" y el despertador externo de cron-job.org
 
 permissions:
   contents: write
@@ -17,9 +16,9 @@ env:
   TZ: Europe/Madrid
 
 jobs:
-  # 1) Calcular y guardar. No depende de la web: si publicar se atasca, esto sigue funcionando.
+  # 1) Calcular y guardar. No depende de la web: si publicar falla, esto sigue funcionando.
   ejecutar:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     concurrency:
       group: bot-estado        # una sola a la vez, para que no se pisen al guardar
@@ -28,6 +27,8 @@ jobs:
       cambios: ${{ steps.guardar.outputs.cambios }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: main              # el estado MÁS RECIENTE (no el del momento en que se lanzó)
 
       - uses: actions/setup-python@v6
         with:
@@ -42,32 +43,20 @@ jobs:
 
       - name: Guardar estado en el repositorio
         id: guardar
-        run: |
-          git config user.name "bot-trading"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add datos_bot docs INFORME_APRENDIZAJE.md
-          git add datos_red INFORME_RED.md 2>/dev/null || true
-          if ! git diff --cached --quiet; then
-            git commit -m "Bot: vela procesada"
-            git pull --rebase
-            git push
-            echo "cambios=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "cambios=false" >> "$GITHUB_OUTPUT"
-          fi
+        run: bash .github/guardar.sh "Bot: vela procesada" datos_bot docs INFORME_APRENDIZAJE.md datos_red INFORME_RED.md
 
-  # 2) Publicar la web, solo si hubo cambios. Si una publicación se atasca, la siguiente la sustituye.
+  # 2) Publicar la web, solo si hubo cambios. Si GitHub la rechaza, espera y lo reintenta una vez.
   publicar:
     needs: ejecutar
     if: needs.ejecutar.outputs.cambios == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
       group: bot-web
-      cancel-in-progress: true
+      cancel-in-progress: false
     environment:
       name: github-pages
-      url: ${{ steps.despliegue.outputs.page_url }}
+      url: ${{ steps.despliegue.outputs.page_url || steps.reintento.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -77,4 +66,11 @@ jobs:
         with:
           path: docs
       - id: despliegue
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Esperar antes de reintentar
+        if: steps.despliegue.outcome == 'failure'
+        run: sleep 60
+      - id: reintento
+        if: steps.despliegue.outcome == 'failure'
         uses: actions/deploy-pages@v4

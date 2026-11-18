@@ -40,13 +40,15 @@ env:
 
 jobs:
   controlar:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     concurrency:
       group: bot-estado        # la misma cola que el bot: nunca guardan a la vez
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v5
+        with:
+          ref: main              # el estado MÁS RECIENTE
 
       - uses: actions/setup-python@v6
         with:
@@ -67,27 +69,18 @@ jobs:
       - name: Guardar estado en el repositorio
         env:
           ACCION: ${{ inputs.accion }}
-        run: |
-          git config user.name "bot-trading"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A datos_bot docs INFORME_APRENDIZAJE.md
-          if [ -f ajustes.json ]; then git add ajustes.json; fi
-          if ! git diff --cached --quiet; then
-            git commit -m "Control: $ACCION"
-            git pull --rebase
-            git push
-          fi
+        run: bash .github/guardar.sh "Control: $ACCION" datos_bot docs INFORME_APRENDIZAJE.md ajustes.json
 
   publicar:
     needs: controlar
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
       group: bot-web
-      cancel-in-progress: true
+      cancel-in-progress: false
     environment:
       name: github-pages
-      url: ${{ steps.despliegue.outputs.page_url }}
+      url: ${{ steps.despliegue.outputs.page_url || steps.reintento.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -97,4 +90,11 @@ jobs:
         with:
           path: docs
       - id: despliegue
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+      - name: Esperar antes de reintentar
+        if: steps.despliegue.outcome == 'failure'
+        run: sleep 60
+      - id: reintento
+        if: steps.despliegue.outcome == 'failure'
         uses: actions/deploy-pages@v4
