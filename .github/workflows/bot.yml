@@ -43,7 +43,8 @@ jobs:
 
       - name: Guardar estado en el repositorio
         id: guardar
-        run: bash .github/guardar.sh "Bot: vela procesada" datos_bot docs INFORME_APRENDIZAJE.md datos_red INFORME_RED.md
+        run: |
+          bash .github/guardar.sh "Bot: vela procesada" datos_bot docs INFORME_APRENDIZAJE.md datos_red INFORME_RED.md
 
   # 2) Publicar la web, solo si hubo cambios. Si GitHub la rechaza, espera y lo reintenta una vez.
   publicar:

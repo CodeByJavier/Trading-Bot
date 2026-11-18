@@ -69,7 +69,8 @@ jobs:
       - name: Guardar estado en el repositorio
         env:
           ACCION: ${{ inputs.accion }}
-        run: bash .github/guardar.sh "Control: $ACCION" datos_bot docs INFORME_APRENDIZAJE.md ajustes.json
+        run: |
+          bash .github/guardar.sh "Control: $ACCION" datos_bot docs INFORME_APRENDIZAJE.md ajustes.json
 
   publicar:
     needs: controlar
